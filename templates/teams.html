@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Команды | Улак тартыш{% endblock %}
+
+{% block content %}
+<main>
+  <section class="section page-hero">
+    <p class="eyebrow">Команды</p>
+    <h1>Все команды</h1>
+    <p class="lead">Составы, лиги и базовая статистика команд федерации.</p>
+  </section>
+
+  <section class="section">
+    <div class="team-grid">
+      {% for team in teams_public %}
+      <article class="team-card">
+        <div class="team-card-head">
+          <span>{{ team.name[:1] }}</span>
+          <div>
+            <h3>{{ team.name }}</h3>
+            <p>{{ team.region }} · {{ team.league }}</p>
+          </div>
+        </div>
+        <div class="horse-stats">
+          <span><strong>{{ team.players }}</strong> игроков</span>
+          <span><strong>{{ team.wins }}</strong> побед</span>
+          <span><strong>{{ team.points }}</strong> очков</span>
+          <span><strong>{{ team.league }}</strong> лига</span>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+</main>
+{% endblock %}

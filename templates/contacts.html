@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Контакты | Улак тартыш{% endblock %}
+
+{% block content %}
+<main>
+  <section class="section page-hero">
+    <p class="eyebrow">Контакты</p>
+    <h1>Связаться с федерацией</h1>
+    <p class="lead">Адрес, телефон, email и форма обратной связи.</p>
+  </section>
+
+  <section class="section">
+    <div class="contact-layout">
+      <article class="about-card">
+        <h3>Контактная информация</h3>
+        <p><strong>Адрес:</strong> Бишкек, спортивный комплекс федерации</p>
+        <p>
+          <strong>Телефон:</strong> 
+          <a href="tel:+996544444" class="contact-link">0(995) 544-444</a>
+        </p>
+        <p>
+          <strong>Email:</strong> 
+          <a href="mailto:ulaktartys@gmail.com" class="contact-link">ulaktartys@gmail.com</a>
+        </p>
+      </article>
+
+      <article class="about-card">
+        <h3>Форма обратной связи</h3>
+        <form class="form-grid" data-submit="contact">
+          <div class="form-field"><label>Аты-жөнү</label><input name="fullname" required placeholder="Ваше имя" /></div>
+          <div class="form-field"><label>Email</label><input name="email" type="email" required placeholder="you@example.com" /></div>
+          <div class="form-field"><label>Телефон</label><input name="phone" placeholder="+996 700 000 000" /></div>
+          <div class="form-field"><label>Сообщение</label><input name="message" required placeholder="Коротко опишите вопрос" /></div>
+          <button class="primary" type="submit">Жөнөтүү</button>
+        </form>
+      </article>
+    </div>
+  </section>
+</main>
+{% endblock %}

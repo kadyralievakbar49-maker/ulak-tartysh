@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Судьи | Улак тартыш{% endblock %}
+
+{% block content %}
+<main>
+  <section class="section page-hero">
+    <p class="eyebrow">Калыстар</p>
+    <h1>Судьи</h1>
+    <p class="lead">Список судей, категории и текущие назначения.</p>
+  </section>
+
+  <section class="section referees-section">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">Список</p>
+        <h2>Официальный состав судей</h2>
+      </div>
+    </div>
+    <div class="referee-grid">
+      {% for referee in referees_public %}
+      <article class="referee-card">
+        <span class="referee-avatar">{{ referee.name[:1] }}</span>
+        <div>
+          <h3>{{ referee.name }}</h3>
+          <p>{{ referee.category }}</p>
+        </div>
+        <small>{{ referee.experience }} лет · {{ referee.region }}</small>
+        <small>Назначение: {{ referee.assignment }}</small>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="league-grid">
+      <article class="league-card">
+        <strong>Категории</strong>
+        <span>Башкы калыс, улуттук категория, аймактык калыс, катчы-калыс.</span>
+      </article>
+      <article class="league-card">
+        <strong>Назначения</strong>
+        <span>Назначения формируются перед игровым туром и утверждаются федерацией.</span>
+      </article>
+    </div>
+  </section>
+</main>
+{% endblock %}

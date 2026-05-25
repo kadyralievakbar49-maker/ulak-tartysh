@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block title %}Башкы бет | Улак тартыш Федерациясы{% endblock %}
+
+{% block content %}
+<main id="home">
+  <section class="hero">
+    <div>
+      <p class="eyebrow" data-i18n="heroEyebrow">Расмий портал</p>
+      <h1 data-i18n="heroTitle">Улак тартыш оюндарын жаңы деңгээлде көрүңүз</h1>
+      <p class="lead" data-i18n="heroLead">
+        Матчтардын календары, лигалар, оюнчулар, жаңылыктар жана медиа бир жерде.
+        Таза, тез жана мобилге ылайыкташкан интерфейс.
+      </p>
+      <div class="hero-actions">
+        <a class="primary" href="#matches" data-i18n="heroPrimary">Оюндарды көрүү</a>
+        <button class="secondary" data-open="tickets" data-i18n="heroSecondary">Билет алуу</button>
+      </div>
+    </div>
+
+    <aside class="scoreboard">
+      <span data-i18n="nextMatch">Кийинки оюн</span>
+      {% if next_match %}
+      <div class="teams">
+        <div class="team">
+          <span class="badge">{{ next_match.team1[0] }}</span>
+          <strong>{{ next_match.team1 }}</strong>
+        </div>
+        <span class="vs">VS</span>
+        <div class="team">
+          <span class="badge">{{ next_match.team2[0] }}</span>
+          <strong>{{ next_match.team2 }}</strong>
+        </div>
+      </div>
+      <div class="score-meta">
+        <span>{{ next_match.date }} · {{ next_match.time }}</span>
+        <span data-i18n="venueBishkek">Бишкек ипподрому</span>
+      </div>
+      {% else %}
+      <p style="color: rgba(255,255,255,0.5); text-align: center; margin: 20px 0;">Оюндар азырынча жок</p>
+      {% endif %}
+    </aside>
+  </section>
+
+  <section class="section">
+    <form class="search-panel" id="searchForm">
+      <input id="searchInput" type="search" placeholder="Команда, лига, жаңылык же оюнчу издөө" data-i18n-placeholder="searchPlaceholder" />
+      <button class="primary" type="submit" data-i18n="searchButton">Издөө</button>
+    </form>
+  </section>
+
+  <section class="section" id="matches">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow" data-i18n="matchesEyebrow">Календарь</p>
+        <h2 data-i18n="matchesTitle">Жакынкы беттештер</h2>
+      </div>
+      <div class="filters" aria-label="Матч фильтри">
+        <button class="tag active" data-filter="all" data-i18n="filterAll">Баары</button>
+        <button class="tag" data-filter="Жогорку лига" data-i18n="leagueTop">Жогорку лига</button>
+        <button class="tag" data-filter="Биринчи лига" data-i18n="leagueFirst">Биринчи лига</button>
+      </div>
+    </div>
+
+    <div class="match-list" id="matchList">
+      {% for match in matches %}
+      <article class="match" data-league="{{ match.league }}" data-search="{{ match.search_tags }}">
+        <div class="match-date"><strong>{{ match.date }}</strong><span>{{ match.time }}</span></div>
+        <p>{{ match.league }}</p>
+        <h3>{{ match.team1 }}</h3>
+        <span class="vs">VS</span>
+        <h3>{{ match.team2 }}</h3>
+        <button class="ghost" data-match="{{ match.team1 }} - {{ match.team2 }}">Маалымат</button>
+      </article>
+      {% else %}
+      <p style="text-align: center; color: var(--muted); padding: 20px;">Жакынкы арада беттештер жок.</p>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="section" id="leagues">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow" data-i18n="navLeagues">Лигалар</p>
+        <h2 data-i18n="leaguesTitle">Турнирлер жана рейтингдер</h2>
+      </div>
+      <button class="ghost" data-action="calendar" data-i18n="downloadCalendar">Календарды жүктөө</button>
+    </div>
+    <div class="league-grid">
+      <a class="league-card" href="#matches">
+        <strong data-i18n="leagueTop">Жогорку лига</strong>
+        <span data-i18n="leagueTopMeta">12 команда · расмий рейтинг</span>
+        <small data-i18n="heroPrimary">Оюндарды көрүү</small>
+      </a>
+      <a class="league-card" href="#matches">
+        <strong data-i18n="leagueFirst">Биринчи лига</strong>
+        <span data-i18n="leagueFirstMeta">18 команда · плей-офф баскычы</span>
+        <small data-i18n="heroPrimary">Оюндарды көрүү</small>
+      </a>
+    </div>
+  </section>
+
+  <section class="section dark" id="media">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow" data-i18n="navMedia">Медиа</p>
+        <h2 data-i18n="mediaTitle">Оюндан сүрөттөр жана обзорлор</h2>
+      </div>
+      <button class="secondary" data-action="gallery" data-i18n="gallery">Галерея</button>
+    </div>
+    <div class="media-grid">
+      <button class="media" data-action="gallery">
+        <span class="media-photo" aria-hidden="true"></span>
+        <span class="media-label" data-i18n="videoReview">Видео обзор</span>
+      </button>
+      <button class="media" data-action="gallery">
+        <span class="media-photo" aria-hidden="true"></span>
+        <span class="media-label" data-i18n="photo">Фото</span>
+      </button>
+      <button class="media" data-action="gallery">
+        <span class="media-photo" aria-hidden="true"></span>
+        <span class="media-label" data-i18n="gallery">Галерея</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="section" id="news">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow" data-i18n="navNews">Жаңылыктар</p>
+        <h2 data-i18n="newsTitle">Федерациядан акыркы маалыматтар</h2>
+      </div>
+      <button class="ghost" data-action="subscribe" data-i18n="subscribe">Жазылуу</button>
+    </div>
+    <div class="news-grid" id="newsGrid">
+      {% for item in news %}
+      <article class="news-card" data-search="{{ item.search_tags }}">
+        {% if item.img_url %}
+        <img src="{{ item.img_url }}" alt="News Image" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';" />
+        <div class="news-photo" aria-hidden="true" style="display: none;">NEWS</div>
+        {% else %}
+        <div class="news-photo" aria-hidden="true">NEWS</div>
+        {% endif %}
+        <div>
+          <span>{{ item.date }}</span>
+          <h3>{{ item.title }}</h3>
+          <button class="ghost" data-news="{{ item.title }}">Окуу</button>
+        </div>
+      </article>
+      {% else %}
+      <p style="text-align: center; color: var(--muted); padding: 20px;">Жаңылыктар азырынча жок.</p>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="section" id="players">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow" data-i18n="navPlayers">Оюнчулар</p>
+        <h2 data-i18n="playersTitle">Рейтингдеги мыктылар</h2>
+      </div>
+      <button class="ghost" data-action="rating" data-i18n="fullRating">Толук рейтинг</button>
+    </div>
+    <div class="player-grid" id="playerGrid">
+      {% for player in players %}
+      <article class="player" data-search="{{ player.name }} {{ player.team }} {{ player.position }}">
+        {% if player.photo_url %}
+        <img class="player-img" src="{{ player.photo_url }}" alt="{{ player.name }}" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';" />
+        <div class="player-photo" aria-hidden="true" style="display: none;">{{ player.name[:1] }}</div>
+        {% else %}
+        <div class="player-photo" aria-hidden="true">{{ player.name[:1] }}</div>
+        {% endif %}
+        <div class="player-info">
+          <h3>{{ player.name }}</h3>
+          <span>{{ player.position or 'Оюнчу' }} · {{ player.stats_points }} упай</span>
+        </div>
+      </article>
+      {% else %}
+      <p style="text-align: center; color: var(--muted); padding: 20px;">Оюнчулар азырынча жок.</p>
+      {% endfor %}
+    </div>
+  </section>
+</main>
+{% endblock %}

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход для администраторов | Улак тартыш</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <style>
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            padding: 20px;
+        }
+        .auth-box {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 420px;
+            border-top: 4px solid #bd2635;
+        }
+        .auth-box h2 {
+            margin: 0 0 8px;
+            color: #1e293b;
+            font-size: 28px;
+            text-align: center;
+        }
+        .admin-badge {
+            text-align: center;
+            color: #bd2635;
+            font-weight: 700;
+            margin-bottom: 24px;
+            font-size: 14px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #66736b;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #dbe3dc;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #bd2635;
+        }
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: #bd2635;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-primary:hover {
+            background: #9a1f2b;
+        }
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .back-link a {
+            color: #116343;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .flash {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-box">
+            <h2>Админ-панель</h2>
+            <div class="admin-badge">Вход для сотрудников федерации</div>
+            
+            {% if error %}
+            <div class="flash">{{ error }}</div>
+            {% endif %}
+            
+            <form method="POST" action="{{ url_for('admin_panel') }}">
+                <div class="form-group">
+                    <label for="password">Пароль</label>
+                    <input type="password" id="password" name="password" required
+                           placeholder="admin">
+                </div>
+                
+                <button type="submit" class="btn-primary">Войти в панель управления</button>
+            </form>
+            
+            <div class="back-link">
+                <a href="{{ url_for('home') }}">← На главную</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

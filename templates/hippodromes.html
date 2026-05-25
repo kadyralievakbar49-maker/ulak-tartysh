@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Ипподромы | Улак тартыш{% endblock %}
+
+{% block content %}
+<main>
+  <section class="section page-hero">
+    <p class="eyebrow">Ипподромы</p>
+    <h1>Игровые площадки</h1>
+    <p class="lead">Адреса, вместимость и карты основных ипподромов.</p>
+  </section>
+
+  <section class="section">
+    <div class="venue-grid">
+      {% for venue in hippodromes_public %}
+      <article class="venue-card">
+        <div class="venue-top">
+          <span>{{ loop.index }}</span>
+          <strong>{{ venue.location }}</strong>
+        </div>
+        <div class="venue-body">
+          <h3>{{ venue.name }}</h3>
+          <p>{{ venue.description }}</p>
+          <dl>
+            <div><dt>Адрес</dt><dd>{{ venue.address }}</dd></div>
+            <div><dt>Вместимость</dt><dd>{{ venue.capacity }}</dd></div>
+            <div><dt>Поле</dt><dd>{{ venue.surface }}</dd></div>
+            <div><dt>Карта</dt><dd><a href="{{ venue.map_url }}" target="_blank" rel="noopener noreferrer">Открыть</a></dd></div>
+          </dl>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+</main>
+{% endblock %}

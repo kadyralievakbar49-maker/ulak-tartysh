@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}О федерации | Улак тартыш{% endblock %}
+
+{% block content %}
+<main>
+  <section class="section page-hero">
+    <p class="eyebrow">Федерация</p>
+    <h1>О федерации</h1>
+    <p class="lead">История, миссия и руководство федерации улак тартыш.</p>
+  </section>
+
+  <section class="section about-section">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">История</p>
+        <h2>Развитие национальной игры</h2>
+      </div>
+    </div>
+    <div class="about-layout">
+      <article class="about-card">
+        <h3>История</h3>
+        <p>Федерация объединяет команды, судей и организаторов турниров, развивает календарь соревнований и поддерживает единые правила проведения игр.</p>
+      </article>
+      <article class="about-card">
+        <h3>Миссия</h3>
+        <p>Развивать улак тартыш как современный национальный спорт: честные турниры, прозрачные документы, подготовленные судьи и безопасные площадки.</p>
+      </article>
+      <aside class="about-numbers">
+        <span><strong>2</strong> <em>официальные лиги</em></span>
+        <span><strong>4</strong> <em>региональные базы</em></span>
+        <span><strong>12+</strong> <em>турниров в год</em></span>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">Руководство</p>
+        <h2>Команда федерации</h2>
+      </div>
+    </div>
+    <div class="referee-grid">
+      {% for person in leadership %}
+      <article class="referee-card">
+        <span class="referee-avatar">{{ person.name[:1] }}</span>
+        <div>
+          <h3>{{ person.name }}</h3>
+          <p>{{ person.role }}</p>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+</main>
+{% endblock %}

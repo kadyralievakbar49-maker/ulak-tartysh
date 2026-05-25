@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Админ-панель | Улак тартыш</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}" />
+  </head>
+  <body>
+    <header class="admin-header">
+      <div>
+        <span class="eyebrow">Управление сайтом</span>
+        <h1>Админ-панель</h1>
+      </div>
+      <nav>
+        <a href="{{ url_for('home') }}">Главная</a>
+        <a class="danger" href="{{ url_for('admin_logout') }}">Выйти</a>
+      </nav>
+    </header>
+
+    <main class="admin-shell">
+      <section class="stats-grid">
+        <article><span>Матчи</span><strong>{{ matches|length }}</strong></article>
+        <article><span>Новости</span><strong>{{ news|length }}</strong></article>
+        <article><span>Лиги</span><strong>{{ leagues|length }}</strong></article>
+        <article><span>Игроки</span><strong>{{ players|length }}</strong></article>
+      </section>
+
+      <section class="admin-grid">
+        <article class="panel">
+          <h2>Добавить матч</h2>
+          <form action="{{ url_for('add_match') }}" method="post" class="form-grid">
+            <input name="date" type="date" required />
+            <input name="time" type="time" required />
+            <input name="league" type="text" required placeholder="Лига" />
+            <input name="team1" type="text" required placeholder="Команда 1" />
+            <input name="team2" type="text" required placeholder="Команда 2" />
+            <label class="check"><input name="is_next" type="checkbox" /> Следующий матч</label>
+            <button type="submit">Сохранить матч</button>
+          </form>
+        </article>
+
+        <article class="panel">
+          <h2>Добавить новость</h2>
+          <form action="{{ url_for('add_news') }}" method="post" class="form-grid">
+            <input name="date" type="date" required />
+            <input name="title" type="text" required placeholder="Заголовок новости" />
+            <input name="img_url" type="url" placeholder="Ссылка на фото, если есть" />
+            <button type="submit">Опубликовать</button>
+          </form>
+        </article>
+
+        <article class="panel">
+          <h2>Добавить игрока</h2>
+          <form action="{{ url_for('add_player') }}" method="post" class="form-grid">
+            <input name="name" type="text" required placeholder="Имя игрока" />
+            <input name="team" type="text" placeholder="Команда" />
+            <input name="position" type="text" placeholder="Позиция" />
+            <input name="stats_points" type="number" min="0" placeholder="Очки" />
+            <input name="stats_matches" type="number" min="0" placeholder="Матчи" />
+            <input name="birth_year" type="number" min="1900" max="2026" placeholder="Год рождения" />
+            <input name="region" type="text" placeholder="Регион" />
+            <input name="photo_url" type="url" placeholder="Ссылка на фото" />
+            <button type="submit">Добавить игрока</button>
+          </form>
+        </article>
+
+        <article class="panel">
+          <h2>Добавить лигу</h2>
+          <form action="{{ url_for('add_league') }}" method="post" class="form-grid">
+            <input name="name" type="text" required placeholder="Название" />
+            <input name="category" type="text" placeholder="Категория" />
+            <input name="description" type="text" placeholder="Описание" />
+            <input name="teams_count" type="number" min="0" placeholder="Количество команд" />
+            <input name="stage" type="text" placeholder="Этап" />
+            <button type="submit">Добавить лигу</button>
+          </form>
+        </article>
+      </section>
+
+      <section class="list-grid">
+        <article class="panel">
+          <h2>Матчи</h2>
+          <div class="table-list">
+            {% for match in matches %}
+            <div class="row">
+              <span>{{ match.date }} {{ match.time }}</span>
+              <strong>{{ match.team1 }} - {{ match.team2 }}</strong>
+              <small>{{ match.league }}{% if match.is_next %} · следующий{% endif %}</small>
+              <a class="delete" href="{{ url_for('delete_item', table_name='matches', item_id=match.id) }}">Удалить</a>
+            </div>
+            {% else %}
+            <p class="empty">Матчей пока нет.</p>
+            {% endfor %}
+          </div>
+        </article>
+
+        <article class="panel">
+          <h2>Новости</h2>
+          <div class="table-list">
+            {% for item in news %}
+            <div class="row">
+              <span>{{ item.date }}</span>
+              <strong>{{ item.title }}</strong>
+              <a class="delete" href="{{ url_for('delete_item', table_name='news', item_id=item.id) }}">Удалить</a>
+            </div>
+            {% else %}
+            <p class="empty">Новостей пока нет.</p>
+            {% endfor %}
+          </div>
+        </article>
+
+        <article class="panel">
+          <h2>Игроки</h2>
+          <div class="table-list">
+            {% for player in players %}
+            <div class="row">
+              <strong>{{ player.name }}</strong>
+              <small>{{ player.team or 'Команда не указана' }} · {{ player.position or 'Позиция не указана' }} · {{ player.stats_points }} очков</small>
+              <a class="delete" href="{{ url_for('delete_item', table_name='players', item_id=player.id) }}">Удалить</a>
+            </div>
+            {% else %}
+            <p class="empty">Игроков пока нет.</p>
+            {% endfor %}
+          </div>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>

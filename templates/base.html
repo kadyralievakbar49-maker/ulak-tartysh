@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="kg">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Улак тартыш Федерациясы{% endblock %}</title>
+    <meta name="description" content="{% block description %}Улак тартыш федерациясы: матчи, лиги, новости, медиа, игроки и документы.{% endblock %}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  </head>
+  <body>
+    <div class="topbar">
+      <button class="quick" data-open="questionnaire">
+        <span class="quick-mark" aria-hidden="true">УТ</span>
+        Анкета
+      </button>
+      <div class="top-actions" aria-label="Language and login">
+        <button data-open="login">Кирүү</button>
+        <button data-open="register" style="color:var(--gold);font-weight:800">Каттоо</button>
+        <button class="lang active" data-lang="kg">KG</button>
+        <button class="lang" data-lang="ru">RU</button>
+        <button class="lang" data-lang="en">EN</button>
+      </div>
+    </div>
+
+    <header class="header">
+      <a class="brand" href="{{ url_for('home') }}">
+        <span class="brand-mark" aria-hidden="true">УТ</span>
+        <span class="brand-text">
+          <span>федерация</span>
+          <strong data-i18n="brandName">Улак тартыш</strong>
+        </span>
+      </a>
+      <nav class="nav" id="nav">
+        <div class="nav-item">
+          <button class="nav-trigger" type="button"><span data-i18n="navHome">Башкы бет</span></button>
+          <div class="dropdown">
+            <a href="{{ url_for('home') }}" data-i18n="navHomeMain">Башкы бет</a>
+            <a href="{{ url_for('about_page') }}" data-i18n="navAbout">Федерация жөнүндө</a>
+            <a href="{{ url_for('home') }}#news" data-i18n="navNews">Жаңылыктар</a>
+            <a href="{{ url_for('home') }}#media" data-i18n="navMedia">Медиа</a>
+            <a href="{{ url_for('contacts_page') }}" data-i18n="navContacts">Байланыш</a>
+            <button data-open="tickets" data-i18n="navTickets">Билеттер</button>
+          </div>
+        </div>
+        <div class="nav-item">
+          <button class="nav-trigger" type="button"><span data-i18n="navDocuments">Документтер</span></button>
+          <div class="dropdown">
+            <a href="{{ url_for('documents_page') }}#charters" data-i18n="docAssociation">Уставдар</a>
+            <a href="{{ url_for('documents_page') }}#rules" data-i18n="docRules">Эрежелер</a>
+            <a href="{{ url_for('documents_page') }}#regulations" data-i18n="docTournament">Регламенттер</a>
+            <a href="{{ url_for('documents_page') }}#transfers" data-i18n="docTransfer">Трансферлер</a>
+          </div>
+        </div>
+        <div class="nav-item">
+          <button class="nav-trigger" type="button"><span data-i18n="navLeagues">Лигалар</span></button>
+          <div class="dropdown">
+            <a href="{{ url_for('home') }}#leagues" data-i18n="leagueTop">Жогорку лига</a>
+            <a href="{{ url_for('home') }}#leagues" data-i18n="leagueFirst">Биринчи лига</a>
+          </div>
+        </div>
+        <div class="nav-item">
+          <button class="nav-trigger" type="button"><span data-i18n="navUlak">Улак тартыш</span></button>
+          <div class="dropdown">
+            <a href="{{ url_for('teams_page') }}" data-i18n="navTeam">Командалар</a>
+            <a href="{{ url_for('home') }}#players" data-i18n="navPlayers">Оюнчулар</a>
+            <a href="{{ url_for('hippodromes_page') }}" data-i18n="navHippodromes">Ипподромы</a>
+            <a href="{{ url_for('referees_page') }}" data-i18n="navReferees">Калыстар</a>
+          </div>
+        </div>
+      </nav>
+      <button class="primary" data-open="tickets" data-i18n="navTickets">Билеттер</button>
+      <button class="icon-button menu-toggle" aria-label="Меню" id="menuToggle">☰</button>
+    </header>
+
+    {% block content %}{% endblock %}
+
+    <footer class="footer">
+      <span class="brand-mark footer-mark" aria-hidden="true">УТ</span>
+      <div>
+        <h2 data-i18n="footerTitle">Улак тартыш федерациясы</h2>
+        <p data-i18n="footerText">Улуттук оюнду өнүктүрүү, турнирлерди уюштуруу жана расмий маалыматты заманбап форматта жеткирүү.</p>
+      </div>
+      <div class="footer-links">
+        <a href="{{ url_for('home') }}#matches" data-i18n="navGames">Оюндар</a>
+        <a href="{{ url_for('documents_page') }}" data-i18n="navDocuments">Документтер</a>
+        <a href="{{ url_for('referees_page') }}" data-i18n="navReferees">Калыстар</a>
+        <a href="{{ url_for('contacts_page') }}" data-i18n="navContacts">Байланыш</a>
+      </div>
+      <div class="social-links" aria-label="Социальные сети">
+        <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">Instagram</a>
+        <a href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer">YouTube</a>
+        <a href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer">Facebook</a>
+      </div>
+    </footer>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <div class="modal" id="modal">
+      <div class="modal-card" id="modalCard">
+        <div class="modal-head">
+          <h3 id="modalTitle">Маалымат</h3>
+          <button class="close" id="modalClose" aria-label="Жабуу">×</button>
+        </div>
+        <div class="modal-body" id="modalBody"></div>
+      </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  </body>
+</html>
