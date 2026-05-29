@@ -12,6 +12,24 @@
 
   <section class="section">
     <div class="venue-grid">
+      {% for venue in hippodromes %}
+      <article class="venue-card">
+        <div class="venue-top">
+          <span>{{ loop.index }}</span>
+          <strong>{{ venue.location }}</strong>
+        </div>
+        <div class="venue-body">
+          <h3>{{ venue.name }}</h3>
+          <p>{{ venue.description }}</p>
+          <dl>
+            <div><dt>Адрес</dt><dd>{{ venue.address or 'Не указан' }}</dd></div>
+            <div><dt>Вместимость</dt><dd>{{ venue.capacity or 'Не указана' }}</dd></div>
+            <div><dt>Поле</dt><dd>{{ venue.surface or 'Не указано' }}</dd></div>
+            <div><dt>Карта</dt><dd>{% if venue.map_url %}<a href="{{ venue.map_url }}" target="_blank" rel="noopener noreferrer">Открыть</a>{% else %}Не указана{% endif %}</dd></div>
+          </dl>
+        </div>
+      </article>
+      {% else %}
       {% for venue in hippodromes_public %}
       <article class="venue-card">
         <div class="venue-top">
@@ -29,6 +47,7 @@
           </dl>
         </div>
       </article>
+      {% endfor %}
       {% endfor %}
     </div>
   </section>

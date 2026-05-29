@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}{{ item.title }} | Улак тартыш{% endblock %}
+
+{% block content %}
+<main>
+  <article class="section detail-page">
+    <a class="back-link" href="{{ url_for('home') }}#news">← Жаңылыктар</a>
+    <p class="eyebrow">{{ item.date }}</p>
+    <h1>{{ item.title }}</h1>
+    {% if item.img_url %}
+    <img class="detail-cover" src="{{ item.img_url }}" alt="{{ item.title }}" />
+    {% endif %}
+    <div class="detail-text">
+      {% if item.body %}
+      {% for paragraph in item.body.split('\n') %}
+      {% if paragraph.strip() %}<p>{{ paragraph }}</p>{% endif %}
+      {% endfor %}
+      {% else %}
+      <p>Толук текст жакында кошулат.</p>
+      {% endif %}
+    </div>
+  </article>
+</main>
+{% endblock %}

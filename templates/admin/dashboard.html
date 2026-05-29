@@ -7,124 +7,498 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}" />
   </head>
   <body>
-    <header class="admin-header">
-      <div>
-        <span class="eyebrow">Управление сайтом</span>
-        <h1>Админ-панель</h1>
-      </div>
-      <nav>
-        <a href="{{ url_for('home') }}">Главная</a>
-        <a class="danger" href="{{ url_for('admin_logout') }}">Выйти</a>
+    <aside class="admin-sidebar">
+      <a class="admin-brand" href="{{ url_for('home') }}">
+        <img src="{{ url_for('static', filename='img/logo.jpg') }}" alt="Улак тартыш" />
+        <span>
+          <small>Управление сайтом</small>
+          <strong>Админ-панель</strong>
+        </span>
+      </a>
+
+      <nav class="admin-tabs" aria-label="Разделы админ-панели">
+        <button class="active" type="button" data-section="overview">Обзор</button>
+        <button type="button" data-section="matches">Матчи</button>
+        <button type="button" data-section="news">Новости</button>
+        <button type="button" data-section="media">Медиа</button>
+        <button type="button" data-section="people">Игроки и судьи</button>
+        <button type="button" data-section="horses">Лошади</button>
+        <button type="button" data-section="documents">Документы</button>
+        <button type="button" data-section="venues">Ипподромы</button>
+        <button type="button" data-section="tickets">Билеты</button>
+        <button type="button" data-section="users">Пользователи</button>
       </nav>
-    </header>
 
-    <main class="admin-shell">
-      <section class="stats-grid">
-        <article><span>Матчи</span><strong>{{ matches|length }}</strong></article>
-        <article><span>Новости</span><strong>{{ news|length }}</strong></article>
-        <article><span>Лиги</span><strong>{{ leagues|length }}</strong></article>
-        <article><span>Игроки</span><strong>{{ players|length }}</strong></article>
+      <div class="sidebar-actions">
+        <a href="{{ url_for('home') }}">Открыть сайт</a>
+        <a class="danger" href="{{ url_for('admin_logout') }}">Выйти</a>
+      </div>
+    </aside>
+
+    <main class="admin-main">
+      <header class="admin-topbar">
+        <div>
+          <p class="eyebrow">Федерация улак тартыш</p>
+          <h1>Панель управления сайтом</h1>
+        </div>
+        <a class="open-site" href="{{ url_for('home') }}">На сайт</a>
+      </header>
+
+      <section class="admin-section active" id="overview">
+        <div class="stats-grid">
+          <article><span>Матчи</span><strong>{{ matches|length }}</strong></article>
+          <article><span>Новости</span><strong>{{ news|length }}</strong></article>
+          <article><span>Игроки</span><strong>{{ players|length }}</strong></article>
+          <article><span>Лошади</span><strong>{{ horses|length }}</strong></article>
+          <article><span>Видео</span><strong>{{ videos|length }}</strong></article>
+          <article><span>Альбомы</span><strong>{{ albums|length }}</strong></article>
+          <article><span>Документы</span><strong>{{ documents|length }}</strong></article>
+          <article><span>Заявки</span><strong>{{ ticket_requests|length }}</strong></article>
+        </div>
+
+        <div class="panel">
+          <h2>Быстрые действия</h2>
+          <div class="quick-actions">
+            <button type="button" data-section="matches">Добавить матч</button>
+            <button type="button" data-section="news">Опубликовать новость</button>
+            <button type="button" data-section="media">Загрузить медиа</button>
+            <button type="button" data-section="horses">Добавить лошадь</button>
+            <button type="button" data-section="documents">Добавить документ</button>
+            <button type="button" data-section="tickets">Заявки на билеты</button>
+          </div>
+        </div>
       </section>
 
-      <section class="admin-grid">
-        <article class="panel">
-          <h2>Добавить матч</h2>
-          <form action="{{ url_for('add_match') }}" method="post" class="form-grid">
-            <input name="date" type="date" required />
-            <input name="time" type="time" required />
-            <input name="league" type="text" required placeholder="Лига" />
-            <input name="team1" type="text" required placeholder="Команда 1" />
-            <input name="team2" type="text" required placeholder="Команда 2" />
-            <label class="check"><input name="is_next" type="checkbox" /> Следующий матч</label>
-            <button type="submit">Сохранить матч</button>
-          </form>
-        </article>
+      <section class="admin-section" id="matches">
+        <div class="section-layout">
+          <article class="panel">
+            <h2>Добавить матч</h2>
+            <form action="{{ url_for('add_match') }}" method="post" class="form-grid">
+              <label>Дата<input name="date" type="date" required /></label>
+              <label>Время<input name="time" type="time" required /></label>
+              <label>Лига<input name="league" type="text" required placeholder="Жогорку лига" /></label>
+              <label>Команда 1<input name="team1" type="text" required placeholder="Достук" /></label>
+              <label>Команда 2<input name="team2" type="text" required placeholder="Ынтымак" /></label>
+              <label class="check"><input name="is_next" type="checkbox" /> Сделать следующим матчем</label>
+              <button type="submit">Сохранить матч</button>
+            </form>
+          </article>
 
-        <article class="panel">
-          <h2>Добавить новость</h2>
-          <form action="{{ url_for('add_news') }}" method="post" class="form-grid">
-            <input name="date" type="date" required />
-            <input name="title" type="text" required placeholder="Заголовок новости" />
-            <input name="img_url" type="url" placeholder="Ссылка на фото, если есть" />
-            <button type="submit">Опубликовать</button>
-          </form>
-        </article>
-
-        <article class="panel">
-          <h2>Добавить игрока</h2>
-          <form action="{{ url_for('add_player') }}" method="post" class="form-grid">
-            <input name="name" type="text" required placeholder="Имя игрока" />
-            <input name="team" type="text" placeholder="Команда" />
-            <input name="position" type="text" placeholder="Позиция" />
-            <input name="stats_points" type="number" min="0" placeholder="Очки" />
-            <input name="stats_matches" type="number" min="0" placeholder="Матчи" />
-            <input name="birth_year" type="number" min="1900" max="2026" placeholder="Год рождения" />
-            <input name="region" type="text" placeholder="Регион" />
-            <input name="photo_url" type="url" placeholder="Ссылка на фото" />
-            <button type="submit">Добавить игрока</button>
-          </form>
-        </article>
-
-        <article class="panel">
-          <h2>Добавить лигу</h2>
-          <form action="{{ url_for('add_league') }}" method="post" class="form-grid">
-            <input name="name" type="text" required placeholder="Название" />
-            <input name="category" type="text" placeholder="Категория" />
-            <input name="description" type="text" placeholder="Описание" />
-            <input name="teams_count" type="number" min="0" placeholder="Количество команд" />
-            <input name="stage" type="text" placeholder="Этап" />
-            <button type="submit">Добавить лигу</button>
-          </form>
-        </article>
+          <article class="panel">
+            <h2>Матчи на сайте</h2>
+            <div class="table-list">
+              {% for match in matches %}
+              <div class="row">
+                <form action="{{ url_for('update_match', match_id=match.id) }}" method="post" class="inline-edit">
+                  <input name="date" type="date" value="{{ match.date }}" required />
+                  <input name="time" type="time" value="{{ match.time }}" required />
+                  <input name="league" value="{{ match.league }}" required />
+                  <input name="team1" value="{{ match.team1 }}" required />
+                  <input name="team2" value="{{ match.team2 }}" required />
+                  <label class="check"><input name="is_next" type="checkbox" {% if match.is_next %}checked{% endif %} /> следующий</label>
+                  <button type="submit">Сохранить</button>
+                </form>
+                <a class="delete" href="{{ url_for('delete_item', table_name='matches', item_id=match.id) }}">Удалить</a>
+              </div>
+              {% else %}
+              <p class="empty">Матчей пока нет.</p>
+              {% endfor %}
+            </div>
+          </article>
+        </div>
       </section>
 
-      <section class="list-grid">
+      <section class="admin-section" id="news">
+        <div class="section-layout">
+          <article class="panel">
+            <h2>Добавить новость</h2>
+            <form action="{{ url_for('add_news') }}" method="post" enctype="multipart/form-data" class="form-grid">
+              <label>Дата<input name="date" type="date" required /></label>
+              <label>Заголовок<input name="title" type="text" required placeholder="Заголовок новости" /></label>
+              <label>Полный текст<textarea name="body" rows="6" placeholder="Текст новости"></textarea></label>
+              <label class="file-field">Фото новости<input name="image" type="file" accept="image/*" /></label>
+              <label>Ссылка на фото<input name="img_url" type="url" placeholder="https://..." /></label>
+              <button type="submit">Опубликовать</button>
+            </form>
+          </article>
+
+          <article class="panel">
+            <h2>Новости</h2>
+            <div class="table-list">
+              {% for item in news %}
+              <div class="row">
+                <form action="{{ url_for('update_news', news_id=item.id) }}" method="post" enctype="multipart/form-data" class="inline-edit">
+                  <input name="date" type="date" value="{{ item.date }}" required />
+                  <input name="title" value="{{ item.title }}" required />
+                  <textarea name="body" rows="4" placeholder="Полный текст">{{ item.body or '' }}</textarea>
+                  <input name="img_url" value="{{ item.img_url or '' }}" placeholder="Ссылка на фото" />
+                  <label class="file-field">Заменить фото<input name="image" type="file" accept="image/*" /></label>
+                  <button type="submit">Сохранить</button>
+                </form>
+                <a href="{{ url_for('news_detail_page', news_id=item.id) }}" target="_blank" rel="noopener noreferrer">Открыть</a>
+                <a class="delete" href="{{ url_for('delete_item', table_name='news', item_id=item.id) }}">Удалить</a>
+              </div>
+              {% else %}
+              <p class="empty">Новостей пока нет.</p>
+              {% endfor %}
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="admin-section" id="media">
+        <div class="section-layout">
+          <article class="panel">
+            <h2>Добавить видео</h2>
+            <form action="{{ url_for('add_video') }}" method="post" enctype="multipart/form-data" class="form-grid">
+              <label>Название<input name="title" type="text" required placeholder="Название видео" /></label>
+              <label>Категория
+                <select name="category">
+                  <option value="Обзор">Обзор</option>
+                  <option value="Матч">Матч</option>
+                  <option value="Интервью">Интервью</option>
+                  <option value="Тренировка">Тренировка</option>
+                </select>
+              </label>
+              <label>Матч
+                <select name="match_id">
+                  <option value="">Без привязки</option>
+                  {% for match in matches %}
+                  <option value="{{ match.id }}">{{ match.date }} · {{ match.team1 }} - {{ match.team2 }}</option>
+                  {% endfor %}
+                </select>
+              </label>
+              <label class="file-field">Видео файл<input name="video_file" type="file" accept="video/*" /></label>
+              <label>Ссылка на видео<input name="video_url" type="url" placeholder="https://..." /></label>
+              <label class="file-field">Обложка<input name="thumbnail_file" type="file" accept="image/*" /></label>
+              <label>Ссылка на обложку<input name="thumbnail" type="url" placeholder="https://..." /></label>
+              <label>Дата<input name="upload_date" type="date" /></label>
+              <button type="submit">Добавить видео</button>
+            </form>
+          </article>
+
+          <article class="panel">
+            <h2>Создать фотоальбом</h2>
+            <form action="{{ url_for('create_album') }}" method="post" enctype="multipart/form-data" class="form-grid">
+              <label>Название<input name="title" type="text" required placeholder="Название альбома" /></label>
+              <label>Матч
+                <select name="match_id">
+                  <option value="">Без привязки</option>
+                  {% for match in matches %}
+                  <option value="{{ match.id }}">{{ match.date }} · {{ match.team1 }} - {{ match.team2 }}</option>
+                  {% endfor %}
+                </select>
+              </label>
+              <label class="file-field">Обложка<input name="cover_file" type="file" accept="image/*" /></label>
+              <label>Ссылка на обложку<input name="cover_url" type="url" placeholder="https://..." /></label>
+              <label>Дата<input name="upload_date" type="date" /></label>
+              <button type="submit">Создать альбом</button>
+            </form>
+          </article>
+        </div>
+
+        <div class="section-layout">
+          <article class="panel">
+            <h2>Видео</h2>
+            <div class="table-list">
+              {% for video in videos %}
+              <div class="row media-row">
+                {% if video.thumbnail %}<img src="{{ video.thumbnail }}" alt="{{ video.title }}" />{% else %}<span class="media-fallback">VIDEO</span>{% endif %}
+                <strong>{{ video.title }}</strong>
+                <small>{{ video.category or 'Видео' }} · {{ video.upload_date }}</small>
+                <a class="delete" href="{{ url_for('delete_item', table_name='videos', item_id=video.id) }}">Удалить</a>
+              </div>
+              {% else %}
+              <p class="empty">Видео пока нет.</p>
+              {% endfor %}
+            </div>
+          </article>
+
+          <article class="panel">
+            <h2>Фотоальбомы</h2>
+            <div class="table-list">
+              {% for album in albums %}
+              <div class="row media-row">
+                {% if album.cover_url %}<img src="{{ album.cover_url }}" alt="{{ album.title }}" />{% else %}<span class="media-fallback">PHOTO</span>{% endif %}
+                <strong>{{ album.title }}</strong>
+                <small>{{ album.photo_count }} фото · {{ album.upload_date }}</small>
+                <form action="{{ url_for('add_photo', album_id=album.id) }}" method="post" enctype="multipart/form-data" class="mini-upload">
+                  <input name="caption" type="text" placeholder="Подпись к фото" />
+                  <input name="photo" type="file" accept="image/*" required />
+                  <button type="submit">Загрузить фото</button>
+                </form>
+                <a class="delete" href="{{ url_for('delete_item', table_name='photo_albums', item_id=album.id) }}">Удалить альбом</a>
+              </div>
+              {% else %}
+              <p class="empty">Альбомов пока нет.</p>
+              {% endfor %}
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="admin-section" id="people">
+        <div class="section-layout">
+          <article class="panel">
+            <h2>Добавить игрока</h2>
+            <form action="{{ url_for('add_player') }}" method="post" enctype="multipart/form-data" class="form-grid">
+              <label>Имя<input name="name" type="text" required placeholder="Имя игрока" /></label>
+              <label>Команда<input name="team" type="text" placeholder="Команда" /></label>
+              <label>Позиция<input name="position" type="text" placeholder="Позиция" /></label>
+              <label>Очки<input name="stats_points" type="number" min="0" placeholder="0" /></label>
+              <label>Матчи<input name="stats_matches" type="number" min="0" placeholder="0" /></label>
+              <label>Год рождения<input name="birth_year" type="number" min="1900" max="2026" /></label>
+              <label>Регион<input name="region" type="text" placeholder="Бишкек" /></label>
+              <label class="file-field">Фото игрока<input name="photo" type="file" accept="image/*" /></label>
+              <label>Ссылка на фото<input name="photo_url" type="url" placeholder="https://..." /></label>
+              <button type="submit">Добавить игрока</button>
+            </form>
+          </article>
+
+          <article class="panel">
+            <h2>Добавить судью</h2>
+            <form action="{{ url_for('add_referee') }}" method="post" enctype="multipart/form-data" class="form-grid">
+              <label>ФИО<input name="name" type="text" required placeholder="ФИО судьи" /></label>
+              <label>Категория<input name="category" type="text" placeholder="Башкы калыс" /></label>
+              <label>Стаж<input name="experience_years" type="number" min="0" placeholder="0" /></label>
+              <label>Регион<input name="region" type="text" placeholder="Бишкек" /></label>
+              <label class="file-field">Фото судьи<input name="photo" type="file" accept="image/*" /></label>
+              <label>Ссылка на фото<input name="photo_url" type="url" placeholder="https://..." /></label>
+              <button type="submit">Добавить судью</button>
+            </form>
+          </article>
+        </div>
+
+        <div class="section-layout">
+          <article class="panel">
+            <h2>Игроки</h2>
+            <div class="table-list">
+              {% for player in players %}
+              <div class="row">
+                <strong>{{ player.name }}</strong>
+                <small>{{ player.team or 'Команда не указана' }} · {{ player.position or 'Позиция не указана' }} · {{ player.stats_points }} очков</small>
+                <a class="delete" href="{{ url_for('delete_item', table_name='players', item_id=player.id) }}">Удалить</a>
+              </div>
+              {% else %}
+              <p class="empty">Игроков пока нет.</p>
+              {% endfor %}
+            </div>
+          </article>
+
+          <article class="panel">
+            <h2>Судьи</h2>
+            <div class="table-list">
+              {% for referee in referees %}
+              <div class="row">
+                <strong>{{ referee.name }}</strong>
+                <small>{{ referee.category or 'Категория не указана' }} · {{ referee.region or 'Регион не указан' }}</small>
+                <a class="delete" href="{{ url_for('delete_item', table_name='referees', item_id=referee.id) }}">Удалить</a>
+              </div>
+              {% else %}
+              <p class="empty">Судей пока нет.</p>
+              {% endfor %}
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="admin-section" id="horses">
+        <div class="section-layout">
+          <article class="panel">
+            <h2>Добавить лошадь</h2>
+            <form action="{{ url_for('add_horse') }}" method="post" enctype="multipart/form-data" class="form-grid">
+              <label>Кличка<input name="name" type="text" required placeholder="Аккула" /></label>
+              <label>Порода<input name="breed" type="text" placeholder="Кыргыз жылкысы" /></label>
+              <label>Возраст<input name="age" type="number" min="0" max="40" placeholder="7" /></label>
+              <label>Масть<input name="color" type="text" placeholder="Ак боз" /></label>
+              <label>Скорость<input name="speed" type="number" min="0" max="100" placeholder="90" /></label>
+              <label>Выносливость<input name="stamina" type="number" min="0" max="100" placeholder="90" /></label>
+              <label>Баллы<input name="points" type="number" min="0" placeholder="120" /></label>
+              <label>Цена продажи, сом<input name="price" type="number" min="0" placeholder="850000" /></label>
+              <label>Описание<input name="description" type="text" placeholder="Краткая характеристика" /></label>
+              <label class="check"><input name="is_for_sale" type="checkbox" /> Выставить на продажу</label>
+              <label class="file-field">Фото лошади<input name="photo" type="file" accept="image/*" /></label>
+              <label>Ссылка на фото<input name="photo_url" type="url" placeholder="https://..." /></label>
+              <button type="submit">Добавить лошадь</button>
+            </form>
+          </article>
+
+          <article class="panel">
+            <h2>Лошади на сайте</h2>
+            <div class="table-list">
+              {% for horse in horses %}
+              <div class="row media-row">
+                {% if horse.photo_url %}<img src="{{ horse.photo_url }}" alt="{{ horse.name }}" />{% else %}<span class="media-fallback">HORSE</span>{% endif %}
+                <form action="{{ url_for('update_horse', horse_id=horse.id) }}" method="post" enctype="multipart/form-data" class="inline-edit">
+                  <input name="name" value="{{ horse.name }}" required />
+                  <input name="breed" value="{{ horse.breed or '' }}" placeholder="Порода" />
+                  <input name="age" type="number" min="0" max="40" value="{{ horse.age or '' }}" placeholder="Возраст" />
+                  <input name="color" value="{{ horse.color or '' }}" placeholder="Масть" />
+                  <input name="speed" type="number" min="0" max="100" value="{{ horse.speed or 0 }}" placeholder="Скорость" />
+                  <input name="stamina" type="number" min="0" max="100" value="{{ horse.stamina or 0 }}" placeholder="Выносливость" />
+                  <input name="points" type="number" min="0" value="{{ horse.points or 0 }}" placeholder="Баллы" />
+                  <input name="price" type="number" min="0" value="{{ horse.price or '' }}" placeholder="Цена" />
+                  <textarea name="description" rows="3" placeholder="Описание">{{ horse.description or '' }}</textarea>
+                  <input name="photo_url" value="{{ horse.photo_url or '' }}" placeholder="Ссылка на фото" />
+                  <label class="check"><input name="is_for_sale" type="checkbox" {% if horse.is_for_sale %}checked{% endif %} /> продаётся</label>
+                  <label class="check"><input name="is_active" type="checkbox" {% if horse.is_active %}checked{% endif %} /> показывать</label>
+                  <label class="file-field">Заменить фото<input name="photo" type="file" accept="image/*" /></label>
+                  <button type="submit">Сохранить</button>
+                </form>
+                <a href="{{ url_for('horse_detail_page', horse_id=horse.id) }}" target="_blank" rel="noopener noreferrer">Открыть</a>
+                <a class="delete" href="{{ url_for('delete_item', table_name='horses', item_id=horse.id) }}">Удалить</a>
+              </div>
+              {% else %}
+              <p class="empty">Лошадей пока нет.</p>
+              {% endfor %}
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="admin-section" id="documents">
+        <div class="section-layout">
+          <article class="panel">
+            <h2>Загрузить документ</h2>
+            <form action="{{ url_for('upload_document') }}" method="post" enctype="multipart/form-data" class="form-grid">
+              <label>Название<input name="title" type="text" required placeholder="Название документа" /></label>
+              <label>Описание<input name="description" type="text" placeholder="Короткое описание" /></label>
+              <label>Категория
+                <select name="category">
+                  <option value="Уставные документы">Уставные документы</option>
+                  <option value="Правила">Правила</option>
+                  <option value="Положение">Положение</option>
+                  <option value="Заявки">Заявки</option>
+                  <option value="Команды">Команды</option>
+                  <option value="Документы">Документы</option>
+                </select>
+              </label>
+              <label>Дата<input name="upload_date" type="date" /></label>
+              <label class="file-field">Файл PDF/DOCX<input name="file" type="file" accept=".pdf,.docx" required /></label>
+              <button type="submit">Загрузить документ</button>
+            </form>
+          </article>
+
+          <article class="panel">
+            <h2>Документы</h2>
+            <div class="table-list">
+              {% for document in documents %}
+              <div class="row">
+                <strong>{{ document.title }}</strong>
+                <small>{{ document.category }} · {{ document.upload_date }}</small>
+                <a href="/{{ document.file_path }}" target="_blank" rel="noopener noreferrer">Открыть</a>
+                <a class="delete" href="{{ url_for('delete_item', table_name='documents', item_id=document.id) }}">Удалить</a>
+              </div>
+              {% else %}
+              <p class="empty">Документов пока нет.</p>
+              {% endfor %}
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="admin-section" id="venues">
+        <div class="section-layout">
+          <article class="panel">
+            <h2>Добавить ипподром</h2>
+            <form action="{{ url_for('add_hippodrome') }}" method="post" enctype="multipart/form-data" class="form-grid">
+              <label>Название<input name="name" type="text" required placeholder="Бишкек ипподрому" /></label>
+              <label>Город/регион<input name="location" type="text" placeholder="Бишкек" /></label>
+              <label>Адрес<input name="address" type="text" placeholder="Адрес" /></label>
+              <label>Вместимость<input name="capacity" type="number" min="0" placeholder="12000" /></label>
+              <label>Поле<input name="surface" type="text" placeholder="Кумдуу талаа" /></label>
+              <label>Карта<input name="map_url" type="url" placeholder="https://maps.google.com/..." /></label>
+              <label>Описание<input name="description" type="text" placeholder="Описание площадки" /></label>
+              <label class="file-field">Фото<input name="photo" type="file" accept="image/*" /></label>
+              <label>Ссылка на фото<input name="photo_url" type="url" placeholder="https://..." /></label>
+              <button type="submit">Добавить ипподром</button>
+            </form>
+          </article>
+
+          <article class="panel">
+            <h2>Ипподромы</h2>
+            <div class="table-list">
+              {% for venue in hippodromes %}
+              <div class="row">
+                <strong>{{ venue.name }}</strong>
+                <small>{{ venue.location or 'Регион не указан' }} · {{ venue.capacity or 0 }} мест</small>
+                <a class="delete" href="{{ url_for('delete_item', table_name='hippodromes', item_id=venue.id) }}">Удалить</a>
+              </div>
+              {% else %}
+              <p class="empty">Ипподромов пока нет.</p>
+              {% endfor %}
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="admin-section" id="tickets">
         <article class="panel">
-          <h2>Матчи</h2>
+          <h2>Заявки на билеты</h2>
           <div class="table-list">
-            {% for match in matches %}
+            {% for ticket in ticket_requests %}
             <div class="row">
-              <span>{{ match.date }} {{ match.time }}</span>
-              <strong>{{ match.team1 }} - {{ match.team2 }}</strong>
-              <small>{{ match.league }}{% if match.is_next %} · следующий{% endif %}</small>
-              <a class="delete" href="{{ url_for('delete_item', table_name='matches', item_id=match.id) }}">Удалить</a>
+              <strong>{{ ticket.match_name or 'Матч не указан' }}</strong>
+              <small>{{ ticket.count }} билет(а) · {{ ticket.phone }}{% if ticket.email %} · {{ ticket.email }}{% endif %}</small>
+              <form action="{{ url_for('update_ticket', ticket_id=ticket.id) }}" method="post" class="inline-edit compact">
+                <select name="status">
+                  <option value="new" {% if ticket.status == 'new' %}selected{% endif %}>Новая</option>
+                  <option value="processed" {% if ticket.status == 'processed' %}selected{% endif %}>Обработана</option>
+                  <option value="cancelled" {% if ticket.status == 'cancelled' %}selected{% endif %}>Отменена</option>
+                </select>
+                <button type="submit">Обновить</button>
+              </form>
+              <a class="delete" href="{{ url_for('delete_item', table_name='ticket_requests', item_id=ticket.id) }}">Удалить</a>
             </div>
             {% else %}
-            <p class="empty">Матчей пока нет.</p>
+            <p class="empty">Заявок пока нет.</p>
             {% endfor %}
           </div>
         </article>
+      </section>
 
+      <section class="admin-section" id="users">
         <article class="panel">
-          <h2>Новости</h2>
+          <h2>Пользователи</h2>
           <div class="table-list">
-            {% for item in news %}
+            {% for user in users %}
             <div class="row">
-              <span>{{ item.date }}</span>
-              <strong>{{ item.title }}</strong>
-              <a class="delete" href="{{ url_for('delete_item', table_name='news', item_id=item.id) }}">Удалить</a>
+              <strong>{{ user.full_name }}</strong>
+              <small>{{ user.email }} · {% if user.is_verified %}email подтверждён{% else %}ожидает подтверждения{% endif %}</small>
+              <a class="delete" href="{{ url_for('delete_item', table_name='users', item_id=user.id) }}">Удалить</a>
             </div>
             {% else %}
-            <p class="empty">Новостей пока нет.</p>
-            {% endfor %}
-          </div>
-        </article>
-
-        <article class="panel">
-          <h2>Игроки</h2>
-          <div class="table-list">
-            {% for player in players %}
-            <div class="row">
-              <strong>{{ player.name }}</strong>
-              <small>{{ player.team or 'Команда не указана' }} · {{ player.position or 'Позиция не указана' }} · {{ player.stats_points }} очков</small>
-              <a class="delete" href="{{ url_for('delete_item', table_name='players', item_id=player.id) }}">Удалить</a>
-            </div>
-            {% else %}
-            <p class="empty">Игроков пока нет.</p>
+            <p class="empty">Пользователей пока нет.</p>
             {% endfor %}
           </div>
         </article>
       </section>
     </main>
+
+    <script>
+      const tabs = document.querySelectorAll("[data-section]");
+      const sections = document.querySelectorAll(".admin-section");
+
+      function activate(sectionId) {
+        document.querySelectorAll(".admin-tabs [data-section]").forEach((tab) => {
+          tab.classList.toggle("active", tab.dataset.section === sectionId);
+        });
+        sections.forEach((section) => section.classList.toggle("active", section.id === sectionId));
+        history.replaceState(null, "", `#${sectionId}`);
+      }
+
+      tabs.forEach((tab) => {
+        tab.addEventListener("click", () => activate(tab.dataset.section));
+      });
+
+      document.querySelectorAll(".delete").forEach((link) => {
+        link.addEventListener("click", (event) => {
+          if (!confirm("Удалить запись?")) event.preventDefault();
+        });
+      });
+
+      const initial = window.location.hash.replace("#", "");
+      if (initial && document.getElementById(initial)) activate(initial);
+    </script>
   </body>
 </html>

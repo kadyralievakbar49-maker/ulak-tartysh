@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}{{ horse.name }} | Лошади{% endblock %}
+
+{% block content %}
+<main>
+  <section class="section horse-detail">
+    <a class="back-link" href="{{ url_for('horses_page') }}">← Лошади</a>
+    <div class="horse-detail-grid">
+      <div class="horse-detail-photo">
+        {% if horse.photo_url %}
+        <img src="{{ horse.photo_url }}" alt="{{ horse.name }}" />
+        {% else %}
+        <span>{{ horse.name[:1] }}</span>
+        {% endif %}
+      </div>
+      <div class="horse-detail-info">
+        <p class="eyebrow">{{ horse.breed or 'Порода не указана' }}</p>
+        <h1>{{ horse.name }}</h1>
+        <p class="lead">{{ horse.description or 'Описание пока не добавлено.' }}</p>
+        <div class="horse-stats">
+          <span><strong>{{ horse.age or '-' }}</strong><em>лет</em></span>
+          <span><strong>{{ horse.speed or 0 }}</strong><em>скорость</em></span>
+          <span><strong>{{ horse.stamina or 0 }}</strong><em>выносливость</em></span>
+          <span><strong>{{ horse.points or 0 }}</strong><em>баллов</em></span>
+        </div>
+        <div class="horse-sale">
+          {% if horse.is_for_sale and horse.price %}
+          <strong>{{ "{:,}".format(horse.price).replace(",", " ") }} сом</strong>
+          <span>Продаётся</span>
+          {% elif horse.is_for_sale %}
+          <strong>Цена по запросу</strong>
+          <span>Продаётся</span>
+          {% else %}
+          <strong>Не продаётся</strong>
+          <span>Статус</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+{% endblock %}

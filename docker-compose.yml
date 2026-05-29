@@ -1,0 +1,20 @@
+
+
+services:
+  web:
+    build: .
+    container_name: kokboru_app
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
+      - db_data:/app
+      - uploads_data:/app/static/uploads
+    env_file:
+      - .env
+    command: ["python", "app.py"]
+
+volumes:
+  db_data:
+  uploads_data:

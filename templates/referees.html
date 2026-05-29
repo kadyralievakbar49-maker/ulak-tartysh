@@ -18,6 +18,20 @@
       </div>
     </div>
     <div class="referee-grid">
+      {% for referee in referees %}
+      <article class="referee-card">
+        {% if referee.photo_url %}
+        <img class="referee-avatar" src="{{ referee.photo_url }}" alt="{{ referee.name }}" />
+        {% else %}
+        <span class="referee-avatar">{{ referee.name[:1] }}</span>
+        {% endif %}
+        <div>
+          <h3>{{ referee.name }}</h3>
+          <p>{{ referee.category or 'Категория не указана' }}</p>
+        </div>
+        <small>{{ referee.experience_years or 0 }} лет · {{ referee.region or 'Регион не указан' }}</small>
+      </article>
+      {% else %}
       {% for referee in referees_public %}
       <article class="referee-card">
         <span class="referee-avatar">{{ referee.name[:1] }}</span>
@@ -28,6 +42,7 @@
         <small>{{ referee.experience }} лет · {{ referee.region }}</small>
         <small>Назначение: {{ referee.assignment }}</small>
       </article>
+      {% endfor %}
       {% endfor %}
     </div>
   </section>

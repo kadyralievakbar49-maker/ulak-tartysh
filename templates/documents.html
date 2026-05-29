@@ -18,6 +18,12 @@
       </div>
     </div>
     <div class="doc-grid">
+      {% for doc in db_documents if doc.category == 'Уставные документы' %}
+      <a href="/{{ doc.file_path }}" class="doc-link" target="_blank" rel="noopener noreferrer">
+        <span>{{ doc.category }}</span>
+        <strong>{{ doc.title }}</strong>
+      </a>
+      {% endfor %}
       {% for doc in official_documents if doc.category == 'Уставные документы' or 'ULAK' in doc.title %}
       <a href="{{ url_for('static', filename='uploads/' ~ doc.file) }}" class="doc-link" target="_blank" rel="noopener noreferrer">
         <span>{{ doc.category }}</span>
@@ -35,6 +41,12 @@
       </div>
     </div>
     <div class="doc-grid">
+      {% for doc in db_documents if doc.category == 'Правила' %}
+      <a href="/{{ doc.file_path }}" class="doc-link" target="_blank" rel="noopener noreferrer">
+        <span>{{ doc.category }}</span>
+        <strong>{{ doc.title }}</strong>
+      </a>
+      {% endfor %}
       {% for doc in official_documents if doc.category == 'Правила' %}
       <a href="{{ url_for('static', filename='uploads/' ~ doc.file) }}" class="doc-link" target="_blank" rel="noopener noreferrer">
         <span>{{ doc.category }}</span>
@@ -52,6 +64,12 @@
       </div>
     </div>
     <div class="doc-grid">
+      {% for doc in db_documents if doc.category != 'Правила' and doc.category != 'Уставные документы' %}
+      <a href="/{{ doc.file_path }}" class="doc-link" target="_blank" rel="noopener noreferrer">
+        <span>{{ doc.category }}</span>
+        <strong>{{ doc.title }}</strong>
+      </a>
+      {% endfor %}
       {% for doc in official_documents if doc.category != 'Правила' and doc.category != 'Уставные документы' %}
       <a href="{{ url_for('static', filename='uploads/' ~ doc.file) }}" class="doc-link" target="_blank" rel="noopener noreferrer">
         <span>{{ doc.category }}</span>
@@ -69,6 +87,12 @@
       </div>
     </div>
     <div class="doc-grid">
+      {% for doc in db_documents if doc.category == 'Заявки' or doc.category == 'Команды' %}
+      <a href="/{{ doc.file_path }}" class="doc-link" target="_blank" rel="noopener noreferrer">
+        <span>{{ doc.category }}</span>
+        <strong>{{ doc.title }}</strong>
+      </a>
+      {% endfor %}
       {% for doc in official_documents if doc.category == 'Заявки' or doc.category == 'Команды' %}
       <a href="{{ url_for('static', filename='uploads/' ~ doc.file) }}" class="doc-link" target="_blank" rel="noopener noreferrer">
         <span>{{ doc.category }}</span>

@@ -20,7 +20,7 @@
     navUlak: "Улак тартыш",
     navTeam: "Командалар",
     navPlayers: "Оюнчулар",
-    navHorses: "Лошади",
+    navHorses: "Аттар",
     navHippodromes: "Ипподромы",
     navReferees: "Калыстар",
     navPartners: "Партнерлор",
@@ -79,6 +79,38 @@
     horseStamina: "чыдамкайлык",
     footerTitle: "Улак тартыш федерациясы",
     footerText: "Улуттук оюнду өнүктүрүү, турнирлерди уюштуруу жана расмий маалыматты заманбап форматта жеткирүү.",
+    questionnaire: "Анкета",
+    login: "Кирүү",
+    register: "Каттоо",
+    loginTitle: "Кирүү",
+    registerTitle: "Каттоодон өтүү",
+    ticketsTitle: "Билет алуу",
+    emailOrPhone: "Телефон же email",
+    password: "Сыр сөз",
+    rememberMe: "Эстеп калуу",
+    forgotPassword: "Сыр сөздү унуттуңузбу?",
+    close: "Жабуу",
+    noAccount: "Аккаунт жокпу?",
+    createAccount: "Каттоодон өтүү",
+    fullName: "Аты-жөнү *",
+    fullNamePlaceholder: "Атыңыз жана фамилияңыз",
+    email: "Email *",
+    passwordMin: "Минимум 6 символ",
+    confirmPassword: "Сыр сөздү кайталаңыз *",
+    acceptTermsPrefix: "Шарттарга жана купуялуулук саясатына макулмун",
+    hasAccount: "Аккаунт барбы?",
+    verifyTitle: "Email тастыктоо",
+    verifyLead: "Email дарегиңизге келген 6 орундуу кодду жазыңыз.",
+    verificationCode: "Тастыктоо коду",
+    confirm: "Тастыктоо",
+    booking: "Брондоо",
+    ticketCount: "Билеттер саны",
+    phone: "Телефон",
+    match: "Матч",
+    team: "Команда",
+    contact: "Байланыш",
+    send: "Жөнөтүү",
+    adminLogin: "Админ катары кирүү",
   },
   ru: {
     heroEyebrow: "Официальный портал",
@@ -159,6 +191,38 @@
     horseStamina: "выносливость",
     footerTitle: "Федерация улак тартыш",
     footerText: "Развитие национальной игры, организация турниров и публикация официальной информации в современном формате.",
+    questionnaire: "Анкета",
+    login: "Вход",
+    register: "Регистрация",
+    loginTitle: "Вход",
+    registerTitle: "Регистрация",
+    ticketsTitle: "Купить билет",
+    emailOrPhone: "Телефон или email",
+    password: "Пароль",
+    rememberMe: "Запомнить",
+    forgotPassword: "Забыли пароль?",
+    close: "Закрыть",
+    noAccount: "Нет аккаунта?",
+    createAccount: "Зарегистрироваться",
+    fullName: "ФИО *",
+    fullNamePlaceholder: "Ваше имя и фамилия",
+    email: "Email *",
+    passwordMin: "Минимум 6 символов",
+    confirmPassword: "Повторите пароль *",
+    acceptTermsPrefix: "Согласен с условиями и политикой конфиденциальности",
+    hasAccount: "Уже есть аккаунт?",
+    verifyTitle: "Подтверждение email",
+    verifyLead: "Введите 6-значный код, который пришёл на вашу почту.",
+    verificationCode: "Код подтверждения",
+    confirm: "Подтвердить",
+    booking: "Забронировать",
+    ticketCount: "Количество билетов",
+    phone: "Телефон",
+    match: "Матч",
+    team: "Команда",
+    contact: "Контакт",
+    send: "Отправить",
+    adminLogin: "Войти как админ",
   },
   en: {
     heroEyebrow: "Official portal",
@@ -239,8 +303,48 @@
     horseStamina: "stamina",
     footerTitle: "Ulak tartysh federation",
     footerText: "Developing the national game, organizing tournaments and sharing official information in a modern format.",
+    questionnaire: "Questionnaire",
+    login: "Log in",
+    register: "Register",
+    loginTitle: "Log in",
+    registerTitle: "Create account",
+    ticketsTitle: "Get tickets",
+    emailOrPhone: "Phone or email",
+    password: "Password",
+    rememberMe: "Remember me",
+    forgotPassword: "Forgot password?",
+    close: "Close",
+    noAccount: "No account?",
+    createAccount: "Register",
+    fullName: "Full name *",
+    fullNamePlaceholder: "Your first and last name",
+    email: "Email *",
+    passwordMin: "Minimum 6 characters",
+    confirmPassword: "Repeat password *",
+    acceptTermsPrefix: "I agree to the terms and privacy policy",
+    hasAccount: "Already have an account?",
+    verifyTitle: "Confirm email",
+    verifyLead: "Enter the 6-digit code sent to your email.",
+    verificationCode: "Confirmation code",
+    confirm: "Confirm",
+    booking: "Book",
+    ticketCount: "Ticket count",
+    phone: "Phone",
+    match: "Match",
+    team: "Team",
+    contact: "Contact",
+    send: "Send",
+    adminLogin: "Log in as admin",
   }
 };
+
+      let currentLang = document.documentElement.lang || "kg";
+      let activeModalType = null;
+      let pendingVerificationEmail = "";
+
+      function t(key) {
+        return translations[currentLang]?.[key] || translations.kg[key] || key;
+      }
 
       const modal = document.querySelector("#modal");
       const modalCard = document.querySelector("#modalCard");
@@ -267,6 +371,7 @@
       function closeModal() {
         modal.classList.remove("show");
         document.body.classList.remove("locked");
+        activeModalType = null;
       }
 function formMarkup(type) {
   // === ВХОД ===
@@ -274,25 +379,26 @@ function formMarkup(type) {
     return `
       <form class="form-grid" data-submit="login">
         <div class="form-field">
-          <label for="loginEmail">Телефон же email</label>
+          <label for="loginEmail">${t("emailOrPhone")}</label>
           <input id="loginEmail" name="email" type="text" required placeholder="email@example.com" autocomplete="username" />
         </div>
         <div class="form-field">
-          <label for="loginPassword">Сыр сөз</label>
+          <label for="loginPassword">${t("password")}</label>
           <input id="loginPassword" name="password" type="password" required placeholder="••••••••" autocomplete="current-password" />
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin:-10px 0 10px;">
           <label style="font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px;">
-            <input type="checkbox" name="remember" /> Эстеп калуу
+            <input type="checkbox" name="remember" /> ${t("rememberMe")}
           </label>
-          <a href="#" style="font-size:13px;color:var(--green);text-decoration:none;" data-action="forgot">Сыр сөздү унуттуңузбу?</a>
+          <a href="#" style="font-size:13px;color:var(--green);text-decoration:none;" data-action="forgot">${t("forgotPassword")}</a>
         </div>
+        <a class="admin-login-link" href="/admin">${t("adminLogin")}</a>
         <div class="modal-actions">
-          <button class="ghost" type="button" data-close>Жабуу</button>
-          <button class="primary" type="submit">Кирүү</button>
+          <button class="ghost" type="button" data-close>${t("close")}</button>
+          <button class="primary" type="submit">${t("login")}</button>
         </div>
         <p style="text-align:center;margin-top:16px;font-size:14px;color:var(--muted)">
-          Аккаунт жокпу? <a href="#" style="color:var(--green);text-decoration:none;" data-open="register">Каттоодон өтүү</a>
+          ${t("noAccount")} <a href="#" style="color:var(--green);text-decoration:none;" data-open="register">${t("createAccount")}</a>
         </p>
       </form>`;
   }
@@ -302,34 +408,50 @@ function formMarkup(type) {
     return `
       <form class="form-grid" data-submit="register">
         <div class="form-field">
-          <label for="regFullname">Аты-жөнү *</label>
-          <input id="regFullname" name="fullname" type="text" required placeholder="Атыңыз жана фамилияңыз" autocomplete="name" />
+          <label for="regFullname">${t("fullName")}</label>
+          <input id="regFullname" name="fullname" type="text" required placeholder="${t("fullNamePlaceholder")}" autocomplete="name" />
         </div>
         <div class="form-field">
-          <label for="regEmail">Email *</label>
+          <label for="regEmail">${t("email")}</label>
           <input id="regEmail" name="email" type="email" required placeholder="email@example.com" autocomplete="email" />
         </div>
         <div class="form-field">
-          <label for="regPassword">Сыр сөз *</label>
-          <input id="regPassword" name="password" type="password" required placeholder="Минимум 6 символ" minlength="6" autocomplete="new-password" />
+          <label for="regPassword">${t("password")} *</label>
+          <input id="regPassword" name="password" type="password" required placeholder="${t("passwordMin")}" minlength="6" autocomplete="new-password" />
         </div>
         <div class="form-field">
-          <label for="regConfirm">Сыр сөздү кайталаңыз *</label>
+          <label for="regConfirm">${t("confirmPassword")}</label>
           <input id="regConfirm" name="confirm_password" type="password" required placeholder="••••••••" autocomplete="new-password" />
         </div>
         <div style="font-size:12px;color:var(--muted);margin:-8px 0 8px">
           <input type="checkbox" id="regTerms" required style="vertical-align:middle;margin-right:4px" />
           <label for="regTerms" style="vertical-align:middle">
-            <a href="#" style="color:var(--green)">Шарттарга</a> жана <a href="#" style="color:var(--green)">купуктуулук саясатына</a> макулмун
+            ${t("acceptTermsPrefix")}
           </label>
         </div>
         <div class="modal-actions">
-          <button class="ghost" type="button" data-close>Жабуу</button>
-          <button class="primary" type="submit">Каттоо</button>
+          <button class="ghost" type="button" data-close>${t("close")}</button>
+          <button class="primary" type="submit">${t("register")}</button>
         </div>
         <p style="text-align:center;margin-top:16px;font-size:14px;color:var(--muted)">
-          Аккаунт барбы? <a href="#" style="color:var(--green);text-decoration:none;" data-open="login">Кирүү</a>
+          ${t("hasAccount")} <a href="#" style="color:var(--green);text-decoration:none;" data-open="login">${t("login")}</a>
         </p>
+      </form>`;
+  }
+
+  if (type === "verify_email") {
+    return `
+      <form class="form-grid" data-submit="verify_email">
+        <p style="margin:0;color:var(--muted)">${t("verifyLead")}</p>
+        <input type="hidden" name="email" value="${pendingVerificationEmail}" />
+        <div class="form-field">
+          <label for="verificationCode">${t("verificationCode")}</label>
+          <input id="verificationCode" name="code" type="text" required inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="123456" autocomplete="one-time-code" />
+        </div>
+        <div class="modal-actions">
+          <button class="ghost" type="button" data-close>${t("close")}</button>
+          <button class="primary" type="submit">${t("confirm")}</button>
+        </div>
       </form>`;
   }
 
@@ -337,20 +459,21 @@ function formMarkup(type) {
   if (type === "tickets") {
     return `
       <form class="form-grid" data-submit="tickets">
-        <div class="form-field"><label>Матч</label><select name="match"><option>Достук - Ынтымак</option><option>Сары-Өзөн - Мурас</option><option>Бакубат - Ак-Суу</option></select></div>
-        <div class="form-field"><label>Билеттер саны</label><input name="count" type="number" min="1" max="10" value="2" /></div>
-        <div class="form-field"><label>Телефон</label><input name="phone" required placeholder="+996 700 000 000" /></div>
-        <div class="modal-actions"><button class="ghost" type="button" data-close>Жабуу</button><button class="primary" type="submit">Брондоо</button></div>
+        <div class="form-field"><label>${t("match")}</label><select name="match"><option>Достук - Ынтымак</option><option>Сары-Өзөн - Мурас</option><option>Бакубат - Ак-Суу</option></select></div>
+        <div class="form-field"><label>${t("ticketCount")}</label><input name="count" type="number" min="1" max="10" value="2" /></div>
+        <div class="form-field"><label>${t("phone")}</label><input name="phone" required placeholder="+996 700 000 000" /></div>
+        <div class="form-field"><label>Email</label><input name="email" type="email" placeholder="email@example.com" /></div>
+        <div class="modal-actions"><button class="ghost" type="button" data-close>${t("close")}</button><button class="primary" type="submit">${t("booking")}</button></div>
       </form>`;
   }
 
   // === АНКЕТА ===
   return `
     <form class="form-grid" data-submit="questionnaire">
-      <div class="form-field"><label>Аты-жөнү</label><input name="fullname" required placeholder="Атыңыз" /></div>
-      <div class="form-field"><label>Команда</label><input name="team" required placeholder="Команданын аты" /></div>
-      <div class="form-field"><label>Байланыш</label><input name="contact" required placeholder="+996 700 000 000" /></div>
-      <div class="modal-actions"><button class="ghost" type="button" data-close>Жабуу</button><button class="primary" type="submit">Жөнөтүү</button></div>
+      <div class="form-field"><label>${t("fullName")}</label><input name="fullname" required placeholder="${t("fullNamePlaceholder")}" /></div>
+      <div class="form-field"><label>${t("team")}</label><input name="team" required placeholder="${t("team")}" /></div>
+      <div class="form-field"><label>${t("contact")}</label><input name="contact" required placeholder="+996 700 000 000" /></div>
+      <div class="modal-actions"><button class="ghost" type="button" data-close>${t("close")}</button><button class="primary" type="submit">${t("send")}</button></div>
     </form>`;
 }
 
@@ -372,8 +495,9 @@ function formMarkup(type) {
         button.addEventListener("click", () => {
           document.querySelectorAll(".lang").forEach((item) => item.classList.remove("active"));
           button.classList.add("active");
-          document.documentElement.lang = button.dataset.lang;
-          Object.entries(translations[button.dataset.lang]).forEach(([key, value]) => {
+          currentLang = button.dataset.lang;
+          document.documentElement.lang = currentLang;
+          Object.entries(translations[currentLang]).forEach(([key, value]) => {
             document.querySelectorAll(`[data-i18n="${key}"]`).forEach((el) => {
               el.textContent = value;
             });
@@ -381,6 +505,16 @@ function formMarkup(type) {
               el.setAttribute("placeholder", value);
             });
           });
+          if (activeModalType) {
+            const titles = {
+              login: t("loginTitle"),
+              register: t("registerTitle"),
+              tickets: t("ticketsTitle"),
+              questionnaire: t("questionnaire"),
+              verify_email: t("verifyTitle"),
+            };
+            openModal(titles[activeModalType], formMarkup(activeModalType));
+          }
           showToast(`Тил өзгөрдү: ${button.dataset.lang.toUpperCase()}`);
         });
       });
@@ -410,18 +544,38 @@ function formMarkup(type) {
         });
       }
 
+      const slides = Array.from(document.querySelectorAll(".home-slide"));
+      const dots = Array.from(document.querySelectorAll("[data-slide-dot]"));
+      let activeSlide = Math.max(0, slides.findIndex((slide) => slide.classList.contains("active")));
+
+      function showSlide(index) {
+        if (!slides.length) return;
+        activeSlide = (index + slides.length) % slides.length;
+        slides.forEach((slide, slideIndex) => slide.classList.toggle("active", slideIndex === activeSlide));
+        dots.forEach((dot, dotIndex) => dot.classList.toggle("active", dotIndex === activeSlide));
+      }
+
+      if (slides.length) {
+        document.querySelector("[data-slide-prev]")?.addEventListener("click", () => showSlide(activeSlide - 1));
+        document.querySelector("[data-slide-next]")?.addEventListener("click", () => showSlide(activeSlide + 1));
+        dots.forEach((dot) => dot.addEventListener("click", () => showSlide(Number(dot.dataset.slideDot))));
+        window.setInterval(() => showSlide(activeSlide + 1), 4500);
+      }
+
       document.addEventListener("click", (event) => {
-        const target = event.target.closest("button");
+        const target = event.target.closest("button, a");
         if (!target) return;
 
         if (target.dataset.open) {
+  event.preventDefault();
   const type = target.dataset.open;
   const titles = { 
-    login: "Кирүү", 
-    register: "Каттоодон өтүү", 
-    tickets: "Билет алуу", 
-    questionnaire: "Анкета" 
+    login: t("loginTitle"), 
+    register: t("registerTitle"), 
+    tickets: t("ticketsTitle"), 
+    questionnaire: t("questionnaire") 
   };
+  activeModalType = type;
   openModal(titles[type], formMarkup(type));
   return;
 }
@@ -486,8 +640,27 @@ function formMarkup(type) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ form_type: formType, payload: payload })
         })
-        .then(response => response.json())
-        .then(data => {
+        .then(response => response.json().then(data => ({ ok: response.ok, data })))
+        .then(({ ok, data }) => {
+          if (!ok || data.status === "error") {
+            showToast(data.message || "Ката кетти.");
+            return;
+          }
+
+          if (data.status === "verification_required") {
+            pendingVerificationEmail = data.email || payload.email || "";
+            activeModalType = "verify_email";
+            openModal(t("verifyTitle"), formMarkup("verify_email"));
+            showToast(data.message);
+            return;
+          }
+
+          if (data.reload) {
+            showToast(data.message);
+            window.setTimeout(() => window.location.reload(), 700);
+            return;
+          }
+
           closeModal();
           showToast(data.message);
         })

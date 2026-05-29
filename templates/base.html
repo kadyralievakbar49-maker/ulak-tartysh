@@ -10,12 +10,18 @@
   <body>
     <div class="topbar">
       <button class="quick" data-open="questionnaire">
-        <span class="quick-mark" aria-hidden="true">УТ</span>
-        Анкета
+        <!-- Логотип в кнопке "Анкета" -->
+        <img src="{{ url_for('static', filename='img/logo.jpg') }}" alt="УТ" class="quick-logo" aria-hidden="true" />
+        <span data-i18n="questionnaire">Анкета</span>
       </button>
       <div class="top-actions" aria-label="Language and login">
-        <button data-open="login">Кирүү</button>
-        <button data-open="register" style="color:var(--gold);font-weight:800">Каттоо</button>
+        {% if session.get('user_name') %}
+        <span class="user-chip">{{ session.get('user_name') }}</span>
+        <a class="top-link" href="{{ url_for('user_logout') }}">Чыгуу</a>
+        {% else %}
+        <button data-open="login" data-i18n="login">Кирүү</button>
+        <button data-open="register" data-i18n="register" style="color:var(--gold);font-weight:800">Каттоо</button>
+        {% endif %}
         <button class="lang active" data-lang="kg">KG</button>
         <button class="lang" data-lang="ru">RU</button>
         <button class="lang" data-lang="en">EN</button>
@@ -24,7 +30,8 @@
 
     <header class="header">
       <a class="brand" href="{{ url_for('home') }}">
-        <span class="brand-mark" aria-hidden="true">УТ</span>
+        <!-- ОСНОВНОЙ ЛОГОТИП В ШАПКЕ -->
+        <img src="{{ url_for('static', filename='img/logo.jpg') }}" alt="Улак тартыш" class="brand-logo" aria-hidden="true" />
         <span class="brand-text">
           <span>федерация</span>
           <strong data-i18n="brandName">Улак тартыш</strong>
@@ -63,6 +70,7 @@
           <div class="dropdown">
             <a href="{{ url_for('teams_page') }}" data-i18n="navTeam">Командалар</a>
             <a href="{{ url_for('home') }}#players" data-i18n="navPlayers">Оюнчулар</a>
+            <a href="{{ url_for('horses_page') }}" data-i18n="navHorses">Аттар</a>
             <a href="{{ url_for('hippodromes_page') }}" data-i18n="navHippodromes">Ипподромы</a>
             <a href="{{ url_for('referees_page') }}" data-i18n="navReferees">Калыстар</a>
           </div>
@@ -75,7 +83,8 @@
     {% block content %}{% endblock %}
 
     <footer class="footer">
-      <span class="brand-mark footer-mark" aria-hidden="true">УТ</span>
+      <!-- Логотип в футере -->
+      <img src="{{ url_for('static', filename='img/logo.jpg') }}" alt="УТ" class="footer-logo" aria-hidden="true" />
       <div>
         <h2 data-i18n="footerTitle">Улак тартыш федерациясы</h2>
         <p data-i18n="footerText">Улуттук оюнду өнүктүрүү, турнирлерди уюштуруу жана расмий маалыматты заманбап форматта жеткирүү.</p>
@@ -85,10 +94,11 @@
         <a href="{{ url_for('documents_page') }}" data-i18n="navDocuments">Документтер</a>
         <a href="{{ url_for('referees_page') }}" data-i18n="navReferees">Калыстар</a>
         <a href="{{ url_for('contacts_page') }}" data-i18n="navContacts">Байланыш</a>
+        <a href="{{ url_for('horses_page') }}" data-i18n="navHorses">Аттар</a>
       </div>
       <div class="social-links" aria-label="Социальные сети">
-        <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">Instagram</a>
-        <a href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer">YouTube</a>
+        <a href="https://www.instagram.com/ulak_tartysh_official?igsh=aWJrcHF5a3Rkem1w" target="_blank" rel="noopener noreferrer">Instagram</a>
+        <a href="https://youtube.com/channel/UCSlqV4SGqzS2rdlTFlpMVNQ?si=bdjnYZtXHQbRJg4B" target="_blank" rel="noopener noreferrer">YouTube</a>
         <a href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer">Facebook</a>
       </div>
     </footer>

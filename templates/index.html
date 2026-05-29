@@ -10,7 +10,7 @@
       <h1 data-i18n="heroTitle">Улак тартыш оюндарын жаңы деңгээлде көрүңүз</h1>
       <p class="lead" data-i18n="heroLead">
         Матчтардын календары, лигалар, оюнчулар, жаңылыктар жана медиа бир жерде.
-        Таза, тез жана мобилге ылайыкташкан интерфейс.
+        
       </p>
       <div class="hero-actions">
         <a class="primary" href="#matches" data-i18n="heroPrimary">Оюндарды көрүү</a>
@@ -47,6 +47,46 @@
       <input id="searchInput" type="search" placeholder="Команда, лига, жаңылык же оюнчу издөө" data-i18n-placeholder="searchPlaceholder" />
       <button class="primary" type="submit" data-i18n="searchButton">Издөө</button>
     </form>
+  </section>
+
+  <section class="section home-slider-section" aria-label="Ulak tartysh slider">
+    <div class="home-slider" id="homeSlider">
+      <div class="slide-track">
+        {% for item in news[:3] %}
+        <article class="home-slide{% if loop.first %} active{% endif %}">
+          {% if item.img_url %}
+          <img src="{{ item.img_url }}" alt="{{ item.title }}" />
+          {% endif %}
+          <div>
+            <span>{{ item.date }}</span>
+            <h2>{{ item.title }}</h2>
+            <p>{{ item.body or 'Федерация жаңылыктары жана расмий маалыматтар.' }}</p>
+            <a class="primary" href="{{ url_for('news_detail_page', news_id=item.id) }}">Окуу</a>
+          </div>
+        </article>
+        {% else %}
+        <article class="home-slide active">
+          <div>
+            <span data-i18n="heroEyebrow">Расмий портал</span>
+            <h2 data-i18n="heroTitle">Улак тартыш оюндарын жаңы деңгээлде көрүңүз</h2>
+            <p data-i18n="heroLead">Матчтардын календары, лигалар, оюнчулар, жаңылыктар жана медиа бир жерде.</p>
+            <a class="primary" href="#matches" data-i18n="heroPrimary">Оюндарды көрүү</a>
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+      <div class="slider-controls">
+        <button type="button" data-slide-prev aria-label="Previous slide">‹</button>
+        <div class="slider-dots">
+          {% for item in news[:3] %}
+          <button type="button" class="{% if loop.first %}active{% endif %}" data-slide-dot="{{ loop.index0 }}" aria-label="Slide {{ loop.index }}"></button>
+          {% else %}
+          <button type="button" class="active" data-slide-dot="0" aria-label="Slide 1"></button>
+          {% endfor %}
+        </div>
+        <button type="button" data-slide-next aria-label="Next slide">›</button>
+      </div>
+    </div>
   </section>
 
   <section class="section" id="matches">
@@ -109,6 +149,31 @@
       <button class="secondary" data-action="gallery" data-i18n="gallery">Галерея</button>
     </div>
     <div class="media-grid">
+      {% for video in videos %}
+      <a class="media" href="{{ video.video_url }}" target="_blank" rel="noopener noreferrer">
+        {% if video.thumbnail %}
+        <img class="media-photo" src="{{ video.thumbnail }}" alt="{{ video.title }}" />
+        {% elif video.video_url.endswith('.mp4') or video.video_url.endswith('.webm') or video.video_url.endswith('.mov') %}
+        <video class="media-photo" src="{{ video.video_url }}" muted playsinline preload="metadata"></video>
+        {% else %}
+        <span class="media-photo" aria-hidden="true"></span>
+        {% endif %}
+        <span class="media-label">{{ video.category or 'Видео' }} · {{ video.title }}</span>
+      </a>
+      {% endfor %}
+
+      {% for album in albums %}
+      <button class="media" data-action="gallery">
+        {% if album.cover_url %}
+        <img class="media-photo" src="{{ album.cover_url }}" alt="{{ album.title }}" />
+        {% else %}
+        <span class="media-photo" aria-hidden="true"></span>
+        {% endif %}
+        <span class="media-label">Фото · {{ album.title }}</span>
+      </button>
+      {% endfor %}
+
+      {% if not videos and not albums %}
       <button class="media" data-action="gallery">
         <span class="media-photo" aria-hidden="true"></span>
         <span class="media-label" data-i18n="videoReview">Видео обзор</span>
@@ -121,6 +186,7 @@
         <span class="media-photo" aria-hidden="true"></span>
         <span class="media-label" data-i18n="gallery">Галерея</span>
       </button>
+      {% endif %}
     </div>
   </section>
 
@@ -144,7 +210,7 @@
         <div>
           <span>{{ item.date }}</span>
           <h3>{{ item.title }}</h3>
-          <button class="ghost" data-news="{{ item.title }}">Окуу</button>
+          <a class="ghost" href="{{ url_for('news_detail_page', news_id=item.id) }}">Окуу</a>
         </div>
       </article>
       {% else %}
