@@ -5,15 +5,22 @@
 {% block content %}
 <main>
   <section class="section page-hero">
-    <p class="eyebrow">Команды</p>
-    <h1>Все команды</h1>
-    <p class="lead">Составы, лиги и базовая статистика команд федерации.</p>
+    <p class="eyebrow" data-i18n="pageTeamsEyebrow">Команды</p>
+    <h1 data-i18n="pageTeamsTitle">Все команды</h1>
+    <p class="lead" data-i18n="pageTeamsLead">Составы, лиги и базовая статистика команд федерации.</p>
   </section>
 
   <section class="section">
     <div class="team-grid">
-      {% for team in teams_public %}
-      <article class="team-card">
+      {% for team in teams %}
+      <a class="team-card team-link-card" href="{{ url_for('team_detail_page', team_id=team.id) }}">
+        <div class="team-photo-box">
+          {% if team.photo_url %}
+          <img src="{{ team.photo_url }}" alt="{{ team.name }}" loading="lazy" />
+          {% else %}
+          <span>{{ team.name[:1] }}</span>
+          {% endif %}
+        </div>
         <div class="team-card-head">
           <span>{{ team.name[:1] }}</span>
           <div>
@@ -22,12 +29,14 @@
           </div>
         </div>
         <div class="horse-stats">
-          <span><strong>{{ team.players }}</strong> игроков</span>
-          <span><strong>{{ team.wins }}</strong> побед</span>
-          <span><strong>{{ team.points }}</strong> очков</span>
+          <span><strong>{{ team.player_count or 0 }}</strong> <em data-i18n="playersCount">игроков</em></span>
+          <span><strong>{{ team.wins }}</strong> <em data-i18n="wins">побед</em></span>
+          <span><strong>{{ team.points }}</strong> <em data-i18n="points">очков</em></span>
           <span><strong>{{ team.league }}</strong> лига</span>
         </div>
-      </article>
+      </a>
+      {% else %}
+      <p class="empty-state" data-i18n="noTeams">Команды пока не добавлены.</p>
       {% endfor %}
     </div>
   </section>

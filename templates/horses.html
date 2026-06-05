@@ -5,25 +5,25 @@
 {% block content %}
 <main>
   <section class="section page-hero">
-    <p class="eyebrow">Лошади</p>
-    <h1>Лошади улак тартыш</h1>
-    <p class="lead">Фото, характеристики, игровые баллы и статус продажи.</p>
+    <p class="eyebrow" data-i18n="pageHorsesEyebrow">Лошади</p>
+    <h1 data-i18n="pageHorsesTitle">Лошади улак тартыш</h1>
+    <p class="lead" data-i18n="pageHorsesLead">Фото, характеристики, игровые баллы и статус продажи.</p>
   </section>
 
   <section class="section horses-section">
     <div class="section-head compact-head">
       <div>
-        <p class="eyebrow">Рейтинг</p>
+        <p class="eyebrow" data-i18n="rating">Рейтинг</p>
         <h2 data-i18n="horsesTitle">Топ лошадей и игровые показатели</h2>
       </div>
     </div>
 
     <div class="horse-grid">
       {% for horse in horses %}
-      <article class="horse-card" data-search="{{ horse.name }} {{ horse.breed }} {{ horse.color }}">
+      <a class="horse-card" href="{{ url_for('horse_detail_page', horse_id=horse.id) }}" data-search="{{ horse.name }} {{ horse.breed }} {{ horse.color }}">
         <div class="horse-visual{% if horse.photo_url %} has-photo{% endif %}">
           {% if horse.photo_url %}
-          <img src="{{ horse.photo_url }}" alt="{{ horse.name }}" />
+          <img src="{{ horse.photo_url }}" alt="{{ horse.name }}" loading="lazy" onerror="this.style.display='none'; this.parentElement.classList.remove('has-photo');" />
           {% endif %}
           <span>{{ loop.index }}</span>
           <strong>{{ horse.points }} баллов</strong>
@@ -55,11 +55,11 @@
             <span>Статус</span>
             {% endif %}
           </div>
-          <a class="ghost horse-more" href="{{ url_for('horse_detail_page', horse_id=horse.id) }}">Подробнее</a>
+          <span class="ghost horse-more" data-i18n="details">Подробнее</span>
         </div>
-      </article>
+      </a>
       {% else %}
-      <p class="empty-state">Лошади пока не добавлены.</p>
+      <p class="empty-state" data-i18n="noHorses">Лошади пока не добавлены.</p>
       {% endfor %}
     </div>
   </section>

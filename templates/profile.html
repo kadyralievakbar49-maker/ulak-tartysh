@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Профиль | Улак тартыш{% endblock %}
+{% block description %}Улак тартыш колдонуучусунун жеке кабинети.{% endblock %}
+
+{% block content %}
+<main>
+  <section class="section page-hero profile-hero">
+    <div class="profile-avatar">
+      {% if user.photo_url %}
+      <img src="{{ user.photo_url }}" alt="{{ user.full_name }}" loading="lazy" />
+      {% else %}
+      <span>{{ user.full_name[:1] }}</span>
+      {% endif %}
+    </div>
+    <div>
+      <p class="eyebrow">Жеке кабинет</p>
+      <h1>{{ user.full_name }}</h1>
+      <p class="lead">{{ user.email }} · {{ user.created_at }}</p>
+    </div>
+  </section>
+
+  <section class="section profile-grid">
+    <article class="profile-panel">
+      <h2>Профилди өзгөртүү</h2>
+      <form class="form-grid" id="profileUpdateForm">
+        <div class="form-field"><label>Email</label><input value="{{ user.email }}" disabled /></div>
+        <div class="form-field"><label>Аты-жөнү</label><input name="full_name" value="{{ user.full_name }}" required /></div>
+        <div class="form-field"><label>Телефон</label><input name="phone" value="{{ user.phone or '' }}" placeholder="+996 700 000 000" /></div>
+        <button class="primary" type="submit">Сактоо</button>
+      </form>
+    </article>
+
+    <article class="profile-panel">
+      <h2>Сыр сөздү өзгөртүү</h2>
+      <form class="form-grid" id="passwordChangeForm">
+        <div class="form-field"><label>Эски сыр сөз</label><input name="old_password" type="password" required /></div>
+        <div class="form-field"><label>Жаңы сыр сөз</label><input name="new_password" type="password" minlength="6" required /></div>
+        <button class="primary" type="submit">Өзгөртүү</button>
+      </form>
+    </article>
+
+    <article class="profile-panel profile-tickets">
+      <h2>Билет заявкалары</h2>
+      <div class="ticket-list">
+        {% for ticket in tickets %}
+        <div class="ticket-card">
+          <strong>{{ ticket.match_name or 'Матч көрсөтүлгөн эмес' }}</strong>
+          <span>{{ ticket.count }} билет · {{ ticket.phone }}</span>
+          <small>{{ ticket.status }} · {{ ticket.created_at }}</small>
+        </div>
+        {% else %}
+        <p class="empty-state">Билет заявкалары азырынча жок.</p>
+        {% endfor %}
+      </div>
+    </article>
+  </section>
+</main>
+{% endblock %}

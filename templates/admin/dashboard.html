@@ -5,11 +5,120 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Админ-панель | Улак тартыш</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}" />
+    <style>
+      /* 🔧 FIX: Ограничение высоты textarea + скролл */
+      .inline-edit textarea,
+      .form-grid textarea {
+        max-height: 120px;
+        min-height: 80px;
+        overflow-y: auto;
+        resize: vertical;
+        font-size: 14px;
+        line-height: 1.4;
+      }
+
+      /* 🔧 FIX: Кнопки всегда видны при прокрутке формы */
+      .inline-edit {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 12px 16px;
+        align-items: start;
+      }
+      .inline-edit button[type="submit"] {
+        grid-column: 1 / -1;
+        justify-self: end;
+        margin-top: 8px;
+        position: sticky;
+        bottom: 0;
+        background: #1a2744;
+        z-index: 10;
+      }
+
+      /* 🔧 FIX: Отображение текущего изображения */
+      .current-image {
+        display: block;
+        max-width: 200px;
+        max-height: 150px;
+        border-radius: 8px;
+        margin: 8px 0;
+        border: 1px solid #e0e0e0;
+        object-fit: cover;
+      }
+      .image-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        margin: 8px 0;
+        flex-wrap: wrap;
+      }
+      .btn-small {
+        padding: 6px 12px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      .btn-danger {
+        background: #e11d48;
+        color: #fff;
+      }
+      .btn-outline {
+        background: #fff;
+        border: 1px solid #ddd;
+        color: #1a2744;
+      }
+      .hint {
+        font-size: 12px;
+        color: #666;
+        margin-top: 4px;
+        display: block;
+      }
+      .form-grid input,
+      .form-grid select,
+      .inline-edit input,
+      .inline-edit select,
+      .inline-edit textarea {
+        border: 2px solid #e0e0e0 !important;
+        border-radius: 8px !important;
+        padding: 12px !important;
+        outline: none;
+      }
+      .form-grid input:focus,
+      .form-grid select:focus,
+      .inline-edit input:focus,
+      .inline-edit select:focus,
+      .inline-edit textarea:focus {
+        border-color: #f5b041 !important;
+        box-shadow: 0 0 0 4px rgba(245, 176, 65, 0.16);
+      }
+      input[type="number"] {
+        appearance: textfield;
+        -moz-appearance: textfield;
+      }
+      input[type="number"]::-webkit-outer-spin-button,
+      input[type="number"]::-webkit-inner-spin-button {
+        margin: 0;
+        -webkit-appearance: none;
+      }
+
+      /* Адаптив для мобильных */
+      @media (max-width: 768px) {
+        .inline-edit {
+          grid-template-columns: 1fr;
+        }
+        .inline-edit button[type="submit"] {
+          position: static;
+          justify-self: stretch;
+          width: 100%;
+        }
+      }
+    </style>
   </head>
   <body>
     <aside class="admin-sidebar">
       <a class="admin-brand" href="{{ url_for('home') }}">
-        <img src="{{ url_for('static', filename='img/logo.jpg') }}" alt="Улак тартыш" />
+        <img src="{{ url_for('static', filename='img/logo.jpg') }}" alt="Улак тартыш" loading="lazy" />
         <span>
           <small>Управление сайтом</small>
           <strong>Админ-панель</strong>
@@ -18,6 +127,7 @@
 
       <nav class="admin-tabs" aria-label="Разделы админ-панели">
         <button class="active" type="button" data-section="overview">Обзор</button>
+        <button type="button" data-section="homepage">Главная страница</button>
         <button type="button" data-section="matches">Матчи</button>
         <button type="button" data-section="news">Новости</button>
         <button type="button" data-section="media">Медиа</button>
@@ -25,6 +135,7 @@
         <button type="button" data-section="horses">Лошади</button>
         <button type="button" data-section="documents">Документы</button>
         <button type="button" data-section="venues">Ипподромы</button>
+        <button type="button" data-section="contact-cards">Контактные карточки</button>
         <button type="button" data-section="tickets">Билеты</button>
         <button type="button" data-section="users">Пользователи</button>
       </nav>
@@ -44,6 +155,7 @@
         <a class="open-site" href="{{ url_for('home') }}">На сайт</a>
       </header>
 
+      <!-- Обзор -->
       <section class="admin-section active" id="overview">
         <div class="stats-grid">
           <article><span>Матчи</span><strong>{{ matches|length }}</strong></article>
@@ -60,6 +172,7 @@
           <h2>Быстрые действия</h2>
           <div class="quick-actions">
             <button type="button" data-section="matches">Добавить матч</button>
+            <button type="button" data-section="homepage">Настроить главную</button>
             <button type="button" data-section="news">Опубликовать новость</button>
             <button type="button" data-section="media">Загрузить медиа</button>
             <button type="button" data-section="horses">Добавить лошадь</button>
@@ -69,11 +182,102 @@
         </div>
       </section>
 
+      <!-- Главная страница -->
+      <section class="admin-section" id="homepage">
+        <div class="section-layout homepage-admin-layout">
+          <article class="panel">
+            <h2>Hero секция</h2>
+            <form action="{{ url_for('admin_homepage') }}" method="post" enctype="multipart/form-data" class="form-grid homepage-form" id="homepageForm">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+              <label>Подзаголовок
+                <input name="subtitle" type="text" value="{{ homepage_settings.subtitle if homepage_settings else 'Расмий портал' }}" required />
+              </label>
+              <label>Заголовок
+                <input name="title" type="text" value="{{ homepage_settings.title if homepage_settings else 'Улак тартыш оюндарын жаңы деңгээлде көрүңүз' }}" required />
+              </label>
+              <label>Описание
+                <textarea name="description" rows="4" required>{{ homepage_settings.description if homepage_settings else 'Матчтардын календары, лигалар, оюнчулар, жаңылыктар жана медиа бир жерде.' }}</textarea>
+              </label>
+              <div class="two-col">
+                <label>Текст кнопки 1
+                  <input name="button1_text" type="text" value="{{ homepage_settings.button1_text if homepage_settings else 'Оюндарды көрүү' }}" required />
+                </label>
+                <label>Ссылка кнопки 1
+                  <input name="button1_link" type="text" value="{{ homepage_settings.button1_link if homepage_settings else '#matches' }}" required />
+                </label>
+              </div>
+              <div class="two-col">
+                <label>Текст кнопки 2
+                  <input name="button2_text" type="text" value="{{ homepage_settings.button2_text if homepage_settings else 'Жаңылыктар' }}" required />
+                </label>
+                <label>Ссылка кнопки 2
+                  <input name="button2_link" type="text" value="{{ homepage_settings.button2_link if homepage_settings else '#news' }}" required />
+                </label>
+              </div>
+              <label class="file-field homepage-dropzone">Фоновое изображение
+                <input name="background_image" id="homepageBackgroundFile" type="file" accept="image/*" />
+                <span class="hint">Можно перетащить файл сюда. Рекомендуется 1920×1080 px.</span>
+              </label>
+              <label>Overlay цвет
+                <input name="overlay_color" type="text" value="{{ homepage_settings.overlay_color if homepage_settings else 'linear-gradient(135deg, rgba(26, 39, 68, 0.58) 0%, rgba(26, 39, 68, 0.36) 55%, rgba(26, 39, 68, 0.21) 100%)' }}" placeholder="rgba(26, 39, 68, 0.45)" />
+              </label>
+
+              <div class="homepage-stats-editor">
+                <h3>Статистика</h3>
+                {% for stat in homepage_stats %}
+                <div class="two-col stat-editor-row">
+                  <input type="hidden" name="stat_id" value="{{ stat.id }}" />
+                  <label>Название
+                    <input name="stat_label" type="text" value="{{ stat.label }}" required />
+                  </label>
+                  <label>Число
+                    <input name="stat_value" type="number" min="0" value="{{ stat.value }}" required />
+                  </label>
+                </div>
+                {% else %}
+                <p class="empty">Статистика ещё не создана. Нажмите «Сбросить к дефолтным».</p>
+                {% endfor %}
+              </div>
+
+              <div class="homepage-actions">
+                <button type="submit">Сохранить изменения</button>
+                <a class="admin-link-button" href="{{ url_for('admin_panel') }}#overview">Отмена</a>
+                <a class="admin-link-button" href="{{ url_for('admin_homepage_preview') }}" target="_blank" rel="noopener noreferrer">Открыть превью</a>
+              </div>
+            </form>
+            <form action="{{ url_for('reset_homepage') }}" method="post" class="reset-homepage-form">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+              <button type="submit" class="btn-danger">Сбросить к дефолтным</button>
+            </form>
+          </article>
+
+          <article class="panel">
+            <h2>Превью главной</h2>
+            <div class="homepage-preview" id="homepagePreview"
+                 style="background-image: url('{{ homepage_settings.background_image if homepage_settings else '/static/img/slider/slide1.jpg' }}');">
+              <div class="homepage-preview-overlay" style="background: {{ homepage_settings.overlay_color if homepage_settings else 'linear-gradient(135deg, rgba(26, 39, 68, 0.58) 0%, rgba(26, 39, 68, 0.36) 55%, rgba(26, 39, 68, 0.21) 100%)' }};"></div>
+              <div class="homepage-preview-content">
+                <p>{{ homepage_settings.subtitle if homepage_settings else 'Расмий портал' }}</p>
+                <h3>{{ homepage_settings.title if homepage_settings else 'Улак тартыш оюндарын жаңы деңгээлде көрүңүз' }}</h3>
+                <span>{{ homepage_settings.description if homepage_settings else 'Матчтардын календары, лигалар, оюнчулар, жаңылыктар жана медиа бир жерде.' }}</span>
+                <div class="preview-buttons">
+                  <b>{{ homepage_settings.button1_text if homepage_settings else 'Оюндарды көрүү' }}</b>
+                  <em>{{ homepage_settings.button2_text if homepage_settings else 'Жаңылыктар' }}</em>
+                </div>
+              </div>
+            </div>
+            <p class="hint">Последнее изменение: {{ homepage_settings.updated_at if homepage_settings and homepage_settings.updated_at else 'ещё не сохраняли' }}</p>
+          </article>
+        </div>
+      </section>
+
+      <!-- Матчи -->
       <section class="admin-section" id="matches">
         <div class="section-layout">
           <article class="panel">
             <h2>Добавить матч</h2>
-            <form action="{{ url_for('add_match') }}" method="post" class="form-grid">
+             <form action="{{ url_for('add_match') }}" method="post" class="form-grid">
+                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
               <label>Дата<input name="date" type="date" required /></label>
               <label>Время<input name="time" type="time" required /></label>
               <label>Лига<input name="league" type="text" required placeholder="Жогорку лига" /></label>
@@ -89,7 +293,8 @@
             <div class="table-list">
               {% for match in matches %}
               <div class="row">
-                <form action="{{ url_for('update_match', match_id=match.id) }}" method="post" class="inline-edit">
+                 <form action="{{ url_for('update_match', match_id=match.id) }}" method="post" class="inline-edit">
+                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                   <input name="date" type="date" value="{{ match.date }}" required />
                   <input name="time" type="time" value="{{ match.time }}" required />
                   <input name="league" value="{{ match.league }}" required />
@@ -108,16 +313,26 @@
         </div>
       </section>
 
+      <!-- 🔧 НОВОСТИ (исправлено) -->
       <section class="admin-section" id="news">
         <div class="section-layout">
           <article class="panel">
             <h2>Добавить новость</h2>
-            <form action="{{ url_for('add_news') }}" method="post" enctype="multipart/form-data" class="form-grid">
+             <form action="{{ url_for('add_news') }}" method="post" enctype="multipart/form-data" class="form-grid">
+                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
               <label>Дата<input name="date" type="date" required /></label>
               <label>Заголовок<input name="title" type="text" required placeholder="Заголовок новости" /></label>
-              <label>Полный текст<textarea name="body" rows="6" placeholder="Текст новости"></textarea></label>
-              <label class="file-field">Фото новости<input name="image" type="file" accept="image/*" /></label>
-              <label>Ссылка на фото<input name="img_url" type="url" placeholder="https://..." /></label>
+              <label>Полный текст
+                <textarea name="body" rows="6" placeholder="Текст новости" style="max-height:120px;overflow-y:auto;"></textarea>
+              </label>
+              <label class="file-field">Фото новости
+                <input name="image" type="file" accept="image/*" />
+                <span class="hint">Рекомендуемый размер: 1200×630 px</span>
+              </label>
+              <label>Ссылка на фото
+                <input name="img_url" type="url" placeholder="https://..." />
+                <span class="hint">Или вставьте ссылку вместо загрузки файла</span>
+              </label>
               <button type="submit">Опубликовать</button>
             </form>
           </article>
@@ -127,12 +342,30 @@
             <div class="table-list">
               {% for item in news %}
               <div class="row">
-                <form action="{{ url_for('update_news', news_id=item.id) }}" method="post" enctype="multipart/form-data" class="inline-edit">
+                 <form action="{{ url_for('update_news', news_id=item.id) }}" method="post" enctype="multipart/form-data" class="inline-edit">
+                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                   <input name="date" type="date" value="{{ item.date }}" required />
                   <input name="title" value="{{ item.title }}" required />
-                  <textarea name="body" rows="4" placeholder="Полный текст">{{ item.body or '' }}</textarea>
+                  <textarea name="body" rows="4" placeholder="Полный текст" style="max-height:100px;overflow-y:auto;">{{ item.body or '' }}</textarea>
                   <input name="img_url" value="{{ item.img_url or '' }}" placeholder="Ссылка на фото" />
-                  <label class="file-field">Заменить фото<input name="image" type="file" accept="image/*" /></label>
+                  
+                  <!-- 🔧 Отображение текущего изображения -->
+                  {% if item.img_url %}
+                  <div style="grid-column: 1 / -1;">
+                    <img src="{{ item.img_url }}" alt="Current" class="current-image" loading="lazy" />
+                    <div class="image-actions">
+                      <button type="button" class="btn-small btn-danger" onclick="deleteNewsImage({{ item.id }}, '{{ item.title|replace("'", "\\'") }}')">
+                        🗑 Удалить фото
+                      </button>
+                      <span class="hint">Или загрузите новое — старое заменится автоматически</span>
+                    </div>
+                  </div>
+                  {% endif %}
+                  
+                  <label class="file-field" style="grid-column: 1 / -1;">
+                    Заменить фото
+                    <input name="image" type="file" accept="image/*" />
+                  </label>
                   <button type="submit">Сохранить</button>
                 </form>
                 <a href="{{ url_for('news_detail_page', news_id=item.id) }}" target="_blank" rel="noopener noreferrer">Открыть</a>
@@ -146,11 +379,13 @@
         </div>
       </section>
 
+      <!-- Медиа -->
       <section class="admin-section" id="media">
         <div class="section-layout">
           <article class="panel">
             <h2>Добавить видео</h2>
-            <form action="{{ url_for('add_video') }}" method="post" enctype="multipart/form-data" class="form-grid">
+             <form action="{{ url_for('add_video') }}" method="post" enctype="multipart/form-data" class="form-grid">
+                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
               <label>Название<input name="title" type="text" required placeholder="Название видео" /></label>
               <label>Категория
                 <select name="category">
@@ -179,7 +414,8 @@
 
           <article class="panel">
             <h2>Создать фотоальбом</h2>
-            <form action="{{ url_for('create_album') }}" method="post" enctype="multipart/form-data" class="form-grid">
+             <form action="{{ url_for('create_album') }}" method="post" enctype="multipart/form-data" class="form-grid">
+                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
               <label>Название<input name="title" type="text" required placeholder="Название альбома" /></label>
               <label>Матч
                 <select name="match_id">
@@ -203,7 +439,7 @@
             <div class="table-list">
               {% for video in videos %}
               <div class="row media-row">
-                {% if video.thumbnail %}<img src="{{ video.thumbnail }}" alt="{{ video.title }}" />{% else %}<span class="media-fallback">VIDEO</span>{% endif %}
+                {% if video.thumbnail %}<img src="{{ video.thumbnail }}" alt="{{ video.title }}" loading="lazy" />{% else %}<span class="media-fallback">VIDEO</span>{% endif %}
                 <strong>{{ video.title }}</strong>
                 <small>{{ video.category or 'Видео' }} · {{ video.upload_date }}</small>
                 <a class="delete" href="{{ url_for('delete_item', table_name='videos', item_id=video.id) }}">Удалить</a>
@@ -219,10 +455,11 @@
             <div class="table-list">
               {% for album in albums %}
               <div class="row media-row">
-                {% if album.cover_url %}<img src="{{ album.cover_url }}" alt="{{ album.title }}" />{% else %}<span class="media-fallback">PHOTO</span>{% endif %}
+                {% if album.cover_url %}<img src="{{ album.cover_url }}" alt="{{ album.title }}" loading="lazy" />{% else %}<span class="media-fallback">PHOTO</span>{% endif %}
                 <strong>{{ album.title }}</strong>
                 <small>{{ album.photo_count }} фото · {{ album.upload_date }}</small>
                 <form action="{{ url_for('add_photo', album_id=album.id) }}" method="post" enctype="multipart/form-data" class="mini-upload">
+                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                   <input name="caption" type="text" placeholder="Подпись к фото" />
                   <input name="photo" type="file" accept="image/*" required />
                   <button type="submit">Загрузить фото</button>
@@ -237,11 +474,13 @@
         </div>
       </section>
 
+      <!-- Игроки и судьи -->
       <section class="admin-section" id="people">
         <div class="section-layout">
           <article class="panel">
             <h2>Добавить игрока</h2>
-            <form action="{{ url_for('add_player') }}" method="post" enctype="multipart/form-data" class="form-grid">
+             <form action="{{ url_for('add_player') }}" method="post" enctype="multipart/form-data" class="form-grid">
+                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
               <label>Имя<input name="name" type="text" required placeholder="Имя игрока" /></label>
               <label>Команда<input name="team" type="text" placeholder="Команда" /></label>
               <label>Позиция<input name="position" type="text" placeholder="Позиция" /></label>
@@ -249,21 +488,32 @@
               <label>Матчи<input name="stats_matches" type="number" min="0" placeholder="0" /></label>
               <label>Год рождения<input name="birth_year" type="number" min="1900" max="2026" /></label>
               <label>Регион<input name="region" type="text" placeholder="Бишкек" /></label>
-              <label class="file-field">Фото игрока<input name="photo" type="file" accept="image/*" /></label>
-              <label>Ссылка на фото<input name="photo_url" type="url" placeholder="https://..." /></label>
+              <label class="file-field">Фото игрока
+                <input name="photo" type="file" accept="image/*" />
+                <span class="hint">Рекомендуемый размер: 300×400 px</span>
+              </label>
+              <label>Ссылка на фото
+                <input name="photo_url" type="text" placeholder="Или вставьте ссылку на фото" />
+              </label>
               <button type="submit">Добавить игрока</button>
             </form>
           </article>
 
           <article class="panel">
             <h2>Добавить судью</h2>
-            <form action="{{ url_for('add_referee') }}" method="post" enctype="multipart/form-data" class="form-grid">
+             <form action="{{ url_for('add_referee') }}" method="post" enctype="multipart/form-data" class="form-grid">
+                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
               <label>ФИО<input name="name" type="text" required placeholder="ФИО судьи" /></label>
               <label>Категория<input name="category" type="text" placeholder="Башкы калыс" /></label>
               <label>Стаж<input name="experience_years" type="number" min="0" placeholder="0" /></label>
               <label>Регион<input name="region" type="text" placeholder="Бишкек" /></label>
-              <label class="file-field">Фото судьи<input name="photo" type="file" accept="image/*" /></label>
-              <label>Ссылка на фото<input name="photo_url" type="url" placeholder="https://..." /></label>
+              <label class="file-field">Фото судьи
+                <input name="photo" type="file" accept="image/*" />
+                <span class="hint">Рекомендуемый размер: 300×400 px</span>
+              </label>
+              <label>Ссылка на фото
+                <input name="photo_url" type="text" placeholder="Или вставьте ссылку на фото" />
+              </label>
               <button type="submit">Добавить судью</button>
             </form>
           </article>
@@ -302,11 +552,13 @@
         </div>
       </section>
 
+      <!-- Лошади -->
       <section class="admin-section" id="horses">
         <div class="section-layout">
           <article class="panel">
             <h2>Добавить лошадь</h2>
             <form action="{{ url_for('add_horse') }}" method="post" enctype="multipart/form-data" class="form-grid">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
               <label>Кличка<input name="name" type="text" required placeholder="Аккула" /></label>
               <label>Порода<input name="breed" type="text" placeholder="Кыргыз жылкысы" /></label>
               <label>Возраст<input name="age" type="number" min="0" max="40" placeholder="7" /></label>
@@ -315,10 +567,17 @@
               <label>Выносливость<input name="stamina" type="number" min="0" max="100" placeholder="90" /></label>
               <label>Баллы<input name="points" type="number" min="0" placeholder="120" /></label>
               <label>Цена продажи, сом<input name="price" type="number" min="0" placeholder="850000" /></label>
-              <label>Описание<input name="description" type="text" placeholder="Краткая характеристика" /></label>
+              <label>Описание
+                <input name="description" type="text" placeholder="Краткая характеристика" />
+              </label>
               <label class="check"><input name="is_for_sale" type="checkbox" /> Выставить на продажу</label>
-              <label class="file-field">Фото лошади<input name="photo" type="file" accept="image/*" /></label>
-              <label>Ссылка на фото<input name="photo_url" type="url" placeholder="https://..." /></label>
+              <label class="file-field">Фото лошади
+                <input name="photo" type="file" accept="image/*" />
+                <span class="hint">Рекомендуемый размер: 800×600 px</span>
+              </label>
+              <label>Ссылка на фото
+                <input name="photo_url" type="text" placeholder="Или вставьте ссылку на фото" />
+              </label>
               <button type="submit">Добавить лошадь</button>
             </form>
           </article>
@@ -328,8 +587,9 @@
             <div class="table-list">
               {% for horse in horses %}
               <div class="row media-row">
-                {% if horse.photo_url %}<img src="{{ horse.photo_url }}" alt="{{ horse.name }}" />{% else %}<span class="media-fallback">HORSE</span>{% endif %}
+                {% if horse.photo_url %}<img src="{{ horse.photo_url }}" alt="{{ horse.name }}" loading="lazy" />{% else %}<span class="media-fallback">HORSE</span>{% endif %}
                 <form action="{{ url_for('update_horse', horse_id=horse.id) }}" method="post" enctype="multipart/form-data" class="inline-edit">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                   <input name="name" value="{{ horse.name }}" required />
                   <input name="breed" value="{{ horse.breed or '' }}" placeholder="Порода" />
                   <input name="age" type="number" min="0" max="40" value="{{ horse.age or '' }}" placeholder="Возраст" />
@@ -338,11 +598,14 @@
                   <input name="stamina" type="number" min="0" max="100" value="{{ horse.stamina or 0 }}" placeholder="Выносливость" />
                   <input name="points" type="number" min="0" value="{{ horse.points or 0 }}" placeholder="Баллы" />
                   <input name="price" type="number" min="0" value="{{ horse.price or '' }}" placeholder="Цена" />
-                  <textarea name="description" rows="3" placeholder="Описание">{{ horse.description or '' }}</textarea>
+                  <textarea name="description" rows="3" placeholder="Описание" style="max-height:80px;overflow-y:auto;">{{ horse.description or '' }}</textarea>
                   <input name="photo_url" value="{{ horse.photo_url or '' }}" placeholder="Ссылка на фото" />
                   <label class="check"><input name="is_for_sale" type="checkbox" {% if horse.is_for_sale %}checked{% endif %} /> продаётся</label>
                   <label class="check"><input name="is_active" type="checkbox" {% if horse.is_active %}checked{% endif %} /> показывать</label>
-                  <label class="file-field">Заменить фото<input name="photo" type="file" accept="image/*" /></label>
+                  <label class="file-field" style="grid-column: 1 / -1;">
+                    Заменить фото
+                    <input name="photo" type="file" accept="image/*" />
+                  </label>
                   <button type="submit">Сохранить</button>
                 </form>
                 <a href="{{ url_for('horse_detail_page', horse_id=horse.id) }}" target="_blank" rel="noopener noreferrer">Открыть</a>
@@ -356,11 +619,13 @@
         </div>
       </section>
 
+      <!-- Документы -->
       <section class="admin-section" id="documents">
         <div class="section-layout">
           <article class="panel">
             <h2>Загрузить документ</h2>
             <form action="{{ url_for('upload_document') }}" method="post" enctype="multipart/form-data" class="form-grid">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
               <label>Название<input name="title" type="text" required placeholder="Название документа" /></label>
               <label>Описание<input name="description" type="text" placeholder="Короткое описание" /></label>
               <label>Категория
@@ -374,7 +639,10 @@
                 </select>
               </label>
               <label>Дата<input name="upload_date" type="date" /></label>
-              <label class="file-field">Файл PDF/DOCX<input name="file" type="file" accept=".pdf,.docx" required /></label>
+              <label class="file-field">Файл PDF/DOCX
+                <input name="file" type="file" accept=".pdf,.docx" required />
+                <span class="hint">Макс. размер: 20 МБ</span>
+              </label>
               <button type="submit">Загрузить документ</button>
             </form>
           </article>
@@ -397,11 +665,13 @@
         </div>
       </section>
 
+      <!-- Ипподромы -->
       <section class="admin-section" id="venues">
         <div class="section-layout">
           <article class="panel">
             <h2>Добавить ипподром</h2>
             <form action="{{ url_for('add_hippodrome') }}" method="post" enctype="multipart/form-data" class="form-grid">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
               <label>Название<input name="name" type="text" required placeholder="Бишкек ипподрому" /></label>
               <label>Город/регион<input name="location" type="text" placeholder="Бишкек" /></label>
               <label>Адрес<input name="address" type="text" placeholder="Адрес" /></label>
@@ -409,8 +679,13 @@
               <label>Поле<input name="surface" type="text" placeholder="Кумдуу талаа" /></label>
               <label>Карта<input name="map_url" type="url" placeholder="https://maps.google.com/..." /></label>
               <label>Описание<input name="description" type="text" placeholder="Описание площадки" /></label>
-              <label class="file-field">Фото<input name="photo" type="file" accept="image/*" /></label>
-              <label>Ссылка на фото<input name="photo_url" type="url" placeholder="https://..." /></label>
+              <label class="file-field">Фото
+                <input name="photo" type="file" accept="image/*" />
+                <span class="hint">Рекомендуемый размер: 1200×800 px</span>
+              </label>
+              <label>Ссылка на фото
+                <input name="photo_url" type="url" placeholder="https://..." />
+              </label>
               <button type="submit">Добавить ипподром</button>
             </form>
           </article>
@@ -432,6 +707,63 @@
         </div>
       </section>
 
+      <!-- Контактные карточки -->
+      <section class="admin-section" id="contact-cards">
+        <div class="section-layout">
+          <article class="panel">
+            <h2>Добавить контактную карточку</h2>
+            <form action="{{ url_for('add_contact_card') }}" method="post" class="form-grid">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+              <label>Название<input name="title" type="text" required placeholder="WhatsApp" /></label>
+              <label>Тип
+                <select name="type">
+                  <option value="phone">phone</option>
+                  <option value="whatsapp">whatsapp</option>
+                  <option value="telegram">telegram</option>
+                  <option value="email">email</option>
+                  <option value="website">website</option>
+                </select>
+              </label>
+              <label>Значение<input name="value" type="text" required placeholder="+996995544444" /></label>
+              <label>Иконка<input name="icon" type="text" placeholder="💬" /></label>
+              <label>Цвет<input name="color" type="text" value="#16a34a" placeholder="#16a34a" /></label>
+              <label>Порядок<input name="order_num" type="number" min="0" value="0" /></label>
+              <button type="submit">Добавить карточку</button>
+            </form>
+          </article>
+
+          <article class="panel">
+            <h2>Карточки</h2>
+            <div class="table-list">
+              {% for card in contact_cards %}
+              <div class="row">
+                <form action="{{ url_for('update_contact_card', card_id=card.id) }}" method="post" class="inline-edit">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                  <input name="title" value="{{ card.title }}" required />
+                  <select name="type">
+                    {% for type in ['phone', 'whatsapp', 'telegram', 'email', 'website'] %}
+                    <option value="{{ type }}" {% if card.type == type %}selected{% endif %}>{{ type }}</option>
+                    {% endfor %}
+                  </select>
+                  <input name="value" value="{{ card.value }}" required />
+                  <input name="icon" value="{{ card.icon or '' }}" placeholder="Иконка" />
+                  <input name="color" value="{{ card.color or '#16a34a' }}" placeholder="#16a34a" />
+                  <input name="order_num" type="number" min="0" value="{{ card.order_num or 0 }}" />
+                  <label class="check"><input name="is_active" type="checkbox" {% if card.is_active %}checked{% endif %} /> активно</label>
+                  <button type="submit">Сохранить</button>
+                </form>
+                <a href="{{ url_for('toggle_contact_card', card_id=card.id) }}">{% if card.is_active %}Выключить{% else %}Включить{% endif %}</a>
+                <a class="delete" href="{{ url_for('delete_contact_card', card_id=card.id) }}">Удалить</a>
+              </div>
+              {% else %}
+              <p class="empty">Контактных карточек пока нет.</p>
+              {% endfor %}
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- Билеты -->
       <section class="admin-section" id="tickets">
         <article class="panel">
           <h2>Заявки на билеты</h2>
@@ -441,6 +773,7 @@
               <strong>{{ ticket.match_name or 'Матч не указан' }}</strong>
               <small>{{ ticket.count }} билет(а) · {{ ticket.phone }}{% if ticket.email %} · {{ ticket.email }}{% endif %}</small>
               <form action="{{ url_for('update_ticket', ticket_id=ticket.id) }}" method="post" class="inline-edit compact">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                 <select name="status">
                   <option value="new" {% if ticket.status == 'new' %}selected{% endif %}>Новая</option>
                   <option value="processed" {% if ticket.status == 'processed' %}selected{% endif %}>Обработана</option>
@@ -457,6 +790,7 @@
         </article>
       </section>
 
+      <!-- Пользователи -->
       <section class="admin-section" id="users">
         <article class="panel">
           <h2>Пользователи</h2>
@@ -464,7 +798,7 @@
             {% for user in users %}
             <div class="row">
               <strong>{{ user.full_name }}</strong>
-              <small>{{ user.email }} · {% if user.is_verified %}email подтверждён{% else %}ожидает подтверждения{% endif %}</small>
+              <small>{{ user.email }} · зарегистрирован {{ user.created_at }}</small>
               <a class="delete" href="{{ url_for('delete_item', table_name='users', item_id=user.id) }}">Удалить</a>
             </div>
             {% else %}
@@ -475,7 +809,9 @@
       </section>
     </main>
 
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script>
+      // Переключение вкладок
       const tabs = document.querySelectorAll("[data-section]");
       const sections = document.querySelectorAll(".admin-section");
 
@@ -491,12 +827,80 @@
         tab.addEventListener("click", () => activate(tab.dataset.section));
       });
 
+      // Подтверждение удаления
       document.querySelectorAll(".delete").forEach((link) => {
         link.addEventListener("click", (event) => {
           if (!confirm("Удалить запись?")) event.preventDefault();
         });
       });
 
+      const homepageFile = document.getElementById("homepageBackgroundFile");
+      const homepagePreview = document.getElementById("homepagePreview");
+      const homepageDropzone = document.querySelector(".homepage-dropzone");
+      const resetHomepageForm = document.querySelector(".reset-homepage-form");
+
+      function setHomepagePreview(url) {
+        if (homepagePreview && url) {
+          homepagePreview.style.backgroundImage = `url("${url}")`;
+        }
+      }
+
+      if (homepageFile) {
+        homepageFile.addEventListener("change", () => {
+          const file = homepageFile.files && homepageFile.files[0];
+          if (file) setHomepagePreview(URL.createObjectURL(file));
+        });
+      }
+
+      if (homepageDropzone && homepageFile) {
+        ["dragenter", "dragover"].forEach((eventName) => {
+          homepageDropzone.addEventListener(eventName, (event) => {
+            event.preventDefault();
+            homepageDropzone.classList.add("is-dragging");
+          });
+        });
+        ["dragleave", "drop"].forEach((eventName) => {
+          homepageDropzone.addEventListener(eventName, (event) => {
+            event.preventDefault();
+            homepageDropzone.classList.remove("is-dragging");
+          });
+        });
+        homepageDropzone.addEventListener("drop", (event) => {
+          const file = event.dataTransfer.files && event.dataTransfer.files[0];
+          if (!file) return;
+          const transfer = new DataTransfer();
+          transfer.items.add(file);
+          homepageFile.files = transfer.files;
+          setHomepagePreview(URL.createObjectURL(file));
+        });
+      }
+
+      if (resetHomepageForm) {
+        resetHomepageForm.addEventListener("submit", (event) => {
+          if (!confirm("Сбросить hero секцию к дефолтным значениям?")) {
+            event.preventDefault();
+          }
+        });
+      }
+
+      // 🔧 Функция удаления фото новости
+      function deleteNewsImage(newsId, newsTitle) {
+        if (!confirm(`Удалить фото из новости "${newsTitle}"?`)) return;
+        
+        // Создаём временную форму для отправки POST-запроса
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/delete-news-image/${newsId}`;
+        const csrf = document.createElement('input');
+        csrf.type = 'hidden';
+        csrf.name = 'csrf_token';
+        csrf.value = '{{ csrf_token() }}';
+        form.appendChild(csrf);
+        document.body.appendChild(form);
+        form.submit();
+      }
+
+      // Авто-активация вкладки из хэша URL
       const initial = window.location.hash.replace("#", "");
       if (initial && document.getElementById(initial)) activate(initial);
     </script>

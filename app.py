@@ -1,21 +1,30 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for, session
+from flask import Flask, Blueprint, render_template, request, jsonify, redirect, url_for, session, send_from_directory
 import sqlite3
 import os
-import random
-import smtplib
-from datetime import date, datetime, timedelta
-from email.message import EmailMessage
+import logging
+import re
+from markupsafe import Markup, escape
+from datetime import date, datetime
 from uuid import uuid4
 from dotenv import load_dotenv
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_wtf.csrf import CSRFProtect
+from PIL import Image, ImageOps
 
-load_dotenv()
+load_dotenv(override=True)
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)  # ✅ ИСПРАВЛЕНО
+pages_bp = Blueprint('pages', __name__)
 app.secret_key = os.getenv('SECRET_KEY', 'super_secret_key_for_sessions')
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['MAX_CONTENT_LENGTH'] = 200 * 1024 * 1024
+
+# Initialize CSRF protection
+csrf = CSRFProtect(app)
 
 ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'admin')
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
@@ -23,12 +32,25 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 IMAGE_EXTENSIONS = {'jpg', 'jpeg', 'png', 'webp'}
 VIDEO_EXTENSIONS = {'mp4', 'mov', 'webm', 'avi', 'mkv'}
 DOCUMENT_EXTENSIONS = {'pdf', 'docx'}
-
-SMTP_HOST = os.getenv('SMTP_HOST', '')
-SMTP_PORT = int(os.getenv('SMTP_PORT', '587'))
-SMTP_USER = os.getenv('SMTP_USER', '')
-SMTP_PASSWORD = os.getenv('SMTP_PASSWORD', '')
-SMTP_FROM = os.getenv('SMTP_FROM', SMTP_USER or 'noreply@example.com')
+HORSE_PHOTO_PLACEHOLDER = 'https://placehold.co/800x600/1a2744/f5b041?text=Horse'
+DEFAULT_HOMEPAGE_SETTINGS = {
+    'section_name': 'hero',
+    'title': 'Улак тартыш оюндарын жаңы деңгээлде көрүңүз',
+    'subtitle': 'Расмий портал',
+    'description': 'Матчтардын календары, лигалар, оюнчулар, жаңылыктар жана медиа бир жерде.',
+    'button1_text': 'Оюндарды көрүү',
+    'button1_link': '#matches',
+    'button2_text': 'Жаңылыктар',
+    'button2_link': '#news',
+    'background_image': '/static/img/slider/slide1.jpg',
+    'overlay_color': 'linear-gradient(135deg, rgba(26, 39, 68, 0.58) 0%, rgba(26, 39, 68, 0.36) 55%, rgba(26, 39, 68, 0.21) 100%)',
+    'is_active': 1,
+}
+DEFAULT_HOMEPAGE_STATS = [
+    ('Оюн', 0, 1, 1),
+    ('Жаңылык', 3, 2, 1),
+    ('Оюнчу', 2, 3, 1),
+]
 
 def site_content():
     official_documents = [
@@ -103,41 +125,222 @@ def get_db_connection():
 def today_iso():
     return date.today().isoformat()
 
-def send_confirmation_email(email, code):
-    subject = 'Код подтверждения регистрации'
-    text = f'Ваш код подтверждения: {code}\n\nКод действует 15 минут.'
-
-    if not SMTP_HOST:
-        print(f"[EMAIL DEV] Код подтверждения для {email}: {code}")
-        return False
-
-    message = EmailMessage()
-    message['Subject'] = subject
-    message['From'] = SMTP_FROM
-    message['To'] = email
-    message.set_content(text)
-
-    with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
-        server.starttls()
-        if SMTP_USER and SMTP_PASSWORD:
-            server.login(SMTP_USER, SMTP_PASSWORD)
-        server.send_message(message)
-
-    return True
-
 def save_uploaded_file(file, allowed_extensions):
     if not file or file.filename == '' or not allowed_file(file.filename, allowed_extensions):
         return ''
 
     original = secure_filename(file.filename)
+    if '.' not in original:
+        return ''
+
     extension = original.rsplit('.', 1)[1].lower()
-    filename = f"{uuid4().hex}.{extension}"
-    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    file.save(filepath)
-    return f"/{filepath}"
+    try:
+        if extension in IMAGE_EXTENSIONS:
+            image = Image.open(file.stream)
+            image = ImageOps.exif_transpose(image)
+            image.thumbnail((1920, 1080), Image.Resampling.LANCZOS)
+            if image.mode in ('RGBA', 'LA', 'P'):
+                if image.mode == 'P':
+                    image = image.convert('RGBA')
+                canvas = Image.new('RGB', image.size, (255, 255, 255))
+                alpha = image.getchannel('A') if image.mode in ('RGBA', 'LA') else None
+                canvas.paste(image, mask=alpha)
+                image = canvas
+            else:
+                image = image.convert('RGB')
+
+            base_name = uuid4().hex
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], f"{base_name}.jpg")
+            image.save(filepath, 'JPEG', quality=85, optimize=True)
+
+            thumbnail = ImageOps.fit(image, (400, 300), method=Image.Resampling.LANCZOS, centering=(0.5, 0.5))
+            thumbnail_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{base_name}_thumb.jpg")
+            thumbnail.save(thumbnail_path, 'JPEG', quality=85, optimize=True)
+            return f"/{filepath}"
+
+        filename = f"{uuid4().hex}.{extension}"
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(filepath)
+        return f"/{filepath}"
+    except Exception:
+        logger.exception("Could not save uploaded file: %s", original)
+        return ''
 
 def form_int_or_none(value):
     return int(value) if value and str(value).isdigit() else None
+
+def row_to_dict(row):
+    return dict(row) if row else {}
+
+def get_homepage_settings(conn=None):
+    owns_connection = conn is None
+    if owns_connection:
+        conn = get_db_connection()
+    settings = conn.execute(
+        "SELECT * FROM homepage_settings WHERE section_name = 'hero' AND is_active = 1 LIMIT 1"
+    ).fetchone()
+    if owns_connection:
+        conn.close()
+    return settings
+
+def get_homepage_stats(conn=None):
+    owns_connection = conn is None
+    if owns_connection:
+        conn = get_db_connection()
+    stats = conn.execute(
+        'SELECT * FROM homepage_stats WHERE is_active = 1 ORDER BY order_num, id'
+    ).fetchall()
+    if owns_connection:
+        conn.close()
+    return stats
+
+def build_homepage_context():
+    conn = get_db_connection()
+    page = max(form_int_or_none(request.args.get('page')) or 1, 1)
+    per_page = 10
+    offset = (page - 1) * per_page
+    matches = conn.execute('SELECT * FROM matches ORDER BY date, time').fetchall()
+    total_news = conn.execute('SELECT COUNT(*) FROM news').fetchone()[0]
+    news = conn.execute('SELECT * FROM news ORDER BY date DESC, id DESC LIMIT ? OFFSET ?', (per_page, offset)).fetchall()
+    next_match = conn.execute('SELECT * FROM matches WHERE is_next = 1 LIMIT 1').fetchone()
+    if not next_match and matches:
+        next_match = matches[0]
+
+    context = {
+        'matches': matches,
+        'news': news,
+        'next_match': next_match,
+        'leagues': conn.execute('SELECT * FROM leagues WHERE is_active = 1 ORDER BY category, name').fetchall(),
+        'players': conn.execute('SELECT * FROM players WHERE is_active = 1 ORDER BY stats_points DESC LIMIT 4').fetchall(),
+        'documents': conn.execute('SELECT * FROM documents WHERE is_public = 1 ORDER BY upload_date DESC').fetchall(),
+        'videos': conn.execute('SELECT * FROM videos ORDER BY upload_date DESC LIMIT 4').fetchall(),
+        'albums': conn.execute('SELECT * FROM photo_albums ORDER BY upload_date DESC LIMIT 4').fetchall(),
+        'homepage_settings': get_homepage_settings(conn),
+        'homepage_stats': get_homepage_stats(conn),
+        'page': page,
+        'per_page': per_page,
+        'total_news': total_news,
+    }
+    conn.close()
+    return context
+
+def highlight_text(text, query):
+    text = text or ''
+    query = (query or '').strip()
+    safe_text = escape(text)
+    if not query:
+        return safe_text
+
+    pattern = re.compile(re.escape(query), re.IGNORECASE)
+    highlighted = pattern.sub(lambda match: f'<mark>{escape(match.group(0))}</mark>', str(safe_text))
+    return Markup(highlighted)
+
+def search_site(query):
+    query = (query or '').strip()
+    empty = {'news': [], 'matches': [], 'players': [], 'teams': [], 'horses': []}
+    if not query:
+        return empty
+
+    term = f"%{query}%"
+    conn = get_db_connection()
+    results = {
+        'news': [row_to_dict(row) for row in conn.execute(
+            '''SELECT id, title, body, date, img_url FROM news
+               WHERE title LIKE ? OR COALESCE(body, '') LIKE ?
+               ORDER BY date DESC, id DESC LIMIT 5''',
+            (term, term)).fetchall()],
+        'matches': [row_to_dict(row) for row in conn.execute(
+            '''SELECT id, date, time, league, team1, team2 FROM matches
+               WHERE team1 LIKE ? OR team2 LIKE ? OR league LIKE ?
+               ORDER BY date, time LIMIT 5''',
+            (term, term, term)).fetchall()],
+        'players': [row_to_dict(row) for row in conn.execute(
+            '''SELECT id, name, team, position, photo_url, stats_points FROM players
+               WHERE is_active = 1 AND (name LIKE ? OR COALESCE(team, '') LIKE ?)
+               ORDER BY stats_points DESC, name LIMIT 5''',
+            (term, term)).fetchall()],
+        'teams': [row_to_dict(row) for row in conn.execute(
+            '''SELECT id, name, region, league, photo_url, points FROM teams
+               WHERE is_active = 1 AND (name LIKE ? OR COALESCE(region, '') LIKE ?)
+               ORDER BY points DESC, name LIMIT 5''',
+            (term, term)).fetchall()],
+        'horses': [row_to_dict(row) for row in conn.execute(
+            '''SELECT id, name, breed, color, photo_url, points FROM horses
+               WHERE is_active = 1 AND (name LIKE ? OR COALESCE(breed, '') LIKE ?)
+               ORDER BY points DESC, name LIMIT 5''',
+            (term, term)).fetchall()],
+    }
+    conn.close()
+    return results
+
+def contact_card_href(card):
+    card_type = (card['type'] or '').strip().lower()
+    value = (card['value'] or '').strip()
+    compact_value = re.sub(r'[\s()+-]', '', value)
+    if card_type == 'phone':
+        return f"tel:+{compact_value.lstrip('+')}"
+    if card_type == 'whatsapp':
+        return f"https://wa.me/{compact_value.lstrip('+')}"
+    if card_type == 'telegram':
+        username = value.replace('https://t.me/', '').replace('http://t.me/', '').lstrip('@')
+        return f"https://t.me/{username}"
+    if card_type == 'email':
+        return f"mailto:{value}"
+    if card_type == 'website':
+        return value if value.startswith(('http://', 'https://')) else f"https://{value}"
+    return value or '#'
+
+def get_active_contact_cards():
+    conn = get_db_connection()
+    cards = [row_to_dict(row) for row in conn.execute('''SELECT * FROM contact_cards
+                                                          WHERE is_active = 1
+                                                          ORDER BY order_num, id''').fetchall()]
+    conn.close()
+    for card in cards:
+        card['href'] = contact_card_href(card)
+    return cards
+
+def register_user_from_payload(payload):
+    payload = payload or {}
+    fullname = payload.get('fullname', '').strip()
+    email = payload.get('email', '').strip().lower()
+    password = payload.get('password', '')
+    confirm_password = payload.get('confirm_password', '')
+
+    if not fullname or not email or not password:
+        return jsonify({"status": "error", "message": "Заполните все поля регистрации."}), 400
+    if len(password) < 6:
+        return jsonify({"status": "error", "message": "Пароль должен быть минимум 6 символов."}), 400
+    if password != confirm_password:
+        return jsonify({"status": "error", "message": "Пароли не совпадают."}), 400
+
+    now = datetime.utcnow()
+    password_hash = generate_password_hash(password)
+    conn = get_db_connection()
+    existing = conn.execute('SELECT id FROM users WHERE email = ?', (email,)).fetchone()
+
+    if existing:
+        conn.execute('''UPDATE users SET full_name = ?, password_hash = ?
+                        WHERE email = ?''', (fullname, password_hash, email))
+        user_id = existing['id']
+    else:
+        conn.execute('''INSERT INTO users (full_name, email, password_hash, created_at)
+                        VALUES (?, ?, ?, ?)''',
+                     (fullname, email, password_hash, now.isoformat()))
+        user_id = conn.execute('SELECT last_insert_rowid()').fetchone()[0]
+    conn.commit()
+    conn.close()
+
+    session['user_id'] = user_id
+    session['user_name'] = fullname
+    return jsonify({"status": "success", "message": "Регистрация завершена.", "reload": True})
+
+@app.context_processor
+def inject_contact_cards():
+    try:
+        return {'footer_contact_cards': get_active_contact_cards()}
+    except sqlite3.Error:
+        return {'footer_contact_cards': []}
 
 def init_db():
     conn = get_db_connection()
@@ -174,6 +377,21 @@ def init_db():
         name TEXT, photo_url TEXT, team TEXT, position TEXT,
         stats_points INTEGER DEFAULT 0, stats_matches INTEGER DEFAULT 0,
         birth_year INTEGER, region TEXT, is_active INTEGER DEFAULT 1
+    )''')
+
+    player_columns = {row[1] for row in conn.execute('PRAGMA table_info(players)').fetchall()}
+    if 'team_id' not in player_columns:
+        conn.execute('ALTER TABLE players ADD COLUMN team_id INTEGER')
+
+    conn.execute('''CREATE TABLE IF NOT EXISTS teams (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT UNIQUE NOT NULL,
+        region TEXT,
+        league TEXT,
+        photo_url TEXT,
+        wins INTEGER DEFAULT 0,
+        points INTEGER DEFAULT 0,
+        is_active INTEGER DEFAULT 1
     )''')
 
     conn.execute('''CREATE TABLE IF NOT EXISTS horses (
@@ -233,21 +451,13 @@ def init_db():
         full_name TEXT NOT NULL,
         email TEXT NOT NULL UNIQUE,
         password_hash TEXT NOT NULL,
-        is_verified INTEGER DEFAULT 0,
         created_at TEXT NOT NULL
     )''')
-
     user_columns = {row[1] for row in conn.execute('PRAGMA table_info(users)').fetchall()}
-    if 'is_verified' not in user_columns:
-        conn.execute('ALTER TABLE users ADD COLUMN is_verified INTEGER DEFAULT 0')
-
-    conn.execute('''CREATE TABLE IF NOT EXISTS email_confirmations (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        email TEXT NOT NULL,
-        code TEXT NOT NULL,
-        expires_at TEXT NOT NULL,
-        created_at TEXT NOT NULL
-    )''')
+    if 'photo_url' not in user_columns:
+        conn.execute("ALTER TABLE users ADD COLUMN photo_url TEXT DEFAULT ''")
+    if 'phone' not in user_columns:
+        conn.execute("ALTER TABLE users ADD COLUMN phone TEXT DEFAULT ''")
 
     conn.execute('''CREATE TABLE IF NOT EXISTS ticket_requests (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -259,6 +469,80 @@ def init_db():
         created_at TEXT NOT NULL
     )''')
 
+    conn.execute('''CREATE TABLE IF NOT EXISTS homepage_settings (
+        id INTEGER PRIMARY KEY,
+        section_name TEXT UNIQUE,
+        title TEXT,
+        subtitle TEXT,
+        description TEXT,
+        button1_text TEXT,
+        button1_link TEXT,
+        button2_text TEXT,
+        button2_link TEXT,
+        background_image TEXT,
+        overlay_color TEXT,
+        is_active INTEGER DEFAULT 1,
+        updated_at TIMESTAMP
+    )''')
+
+    conn.execute('''CREATE TABLE IF NOT EXISTS homepage_stats (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        label TEXT NOT NULL,
+        value INTEGER DEFAULT 0,
+        order_num INTEGER DEFAULT 0,
+        is_active INTEGER DEFAULT 1,
+        updated_at TIMESTAMP
+    )''')
+
+    if not conn.execute("SELECT 1 FROM homepage_settings WHERE section_name = 'hero' LIMIT 1").fetchone():
+        conn.execute('''INSERT INTO homepage_settings (
+                            section_name, title, subtitle, description,
+                            button1_text, button1_link, button2_text, button2_link,
+                            background_image, overlay_color, is_active, updated_at
+                        )
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                     (
+                         DEFAULT_HOMEPAGE_SETTINGS['section_name'],
+                         DEFAULT_HOMEPAGE_SETTINGS['title'],
+                         DEFAULT_HOMEPAGE_SETTINGS['subtitle'],
+                         DEFAULT_HOMEPAGE_SETTINGS['description'],
+                         DEFAULT_HOMEPAGE_SETTINGS['button1_text'],
+                         DEFAULT_HOMEPAGE_SETTINGS['button1_link'],
+                         DEFAULT_HOMEPAGE_SETTINGS['button2_text'],
+                         DEFAULT_HOMEPAGE_SETTINGS['button2_link'],
+                         DEFAULT_HOMEPAGE_SETTINGS['background_image'],
+                         DEFAULT_HOMEPAGE_SETTINGS['overlay_color'],
+                         DEFAULT_HOMEPAGE_SETTINGS['is_active'],
+                         datetime.now().isoformat(timespec='seconds'),
+                     ))
+
+    if not conn.execute('SELECT 1 FROM homepage_stats LIMIT 1').fetchone():
+        conn.executemany('''INSERT INTO homepage_stats (label, value, order_num, is_active, updated_at)
+                            VALUES (?, ?, ?, ?, ?)''',
+                         [(label, value, order_num, is_active, datetime.now().isoformat(timespec='seconds'))
+                          for label, value, order_num, is_active in DEFAULT_HOMEPAGE_STATS])
+
+    conn.execute('''CREATE TABLE IF NOT EXISTS contact_cards (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        type TEXT NOT NULL,
+        value TEXT NOT NULL,
+        icon TEXT DEFAULT '☎️',
+        color TEXT DEFAULT '#16a34a',
+        order_num INTEGER DEFAULT 0,
+        is_active INTEGER DEFAULT 1
+    )''')
+
+    if not conn.execute('SELECT 1 FROM contact_cards LIMIT 1').fetchone():
+        contact_cards = [
+            ('Телефон', 'phone', '+996995544444', '☎️', '#16a34a', 1, 1),
+            ('WhatsApp', 'whatsapp', '+996995544444', '💬', '#22c55e', 2, 1),
+            ('Telegram', 'telegram', 'ulak_tartysh_official', '✈️', '#229ed9', 3, 1),
+            ('Email', 'email', 'ulaktartys@gmail.com', '✉️', '#d32f2f', 4, 1),
+        ]
+        conn.executemany('''INSERT INTO contact_cards (title, type, value, icon, color, order_num, is_active)
+                            VALUES (?, ?, ?, ?, ?, ?, ?)''', contact_cards)
+
     if not conn.execute('SELECT 1 FROM leagues LIMIT 1').fetchone():
         leagues_data = [
             ('Жогорку лига', 'Лига', 'Элиталык дивизион', 12, 'Чемпионат', 1),
@@ -267,12 +551,29 @@ def init_db():
         ]
         conn.executemany('''INSERT INTO leagues (name, category, description, teams_count, stage, is_active) VALUES (?, ?, ?, ?, ?, ?)''', leagues_data)
 
+    if not conn.execute('SELECT 1 FROM teams LIMIT 1').fetchone():
+        teams_data = [
+            ('Ынтымак', 'Ош', 'Жогорку лига', 'https://placehold.co/300x300/1a2744/d4a843?text=Ы', 12, 36, 1),
+            ('Достук', 'Талас', 'Жогорку лига', 'https://placehold.co/300x300/1a2744/d4a843?text=Д', 10, 31, 1),
+            ('Сары-Өзөн', 'Чүй', 'Биринчи лига', 'https://placehold.co/300x300/1a2744/d4a843?text=С', 8, 25, 1),
+            ('Намыс', 'Нарын', 'Биринчи лига', 'https://placehold.co/300x300/1a2744/d4a843?text=Н', 7, 22, 1),
+        ]
+        conn.executemany('''INSERT INTO teams (name, region, league, photo_url, wins, points, is_active)
+                            VALUES (?, ?, ?, ?, ?, ?, ?)''', teams_data)
+
     if not conn.execute('SELECT 1 FROM players LIMIT 1').fetchone():
         players_data = [
             ('Айбек Абдыразаков', 'https://placehold.co/300x400/1e293b/38bdf8?text=AA', 'Достук', 'Чабуулчу', 42, 18, 1995, 'Бишкек', 1),
             ('Руслан Ниязов', 'https://placehold.co/300x400/1e293b/38bdf8?text=RN', 'Ынтымак', 'Капитан', 38, 20, 1992, 'Ош', 1),
         ]
         conn.executemany('''INSERT INTO players (name, photo_url, team, position, stats_points, stats_matches, birth_year, region, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)''', players_data)
+
+    conn.execute('''UPDATE players
+                    SET team_id = (SELECT teams.id FROM teams WHERE teams.name = players.team)
+                    WHERE team_id IS NULL AND team IS NOT NULL''')
+    conn.execute('CREATE INDEX IF NOT EXISTS idx_players_team ON players(team)')
+    conn.execute('CREATE INDEX IF NOT EXISTS idx_players_team_id ON players(team_id)')
+    conn.execute('CREATE INDEX IF NOT EXISTS idx_news_date ON news(date DESC)')
 
     if not conn.execute('SELECT 1 FROM horses LIMIT 1').fetchone():
         horses_data = [
@@ -288,27 +589,15 @@ def init_db():
 
 @app.route('/')
 def home():
-    conn = get_db_connection()
-    matches = conn.execute('SELECT * FROM matches ORDER BY date, time').fetchall()
-    news = conn.execute('SELECT * FROM news').fetchall()
-    next_match = conn.execute('SELECT * FROM matches WHERE is_next = 1 LIMIT 1').fetchone()
-    if not next_match and matches:
-        next_match = matches[0]
-    
-    leagues = conn.execute('SELECT * FROM leagues WHERE is_active = 1 ORDER BY category, name').fetchall()
-    players = conn.execute('SELECT * FROM players WHERE is_active = 1 ORDER BY stats_points DESC LIMIT 4').fetchall()
-    documents = conn.execute('SELECT * FROM documents WHERE is_public = 1 ORDER BY upload_date DESC').fetchall()
-    videos = conn.execute('SELECT * FROM videos ORDER BY upload_date DESC LIMIT 4').fetchall()
-    albums = conn.execute('SELECT * FROM photo_albums ORDER BY upload_date DESC LIMIT 4').fetchall()
-    conn.close()
-
-    return render_template('index.html', matches=matches, news=news, next_match=next_match,
-                          leagues=leagues, players=players, documents=documents,
-                          videos=videos, albums=albums)
+    return render_template('index.html', **build_homepage_context())
 
 @app.route('/about')
 def about_page():
     return render_template('about.html', **site_content())
+
+@app.route('/rules')
+def rules_page():
+    return render_template('rules.html')
 
 @app.route('/documents')
 def documents_page():
@@ -318,6 +607,10 @@ def documents_page():
     conn.close()
     return render_template('documents.html', **content, db_documents=db_documents)
 
+@app.route('/news')
+def news_page():
+    return redirect(url_for('home') + '#news')
+
 @app.route('/news/<int:news_id>')
 def news_detail_page(news_id):
     conn = get_db_connection()
@@ -326,6 +619,7 @@ def news_detail_page(news_id):
     if not item:
         return render_template('errors/404.html'), 404
     return render_template('news_detail.html', item=item)
+
 
 @app.route('/hippodromes')
 def hippodromes_page():
@@ -345,7 +639,29 @@ def referees_page():
 
 @app.route('/teams')
 def teams_page():
-    return render_template('teams.html', **site_content())
+    conn = get_db_connection()
+    teams = conn.execute('''SELECT t.*, COUNT(p.id) AS player_count
+                            FROM teams t
+                            LEFT JOIN players p ON p.team_id = t.id OR (p.team_id IS NULL AND p.team = t.name)
+                            WHERE t.is_active = 1
+                            GROUP BY t.id
+                            ORDER BY t.league, t.points DESC, t.name''').fetchall()
+    conn.close()
+    return render_template('teams.html', teams=teams, **site_content())
+
+@app.route('/team/<int:team_id>')
+def team_detail_page(team_id):
+    conn = get_db_connection()
+    team = conn.execute('SELECT * FROM teams WHERE id = ? AND is_active = 1', (team_id,)).fetchone()
+    if not team:
+        conn.close()
+        return render_template('errors/404.html'), 404
+    players = conn.execute('''SELECT * FROM players
+                              WHERE is_active = 1 AND (team_id = ? OR (team_id IS NULL AND team = ?))
+                              ORDER BY stats_points DESC, name''',
+                           (team_id, team['name'])).fetchall()
+    conn.close()
+    return render_template('team_detail.html', team=team, players=players)
 
 @app.route('/horses')
 def horses_page():
@@ -365,7 +681,133 @@ def horse_detail_page(horse_id):
 
 @app.route('/contacts')
 def contacts_page():
-    return render_template('contacts.html', **site_content())
+    return render_template('contacts.html', contact_cards=get_active_contact_cards(), **site_content())
+
+@app.route('/api/search')
+def api_search():
+    query = request.args.get('q', '').strip()
+    return jsonify({'query': query, 'results': search_site(query)})
+
+@app.route('/search')
+def search_page():
+    query = request.args.get('q', '').strip()
+    results = search_site(query)
+    total = sum(len(items) for items in results.values())
+    return render_template('search.html', query=query, results=results, total=total, highlight=highlight_text)
+
+@app.route('/profile')
+def profile_page():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('home'))
+
+    conn = get_db_connection()
+    user = conn.execute('SELECT id, full_name, email, photo_url, phone, created_at FROM users WHERE id = ?', (user_id,)).fetchone()
+    if not user:
+        conn.close()
+        session.pop('user_id', None)
+        session.pop('user_name', None)
+        return redirect(url_for('home'))
+
+    tickets = conn.execute('''SELECT * FROM ticket_requests
+                              WHERE email = ?
+                              ORDER BY created_at DESC''', (user['email'],)).fetchall()
+    conn.close()
+    return render_template('profile.html', user=user, tickets=tickets)
+
+@app.route('/api/profile/update', methods=['POST'])
+def api_profile_update():
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'status': 'error', 'message': 'Кирүү талап кылынат.'}), 401
+
+    data = request.get_json() or {}
+    full_name = data.get('full_name', '').strip()
+    phone = data.get('phone', '').strip()
+    if not full_name:
+        return jsonify({'status': 'error', 'message': 'Аты-жөнү бош болбошу керек.'}), 400
+
+    conn = get_db_connection()
+    conn.execute('UPDATE users SET full_name = ?, phone = ? WHERE id = ?', (full_name, phone, user_id))
+    conn.commit()
+    conn.close()
+    session['user_name'] = full_name
+    return jsonify({'status': 'success', 'message': 'Профиль жаңыртылды.', 'full_name': full_name, 'phone': phone})
+
+@app.route('/api/profile/change-password', methods=['POST'])
+def api_profile_change_password():
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'status': 'error', 'message': 'Кирүү талап кылынат.'}), 401
+
+    data = request.get_json() or {}
+    old_password = data.get('old_password', '')
+    new_password = data.get('new_password', '')
+    if len(new_password) < 6:
+        return jsonify({'status': 'error', 'message': 'Жаңы сыр сөз кеминде 6 символ болушу керек.'}), 400
+
+    conn = get_db_connection()
+    user = conn.execute('SELECT password_hash FROM users WHERE id = ?', (user_id,)).fetchone()
+    if not user or not check_password_hash(user['password_hash'], old_password):
+        conn.close()
+        return jsonify({'status': 'error', 'message': 'Эски сыр сөз туура эмес.'}), 400
+
+    conn.execute('UPDATE users SET password_hash = ? WHERE id = ?', (generate_password_hash(new_password), user_id))
+    conn.commit()
+    conn.close()
+    return jsonify({'status': 'success', 'message': 'Сыр сөз өзгөртүлдү.'})
+
+@app.route('/sw.js')
+def service_worker():
+    return send_from_directory(app.static_folder, 'sw.js', mimetype='application/javascript')
+
+def league_payload(league_name):
+    conn = get_db_connection()
+    standings = conn.execute('''SELECT t.*, COUNT(p.id) AS player_count
+                                FROM teams t
+                                LEFT JOIN players p ON p.team_id = t.id OR (p.team_id IS NULL AND p.team = t.name)
+                                WHERE t.is_active = 1 AND t.league = ?
+                                GROUP BY t.id
+                                ORDER BY t.points DESC, t.wins DESC, t.name''', (league_name,)).fetchall()
+    matches = conn.execute('''SELECT * FROM matches
+                              WHERE league = ?
+                              ORDER BY date, time''', (league_name,)).fetchall()
+    conn.close()
+    return standings, matches
+
+@pages_bp.route('/regulations')
+def regulations_page():
+    regulations = [
+        {'title': 'Регламент сезона 2026', 'date': '2026-03-01', 'description': 'Порядок проведения официальных матчей и турнирных этапов.', 'file': 'docs/ulak-tartysh-regulation-1.pdf'},
+        {'title': 'Положение о заявках команд', 'date': '2026-02-15', 'description': 'Требования к составам, срокам подачи и подтверждению заявок.', 'file': 'docs/team-application-1.pdf'},
+        {'title': 'Положение о судействе', 'date': '2026-01-20', 'description': 'Регламент назначения судей и оформления протоколов матчей.', 'file': 'docs/federation-protocol-4.pdf'},
+    ]
+    return render_template('regulations.html', regulations=regulations)
+
+@pages_bp.route('/transfers')
+def transfers_page():
+    transfers = [
+        {'player': 'Айбек Абдыразаков', 'from_team': 'Достук', 'to_team': 'Ынтымак', 'date': '2026-05-12', 'status': 'Подтверждён'},
+        {'player': 'Руслан Ниязов', 'from_team': 'Ынтымак', 'to_team': 'Достук', 'date': '2026-04-28', 'status': 'На рассмотрении'},
+        {'player': 'Тилек Сагынбаев', 'from_team': 'Намыс', 'to_team': 'Сары-Өзөн', 'date': '2026-04-10', 'status': 'Подтверждён'},
+    ]
+    return render_template('transfers.html', transfers=transfers)
+
+@pages_bp.route('/league/higher')
+def league_higher_page():
+    standings, matches = league_payload('Жогорку лига')
+    return render_template('league_higher.html', league_name='Жогорку лига', standings=standings, matches=matches)
+
+@pages_bp.route('/league/first')
+def league_first_page():
+    standings, matches = league_payload('Биринчи лига')
+    return render_template('league_first.html', league_name='Биринчи лига', standings=standings, matches=matches)
+
+@app.route('/api/register', methods=['POST'])
+def api_register():
+    data = request.get_json() or request.form.to_dict()
+    payload = data.get('payload') if isinstance(data, dict) and data.get('payload') else data
+    return register_user_from_payload(payload)
 
 @app.route('/api/submit', methods=['POST'])
 def handle_submissions():
@@ -373,54 +815,7 @@ def handle_submissions():
     print(f"[БЭКЕНД] Получены данные: {data}")
 
     if data.get('form_type') == 'register':
-        payload = data.get('payload') or {}
-        fullname = payload.get('fullname', '').strip()
-        email = payload.get('email', '').strip().lower()
-        password = payload.get('password', '')
-        confirm_password = payload.get('confirm_password', '')
-
-        if not fullname or not email or not password:
-            return jsonify({"status": "error", "message": "Заполните все поля регистрации."}), 400
-        if len(password) < 6:
-            return jsonify({"status": "error", "message": "Пароль должен быть минимум 6 символов."}), 400
-        if password != confirm_password:
-            return jsonify({"status": "error", "message": "Пароли не совпадают."}), 400
-
-        conn = get_db_connection()
-        existing = conn.execute('SELECT id, is_verified FROM users WHERE email = ?', (email,)).fetchone()
-        if existing and existing['is_verified']:
-            conn.close()
-            return jsonify({"status": "error", "message": "Этот email уже зарегистрирован."}), 409
-
-        now = datetime.utcnow()
-        code = f"{random.randint(100000, 999999)}"
-        password_hash = generate_password_hash(password)
-
-        if existing:
-            conn.execute('''UPDATE users SET full_name = ?, password_hash = ?, is_verified = 0
-                            WHERE email = ?''', (fullname, password_hash, email))
-        else:
-            conn.execute('''INSERT INTO users (full_name, email, password_hash, is_verified, created_at)
-                            VALUES (?, ?, ?, 0, ?)''',
-                         (fullname, email, password_hash, now.isoformat()))
-
-        conn.execute('DELETE FROM email_confirmations WHERE email = ?', (email,))
-        conn.execute('''INSERT INTO email_confirmations (email, code, expires_at, created_at)
-                        VALUES (?, ?, ?, ?)''',
-                     (email, code, (now + timedelta(minutes=15)).isoformat(), now.isoformat()))
-        conn.commit()
-        conn.close()
-
-        try:
-            email_sent = send_confirmation_email(email, code)
-        except Exception as error:
-            print(f"[EMAIL ERROR] {error}")
-            return jsonify({"status": "error", "message": "Не удалось отправить письмо. Проверьте настройки SMTP."}), 500
-
-        message = "Код подтверждения отправлен на email."
-        if not email_sent:
-            message = "SMTP не настроен. Код подтверждения выведен в консоль Flask."
-        return jsonify({"status": "verification_required", "message": message, "email": email})
+        return register_user_from_payload(data.get('payload') or {})
 
     if data.get('form_type') == 'login':
         payload = data.get('payload') or {}
@@ -433,36 +828,10 @@ def handle_submissions():
 
         if not user or not check_password_hash(user['password_hash'], password):
             return jsonify({"status": "error", "message": "Неверный email или пароль."}), 401
-        if not user['is_verified']:
-            return jsonify({"status": "error", "message": "Сначала подтвердите email."}), 403
 
         session['user_id'] = user['id']
         session['user_name'] = user['full_name']
         return jsonify({"status": "success", "message": f"Добро пожаловать, {user['full_name']}!", "reload": True})
-
-    if data.get('form_type') == 'verify_email':
-        payload = data.get('payload') or {}
-        email = payload.get('email', '').strip().lower()
-        code = payload.get('code', '').strip()
-
-        conn = get_db_connection()
-        confirmation = conn.execute('''SELECT * FROM email_confirmations
-                                       WHERE email = ? AND code = ?
-                                       ORDER BY created_at DESC LIMIT 1''',
-                                    (email, code)).fetchone()
-        if not confirmation:
-            conn.close()
-            return jsonify({"status": "error", "message": "Неверный код подтверждения."}), 400
-
-        if datetime.fromisoformat(confirmation['expires_at']) < datetime.utcnow():
-            conn.close()
-            return jsonify({"status": "error", "message": "Код истёк. Зарегистрируйтесь ещё раз."}), 400
-
-        conn.execute('UPDATE users SET is_verified = 1 WHERE email = ?', (email,))
-        conn.execute('DELETE FROM email_confirmations WHERE email = ?', (email,))
-        conn.commit()
-        conn.close()
-        return jsonify({"status": "success", "message": "Email подтверждён. Регистрация завершена."})
 
     if data.get('form_type') == 'tickets':
         payload = data.get('payload') or {}
@@ -471,12 +840,16 @@ def handle_submissions():
             return jsonify({"status": "error", "message": "Укажите телефон для бронирования."}), 400
 
         conn = get_db_connection()
+        email = payload.get('email', '').strip()
+        if not email and session.get('user_id'):
+            user = conn.execute('SELECT email FROM users WHERE id = ?', (session['user_id'],)).fetchone()
+            email = user['email'] if user else ''
         conn.execute('''INSERT INTO ticket_requests (match_name, count, phone, email, status, created_at)
                         VALUES (?, ?, ?, ?, 'new', ?)''',
                      (payload.get('match', '').strip(),
                       form_int_or_none(payload.get('count')) or 1,
                       phone,
-                      payload.get('email', '').strip(),
+                      email,
                       datetime.utcnow().isoformat()))
         conn.commit()
         conn.close()
@@ -487,8 +860,9 @@ def handle_submissions():
 @app.route('/admin', methods=['GET', 'POST'])
 def admin_panel():
     if request.method == 'POST':
-        password = request.form.get('password')
-        if password == ADMIN_PASSWORD:
+        password = request.form.get('password', '').strip()
+        expected_password = (ADMIN_PASSWORD or '').strip()
+        if password == expected_password:
             session['logged_in'] = True
             return redirect(url_for('admin_panel'))
         else:
@@ -509,11 +883,116 @@ def admin_panel():
         'hippodromes': conn.execute('SELECT * FROM hippodromes').fetchall(),
         'videos': conn.execute('SELECT * FROM videos').fetchall(),
         'albums': conn.execute('SELECT a.*, COUNT(p.id) as photo_count FROM photo_albums a LEFT JOIN photos p ON a.id = p.album_id GROUP BY a.id').fetchall(),
-        'users': conn.execute('SELECT id, full_name, email, is_verified, created_at FROM users ORDER BY created_at DESC').fetchall(),
+        'users': conn.execute('SELECT id, full_name, email, created_at FROM users ORDER BY created_at DESC').fetchall(),
         'ticket_requests': conn.execute('SELECT * FROM ticket_requests ORDER BY created_at DESC').fetchall(),
+        'contact_cards': conn.execute('SELECT * FROM contact_cards ORDER BY order_num, id').fetchall(),
+        'homepage_settings': get_homepage_settings(conn),
+        'homepage_stats': conn.execute('SELECT * FROM homepage_stats ORDER BY order_num, id').fetchall(),
     }
     conn.close()
     return render_template('admin/dashboard.html', **data)
+
+@app.route('/admin/homepage', methods=['GET', 'POST'])
+def admin_homepage():
+    if not session.get('logged_in'):
+        return redirect(url_for('admin_panel'))
+
+    if request.method == 'GET':
+        return redirect(url_for('admin_panel') + '#homepage')
+
+    try:
+        title = request.form.get('title', '').strip()
+        subtitle = request.form.get('subtitle', '').strip()
+        description = request.form.get('description', '').strip()
+        if not title or not description:
+            return redirect(url_for('admin_panel') + '#homepage')
+
+        conn = get_db_connection()
+        current = get_homepage_settings(conn)
+        uploaded_background = save_uploaded_file(request.files.get('background_image'), IMAGE_EXTENSIONS)
+        background_image = uploaded_background or (current['background_image'] if current else DEFAULT_HOMEPAGE_SETTINGS['background_image'])
+
+        conn.execute('''UPDATE homepage_settings
+                        SET title = ?, subtitle = ?, description = ?,
+                            button1_text = ?, button1_link = ?,
+                            button2_text = ?, button2_link = ?,
+                            background_image = ?, overlay_color = ?,
+                            is_active = 1, updated_at = ?
+                        WHERE section_name = 'hero' ''',
+                     (
+                         title,
+                         subtitle or DEFAULT_HOMEPAGE_SETTINGS['subtitle'],
+                         description,
+                         request.form.get('button1_text', '').strip() or DEFAULT_HOMEPAGE_SETTINGS['button1_text'],
+                         request.form.get('button1_link', '').strip() or DEFAULT_HOMEPAGE_SETTINGS['button1_link'],
+                         request.form.get('button2_text', '').strip() or DEFAULT_HOMEPAGE_SETTINGS['button2_text'],
+                         request.form.get('button2_link', '').strip() or DEFAULT_HOMEPAGE_SETTINGS['button2_link'],
+                         background_image,
+                         request.form.get('overlay_color', '').strip() or DEFAULT_HOMEPAGE_SETTINGS['overlay_color'],
+                         datetime.now().isoformat(timespec='seconds'),
+                     ))
+
+        stat_ids = request.form.getlist('stat_id')
+        stat_labels = request.form.getlist('stat_label')
+        stat_values = request.form.getlist('stat_value')
+        for index, stat_id in enumerate(stat_ids):
+            label = stat_labels[index].strip() if index < len(stat_labels) else ''
+            value = form_int_or_none(stat_values[index] if index < len(stat_values) else '') or 0
+            if stat_id.isdigit() and label:
+                conn.execute('''UPDATE homepage_stats
+                                SET label = ?, value = ?, order_num = ?, is_active = 1, updated_at = ?
+                                WHERE id = ?''',
+                             (label, value, index + 1, datetime.now().isoformat(timespec='seconds'), int(stat_id)))
+
+        conn.commit()
+        conn.close()
+    except Exception:
+        logger.exception("Could not update homepage settings")
+    return redirect(url_for('admin_panel') + '#homepage')
+
+@app.route('/admin/homepage/preview')
+def admin_homepage_preview():
+    if not session.get('logged_in'):
+        return redirect(url_for('admin_panel'))
+    context = build_homepage_context()
+    context['is_admin_preview'] = True
+    return render_template('index.html', **context)
+
+@app.route('/admin/homepage/reset', methods=['POST'])
+def reset_homepage():
+    if not session.get('logged_in'):
+        return redirect(url_for('admin_panel'))
+    try:
+        conn = get_db_connection()
+        conn.execute('''UPDATE homepage_settings
+                        SET title = ?, subtitle = ?, description = ?,
+                            button1_text = ?, button1_link = ?,
+                            button2_text = ?, button2_link = ?,
+                            background_image = ?, overlay_color = ?,
+                            is_active = 1, updated_at = ?
+                        WHERE section_name = 'hero' ''',
+                     (
+                         DEFAULT_HOMEPAGE_SETTINGS['title'],
+                         DEFAULT_HOMEPAGE_SETTINGS['subtitle'],
+                         DEFAULT_HOMEPAGE_SETTINGS['description'],
+                         DEFAULT_HOMEPAGE_SETTINGS['button1_text'],
+                         DEFAULT_HOMEPAGE_SETTINGS['button1_link'],
+                         DEFAULT_HOMEPAGE_SETTINGS['button2_text'],
+                         DEFAULT_HOMEPAGE_SETTINGS['button2_link'],
+                         DEFAULT_HOMEPAGE_SETTINGS['background_image'],
+                         DEFAULT_HOMEPAGE_SETTINGS['overlay_color'],
+                         datetime.now().isoformat(timespec='seconds'),
+                     ))
+        conn.execute('DELETE FROM homepage_stats')
+        conn.executemany('''INSERT INTO homepage_stats (label, value, order_num, is_active, updated_at)
+                            VALUES (?, ?, ?, ?, ?)''',
+                         [(label, value, order_num, is_active, datetime.now().isoformat(timespec='seconds'))
+                          for label, value, order_num, is_active in DEFAULT_HOMEPAGE_STATS])
+        conn.commit()
+        conn.close()
+    except Exception:
+        logger.exception("Could not reset homepage settings")
+    return redirect(url_for('admin_panel') + '#homepage')
 
 @app.route('/admin/add-match', methods=['POST'])
 def add_match():
@@ -648,11 +1127,13 @@ def upload_document():
 def add_player():
     if not session.get('logged_in'): return redirect(url_for('admin_panel'))
     photo_url = save_uploaded_file(request.files.get('photo'), IMAGE_EXTENSIONS) or request.form.get('photo_url') or 'https://placehold.co/300x400'
+    team_name = request.form.get('team', '').strip()
     conn = get_db_connection()
-    conn.execute('''INSERT INTO players (name, photo_url, team, position, stats_points, stats_matches, birth_year, region, is_active)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+    team = conn.execute('SELECT id FROM teams WHERE name = ?', (team_name,)).fetchone()
+    conn.execute('''INSERT INTO players (name, photo_url, team, team_id, position, stats_points, stats_matches, birth_year, region, is_active)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
                  (request.form.get('name'), photo_url,
-                  request.form.get('team'), request.form.get('position'),
+                  team_name, team['id'] if team else None, request.form.get('position'),
                   request.form.get('stats_points', 0), request.form.get('stats_matches', 0),
                   request.form.get('birth_year'), request.form.get('region'), 1))
     conn.commit()
@@ -666,7 +1147,9 @@ def add_horse():
     if not name:
         return redirect(url_for('admin_panel') + '#horses')
 
-    photo_url = save_uploaded_file(request.files.get('photo'), IMAGE_EXTENSIONS) or request.form.get('photo_url', '').strip()
+    uploaded_photo = save_uploaded_file(request.files.get('photo'), IMAGE_EXTENSIONS)
+    linked_photo = request.form.get('photo_url', '').strip()
+    photo_url = uploaded_photo or linked_photo or HORSE_PHOTO_PLACEHOLDER
     conn = get_db_connection()
     conn.execute('''INSERT INTO horses (name, photo_url, breed, age, color, speed, stamina, points, price, description, is_for_sale, is_active)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)''',
@@ -726,6 +1209,59 @@ def update_ticket(ticket_id):
     conn.commit()
     conn.close()
     return redirect(url_for('admin_panel') + '#tickets')
+
+@app.route('/admin/add-contact-card', methods=['POST'])
+def add_contact_card():
+    if not session.get('logged_in'): return redirect(url_for('admin_panel'))
+    conn = get_db_connection()
+    conn.execute('''INSERT INTO contact_cards (title, type, value, icon, color, order_num, is_active)
+                    VALUES (?, ?, ?, ?, ?, ?, 1)''',
+                 (request.form.get('title', '').strip(),
+                  request.form.get('type', 'phone').strip(),
+                  request.form.get('value', '').strip(),
+                  request.form.get('icon', '☎️').strip() or '☎️',
+                  request.form.get('color', '#16a34a').strip() or '#16a34a',
+                  form_int_or_none(request.form.get('order_num')) or 0))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('admin_panel') + '#contact-cards')
+
+@app.route('/admin/update-contact-card/<int:card_id>', methods=['POST'])
+def update_contact_card(card_id):
+    if not session.get('logged_in'): return redirect(url_for('admin_panel'))
+    conn = get_db_connection()
+    conn.execute('''UPDATE contact_cards
+                    SET title = ?, type = ?, value = ?, icon = ?, color = ?, order_num = ?, is_active = ?
+                    WHERE id = ?''',
+                 (request.form.get('title', '').strip(),
+                  request.form.get('type', 'phone').strip(),
+                  request.form.get('value', '').strip(),
+                  request.form.get('icon', '☎️').strip() or '☎️',
+                  request.form.get('color', '#16a34a').strip() or '#16a34a',
+                  form_int_or_none(request.form.get('order_num')) or 0,
+                  1 if request.form.get('is_active') else 0,
+                  card_id))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('admin_panel') + '#contact-cards')
+
+@app.route('/admin/delete-contact-card/<int:card_id>')
+def delete_contact_card(card_id):
+    if not session.get('logged_in'): return redirect(url_for('admin_panel'))
+    conn = get_db_connection()
+    conn.execute('DELETE FROM contact_cards WHERE id = ?', (card_id,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('admin_panel') + '#contact-cards')
+
+@app.route('/admin/toggle-contact-card/<int:card_id>')
+def toggle_contact_card(card_id):
+    if not session.get('logged_in'): return redirect(url_for('admin_panel'))
+    conn = get_db_connection()
+    conn.execute('UPDATE contact_cards SET is_active = NOT is_active WHERE id = ?', (card_id,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('admin_panel') + '#contact-cards')
 
 @app.route('/admin/add-referee', methods=['POST'])
 def add_referee():
@@ -826,12 +1362,13 @@ def add_photo(album_id):
 @app.route('/admin/delete/<table_name>/<int:item_id>')  # ✅ ИСПРАВЛЕНО
 def delete_item(table_name, item_id):
     if not session.get('logged_in'): return redirect(url_for('admin_panel'))
-    allowed_tables = ['matches', 'news', 'leagues', 'documents', 'players', 'horses', 'referees', 'hippodromes', 'videos', 'photo_albums', 'photos', 'users', 'ticket_requests']
+    allowed_tables = ['matches', 'news', 'leagues', 'documents', 'players', 'horses', 'referees', 'hippodromes', 'videos', 'photo_albums', 'photos', 'users', 'ticket_requests', 'contact_cards']
     if table_name not in allowed_tables:
         return redirect(url_for('admin_panel'))
     
     conn = get_db_connection()
-    conn.execute(f'DELETE FROM {table_name} WHERE id = ?', (item_id,))
+    # Using validated table_name from whitelist to prevent SQL injection
+    conn.execute(f'DELETE FROM "{table_name}" WHERE id = ?', (item_id,))
     conn.commit()
     conn.close()
     return redirect(url_for('admin_panel'))
@@ -851,7 +1388,42 @@ def allowed_file(filename, allowed_extensions=None):
     extensions = allowed_extensions or (DOCUMENT_EXTENSIONS | IMAGE_EXTENSIONS | VIDEO_EXTENSIONS)
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in extensions
 
+# ==========================================
+# 🔧 Удаление фото из новости
+# ==========================================
+@app.route('/admin/delete-news-image/<int:news_id>', methods=['POST'])
+def delete_news_image(news_id):
+    """Удаление фото из новости"""
+    if not session.get('logged_in'):
+        return redirect(url_for('admin_panel'))
+    
+    conn = get_db_connection()
+    news = conn.execute('SELECT img_url FROM news WHERE id = ?', (news_id,)).fetchone()
+    
+    if news and news['img_url']:
+        # Удаляем файл с диска
+        try:
+            relative_path = news['img_url'].lstrip('/')
+            if relative_path.startswith('static/uploads/'):
+                file_path = relative_path
+            else:
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], relative_path)
+            if os.path.exists(file_path):
+                os.remove(file_path)
+        except Exception as e:
+            logger.warning("Could not delete news image: %s", e)
+        
+        # Очищаем поле в БД
+        conn.execute('UPDATE news SET img_url = ? WHERE id = ?', ('', news_id))
+        conn.commit()
+    
+    conn.close()
+    return redirect(url_for('admin_panel') + '#news')
+
+app.register_blueprint(pages_bp)
+
 if __name__ == '__main__':  # ✅ ИСПРАВЛЕНО
     init_db()
-    app.run(debug=True, host='0.0.0.0', port=5001)
+    port = int(os.getenv('PORT', 5002))
+    app.run(debug=True, host='0.0.0.0', port=port)
     

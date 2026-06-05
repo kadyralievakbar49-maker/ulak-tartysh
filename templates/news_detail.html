@@ -5,11 +5,11 @@
 {% block content %}
 <main>
   <article class="section detail-page">
-    <a class="back-link" href="{{ url_for('home') }}#news">← Жаңылыктар</a>
+    <a class="back-link" href="{{ url_for('home') }}#news">← <span data-i18n="backToNews">Жаңылыктар</span></a>
     <p class="eyebrow">{{ item.date }}</p>
     <h1>{{ item.title }}</h1>
     {% if item.img_url %}
-    <img class="detail-cover" src="{{ item.img_url }}" alt="{{ item.title }}" />
+    <img class="detail-cover" src="{{ item.img_url }}" alt="{{ item.title }}" loading="lazy" />
     {% endif %}
     <div class="detail-text">
       {% if item.body %}
@@ -17,7 +17,7 @@
       {% if paragraph.strip() %}<p>{{ paragraph }}</p>{% endif %}
       {% endfor %}
       {% else %}
-      <p>Толук текст жакында кошулат.</p>
+      <p data-i18n="newsBodyComingSoon">Толук текст жакында кошулат.</p>
       {% endif %}
     </div>
   </article>

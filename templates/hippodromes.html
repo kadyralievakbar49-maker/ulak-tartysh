@@ -5,9 +5,9 @@
 {% block content %}
 <main>
   <section class="section page-hero">
-    <p class="eyebrow">Ипподромы</p>
-    <h1>Игровые площадки</h1>
-    <p class="lead">Адреса, вместимость и карты основных ипподромов.</p>
+    <p class="eyebrow" data-i18n="pageVenuesEyebrow">Ипподромы</p>
+    <h1 data-i18n="pageVenuesTitle">Игровые площадки</h1>
+    <p class="lead" data-i18n="pageVenuesLead">Адреса, вместимость и карты основных ипподромов.</p>
   </section>
 
   <section class="section">
@@ -22,10 +22,10 @@
           <h3>{{ venue.name }}</h3>
           <p>{{ venue.description }}</p>
           <dl>
-            <div><dt>Адрес</dt><dd>{{ venue.address or 'Не указан' }}</dd></div>
-            <div><dt>Вместимость</dt><dd>{{ venue.capacity or 'Не указана' }}</dd></div>
-            <div><dt>Поле</dt><dd>{{ venue.surface or 'Не указано' }}</dd></div>
-            <div><dt>Карта</dt><dd>{% if venue.map_url %}<a href="{{ venue.map_url }}" target="_blank" rel="noopener noreferrer">Открыть</a>{% else %}Не указана{% endif %}</dd></div>
+            <div><dt data-i18n="addressLabel">Адрес</dt><dd>{{ venue.address or 'Не указан' }}</dd></div>
+            <div><dt data-i18n="capacity">Вместимость</dt><dd>{{ venue.capacity or 'Не указана' }}</dd></div>
+            <div><dt data-i18n="field">Поле</dt><dd>{{ venue.surface or 'Не указано' }}</dd></div>
+            <div><dt data-i18n="map">Карта</dt><dd>{% if venue.map_url %}<a href="{{ venue.map_url }}" target="_blank" rel="noopener noreferrer" data-i18n="open">Открыть</a>{% else %}Не указана{% endif %}</dd></div>
           </dl>
         </div>
       </article>
@@ -40,10 +40,10 @@
           <h3>{{ venue.name }}</h3>
           <p>{{ venue.description }}</p>
           <dl>
-            <div><dt>Адрес</dt><dd>{{ venue.address }}</dd></div>
-            <div><dt>Вместимость</dt><dd>{{ venue.capacity }}</dd></div>
-            <div><dt>Поле</dt><dd>{{ venue.surface }}</dd></div>
-            <div><dt>Карта</dt><dd><a href="{{ venue.map_url }}" target="_blank" rel="noopener noreferrer">Открыть</a></dd></div>
+            <div><dt data-i18n="addressLabel">Адрес</dt><dd>{{ venue.address }}</dd></div>
+            <div><dt data-i18n="capacity">Вместимость</dt><dd>{{ venue.capacity }}</dd></div>
+            <div><dt data-i18n="field">Поле</dt><dd>{{ venue.surface }}</dd></div>
+            <div><dt data-i18n="map">Карта</dt><dd><a href="{{ venue.map_url }}" target="_blank" rel="noopener noreferrer" data-i18n="open">Открыть</a></dd></div>
           </dl>
         </div>
       </article>

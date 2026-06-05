@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}{{ team.name }} | Команда улак тартыш{% endblock %}
+{% block description %}Состав, регион, лига и статистика игроков команды {{ team.name }}.{% endblock %}
+
+{% block content %}
+<main>
+  <section class="section page-hero team-detail-hero">
+    <div class="team-detail-photo">
+      {% if team.photo_url %}
+      <img src="{{ team.photo_url }}" alt="{{ team.name }}" loading="lazy" />
+      {% else %}
+      <span>{{ team.name[:1] }}</span>
+      {% endif %}
+    </div>
+    <div>
+      <p class="eyebrow" data-i18n="team">Команда</p>
+      <h1>{{ team.name }}</h1>
+      <p class="lead">{{ team.region or 'Регион не указан' }} · {{ team.league or 'Лига не указана' }}</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow" data-i18n="roster">Состав</p>
+        <h2 data-i18n="teamMembers">Участники команды</h2>
+      </div>
+    </div>
+
+    <div class="team-player-grid">
+      {% for player in players %}
+      <article class="team-player-card">
+        {% if player.photo_url %}
+        <img src="{{ player.photo_url }}" alt="{{ player.name }}" loading="lazy" />
+        {% else %}
+        <span class="team-player-fallback">{{ player.name[:1] }}</span>
+        {% endif %}
+        <div>
+          <h3>{{ player.name }}</h3>
+          <p>{{ player.position or 'Оюнчу' }} · №{{ player.id }}</p>
+          <small>{{ player.stats_matches or 0 }} матчей · {{ player.stats_points or 0 }} очков</small>
+        </div>
+      </article>
+      {% else %}
+      <p class="empty-state" data-i18n="noTeamPlayers">Игроки этой команды пока не добавлены.</p>
+      {% endfor %}
+    </div>
+  </section>
+</main>
+{% endblock %}

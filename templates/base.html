@@ -5,39 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}Улак тартыш Федерациясы{% endblock %}</title>
     <meta name="description" content="{% block description %}Улак тартыш федерациясы: матчи, лиги, новости, медиа, игроки и документы.{% endblock %}" />
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <meta name="theme-color" content="#1a2744" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Улак Тартыш" />
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}" />
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/logo.jpg') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   </head>
   <body>
-    <div class="topbar">
-      <button class="quick" data-open="questionnaire">
-        <!-- Логотип в кнопке "Анкета" -->
-        <img src="{{ url_for('static', filename='img/logo.jpg') }}" alt="УТ" class="quick-logo" aria-hidden="true" />
-        <span data-i18n="questionnaire">Анкета</span>
-      </button>
-      <div class="top-actions" aria-label="Language and login">
-        {% if session.get('user_name') %}
-        <span class="user-chip">{{ session.get('user_name') }}</span>
-        <a class="top-link" href="{{ url_for('user_logout') }}">Чыгуу</a>
-        {% else %}
-        <button data-open="login" data-i18n="login">Кирүү</button>
-        <button data-open="register" data-i18n="register" style="color:var(--gold);font-weight:800">Каттоо</button>
-        {% endif %}
-        <button class="lang active" data-lang="kg">KG</button>
-        <button class="lang" data-lang="ru">RU</button>
-        <button class="lang" data-lang="en">EN</button>
-      </div>
-    </div>
-
     <header class="header">
       <a class="brand" href="{{ url_for('home') }}">
         <!-- ОСНОВНОЙ ЛОГОТИП В ШАПКЕ -->
-        <img src="{{ url_for('static', filename='img/logo.jpg') }}" alt="Улак тартыш" class="brand-logo" aria-hidden="true" />
+        <img src="{{ url_for('static', filename='img/logo.jpg') }}" alt="Улак тартыш" class="brand-logo" aria-hidden="true" loading="lazy" />
         <span class="brand-text">
           <span>федерация</span>
           <strong data-i18n="brandName">Улак тартыш</strong>
         </span>
       </a>
       <nav class="nav" id="nav">
+        <button class="drawer-close" type="button" data-close-menu aria-label="Жабуу">×</button>
         <div class="nav-item">
           <button class="nav-trigger" type="button"><span data-i18n="navHome">Башкы бет</span></button>
           <div class="dropdown">
@@ -53,16 +41,16 @@
           <button class="nav-trigger" type="button"><span data-i18n="navDocuments">Документтер</span></button>
           <div class="dropdown">
             <a href="{{ url_for('documents_page') }}#charters" data-i18n="docAssociation">Уставдар</a>
-            <a href="{{ url_for('documents_page') }}#rules" data-i18n="docRules">Эрежелер</a>
-            <a href="{{ url_for('documents_page') }}#regulations" data-i18n="docTournament">Регламенттер</a>
-            <a href="{{ url_for('documents_page') }}#transfers" data-i18n="docTransfer">Трансферлер</a>
+            <a href="{{ url_for('rules_page') }}" class="dropdown-item">Эрежелер</a>
+            <a href="{{ url_for('pages.regulations_page') }}" data-i18n="docTournament">Регламенттер</a>
+            <a href="{{ url_for('pages.transfers_page') }}" data-i18n="docTransfer">Трансферлер</a>
           </div>
         </div>
         <div class="nav-item">
           <button class="nav-trigger" type="button"><span data-i18n="navLeagues">Лигалар</span></button>
           <div class="dropdown">
-            <a href="{{ url_for('home') }}#leagues" data-i18n="leagueTop">Жогорку лига</a>
-            <a href="{{ url_for('home') }}#leagues" data-i18n="leagueFirst">Биринчи лига</a>
+            <a href="{{ url_for('pages.league_higher_page') }}" data-i18n="leagueTop">Жогорку лига</a>
+            <a href="{{ url_for('pages.league_first_page') }}" data-i18n="leagueFirst">Биринчи лига</a>
           </div>
         </div>
         <div class="nav-item">
@@ -75,8 +63,55 @@
             <a href="{{ url_for('referees_page') }}" data-i18n="navReferees">Калыстар</a>
           </div>
         </div>
+        <div class="mobile-drawer-tools" aria-label="Мобилдик меню орнотуулары">
+          <div class="drawer-tool-row">
+            <span>Тил</span>
+            <div class="lang-switcher drawer-lang-switcher">
+              <a href="?lang=kg" class="lang-btn active" data-lang="kg">KG</a>
+              <a href="?lang=ru" class="lang-btn" data-lang="ru">RU</a>
+              <a href="?lang=en" class="lang-btn" data-lang="en">EN</a>
+            </div>
+          </div>
+          <button class="drawer-theme-toggle theme-toggle" type="button" data-theme-toggle aria-label="Теманы алмаштыруу">🌙</button>
+          <div class="mobile-drawer-auth">
+            {% if session.get('user_id') %}
+            <div class="drawer-user-card">
+              <span class="user-avatar-small">{{ (session.get('user_name') or 'U')[:1] }}</span>
+              <strong>{{ session.get('user_name') }}</strong>
+            </div>
+            <a class="btn-outline" href="{{ url_for('profile_page') }}" data-i18n="profile">Профиль</a>
+            <a class="btn-primary" href="{{ url_for('user_logout') }}" data-i18n="logout">Чыгуу</a>
+            {% else %}
+            <button class="btn-outline" type="button" data-open="login" data-i18n="login">Кируу</button>
+            <button class="btn-primary" type="button" data-open="register" data-i18n="register">Каттоо</button>
+            {% endif %}
+          </div>
+        </div>
       </nav>
-      <button class="primary" data-open="tickets" data-i18n="navTickets">Билеттер</button>
+      <button class="drawer-overlay" type="button" id="drawerOverlay" data-close-menu aria-label="Менюну жабуу"></button>
+      <div class="auth-buttons">
+        {% if session.get('user_id') %}
+        <div class="user-menu-compact" aria-label="Колдонуучу менюсу">
+          <div class="user-avatar-name">
+            <span class="user-avatar-small">{{ (session.get('user_name') or 'U')[:1] }}</span>
+            <span class="user-name-text">{{ session.get('user_name') }}</span>
+          </div>
+          <div class="user-actions">
+            <a href="{{ url_for('profile_page') }}" class="btn-icon" title="Профиль" aria-label="Профиль">👤</a>
+            <a href="{{ url_for('user_logout') }}" class="btn-icon danger" title="Чыгуу" aria-label="Чыгуу">↪</a>
+          </div>
+        </div>
+        {% else %}
+        <button class="btn-outline" type="button" onclick="showLoginModal()" data-i18n="login">Кируу</button>
+        <button class="btn-primary" type="button" onclick="showRegisterModal()" data-i18n="register">Каттоо</button>
+        {% endif %}
+      </div>
+      <div class="lang-switcher">
+        <a href="?lang=kg" class="lang-btn active" data-lang="kg">KG</a>
+        <a href="?lang=ru" class="lang-btn" data-lang="ru">RU</a>
+        <a href="?lang=en" class="lang-btn" data-lang="en">EN</a>
+      </div>
+      <button class="theme-toggle" type="button" id="themeToggle" data-theme-toggle aria-label="Теманы алмаштыруу">🌙</button>
       <button class="icon-button menu-toggle" aria-label="Меню" id="menuToggle">☰</button>
     </header>
 
@@ -84,10 +119,10 @@
 
     <footer class="footer">
       <!-- Логотип в футере -->
-      <img src="{{ url_for('static', filename='img/logo.jpg') }}" alt="УТ" class="footer-logo" aria-hidden="true" />
+      <img src="{{ url_for('static', filename='img/logo.jpg') }}" alt="УТ" class="footer-logo" aria-hidden="true" loading="lazy" />
       <div>
         <h2 data-i18n="footerTitle">Улак тартыш федерациясы</h2>
-        <p data-i18n="footerText">Улуттук оюнду өнүктүрүү, турнирлерди уюштуруу жана расмий маалыматты заманбап форматта жеткирүү.</p>
+        <p data-i18n="footerDesc">Улуттук оюнду өнүктүрүү, турнирлерди уюштуруу жана расмий маалыматты заманбап форматта жеткирүү.</p>
       </div>
       <div class="footer-links">
         <a href="{{ url_for('home') }}#matches" data-i18n="navGames">Оюндар</a>
@@ -96,6 +131,20 @@
         <a href="{{ url_for('contacts_page') }}" data-i18n="navContacts">Байланыш</a>
         <a href="{{ url_for('horses_page') }}" data-i18n="navHorses">Аттар</a>
       </div>
+      <address class="footer-contact">
+        <strong data-i18n="footerContact">Байланыш маалыматы</strong>
+        {% if footer_contact_cards %}
+          {% for card in footer_contact_cards[:4] %}
+          <a href="{{ card.href }}" {% if card.type in ['whatsapp', 'telegram', 'website'] %}target="_blank" rel="noopener noreferrer"{% endif %}>
+            {{ card.icon or '☎️' }} {{ card.title }}: {{ card.value }}
+          </a>
+          {% endfor %}
+        {% else %}
+          <span data-i18n="contactAddress">Бишкек, спортивный комплекс федерации</span>
+          <a href="tel:+996995544444" data-i18n="contactPhone">0(995) 544-444</a>
+          <a href="mailto:ulaktartys@gmail.com" data-i18n="contactEmail">ulaktartys@gmail.com</a>
+        {% endif %}
+      </address>
       <div class="social-links" aria-label="Социальные сети">
         <a href="https://www.instagram.com/ulak_tartysh_official?igsh=aWJrcHF5a3Rkem1w" target="_blank" rel="noopener noreferrer">Instagram</a>
         <a href="https://youtube.com/channel/UCSlqV4SGqzS2rdlTFlpMVNQ?si=bdjnYZtXHQbRJg4B" target="_blank" rel="noopener noreferrer">YouTube</a>
@@ -115,6 +164,17 @@
       </div>
     </div>
 
+    <button class="install-app-btn" id="installAppBtn" type="button">📱 Тиркемени орнотуу</button>
+
+    <script src="{{ url_for('static', filename='js/translations.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/i18n.js') }}"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch((error) => console.error('SW registration failed:', error));
+        });
+      }
+    </script>
   </body>
 </html>

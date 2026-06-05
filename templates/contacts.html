@@ -5,18 +5,33 @@
 {% block content %}
 <main>
   <section class="section page-hero">
-    <p class="eyebrow">Контакты</p>
-    <h1>Связаться с федерацией</h1>
-    <p class="lead">Адрес, телефон, email и форма обратной связи.</p>
+    <p class="eyebrow" data-i18n="pageContactsEyebrow">Контакты</p>
+    <h1 data-i18n="pageContactsTitle">Связаться с федерацией</h1>
+    <p class="lead" data-i18n="pageContactsLead">Адрес, телефон, email и форма обратной связи.</p>
   </section>
 
   <section class="section">
+    {% if contact_cards %}
+    <div class="contact-card-grid">
+      {% for card in contact_cards %}
+      <article class="contact-card" style="--contact-color: {{ card.color or '#16a34a' }};">
+        <a href="{{ card.href }}" {% if card.type in ['whatsapp', 'telegram', 'website'] %}target="_blank" rel="noopener noreferrer"{% endif %} title="{{ card.title }} ачылат">
+          <span class="contact-card-icon">{{ card.icon or '☎️' }}</span>
+          <strong>{{ card.title }}</strong>
+          <small>{{ card.value }}</small>
+        </a>
+        <button type="button" class="copy-contact" data-copy="{{ card.value }}" title="Көчүрүү" data-i18n="copy" data-i18n-title="copy">Көчүрүү</button>
+      </article>
+      {% endfor %}
+    </div>
+    {% endif %}
+
     <div class="contact-layout">
       <article class="about-card">
-        <h3>Контактная информация</h3>
-        <p><strong>Адрес:</strong> Бишкек, спортивный комплекс федерации</p>
+        <h3 data-i18n="contactInfoTitle">Контактная информация</h3>
+        <p><strong data-i18n="addressLabel">Адрес</strong>: <span data-i18n="contactAddress">Бишкек, спортивный комплекс федерации</span></p>
         <p>
-          <strong>Телефон:</strong> 
+          <strong data-i18n="phoneLabel">Телефон</strong>: 
           <a href="tel:+996544444" class="contact-link">0(995) 544-444</a>
         </p>
         <p>
@@ -26,13 +41,13 @@
       </article>
 
       <article class="about-card">
-        <h3>Форма обратной связи</h3>
+        <h3 data-i18n="contactFormTitle">Форма обратной связи</h3>
         <form class="form-grid" data-submit="contact">
-          <div class="form-field"><label>Аты-жөнү</label><input name="fullname" required placeholder="Ваше имя" /></div>
+          <div class="form-field"><label data-i18n="fullName">Аты-жөнү</label><input name="fullname" required placeholder="Ваше имя" data-i18n-placeholder="fullNamePlaceholder" /></div>
           <div class="form-field"><label>Email</label><input name="email" type="email" required placeholder="you@example.com" /></div>
-          <div class="form-field"><label>Телефон</label><input name="phone" placeholder="+996 700 000 000" /></div>
-          <div class="form-field"><label>Сообщение</label><input name="message" required placeholder="Коротко опишите вопрос" /></div>
-          <button class="primary" type="submit">Жөнөтүү</button>
+          <div class="form-field"><label data-i18n="phoneLabel">Телефон</label><input name="phone" placeholder="+996 700 000 000" /></div>
+          <div class="form-field"><label data-i18n="messageLabel">Сообщение</label><input name="message" required placeholder="Коротко опишите вопрос" data-i18n-placeholder="messagePlaceholder" /></div>
+          <button class="primary" type="submit" data-i18n="send">Жөнөтүү</button>
         </form>
       </article>
     </div>

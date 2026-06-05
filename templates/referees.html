@@ -5,23 +5,23 @@
 {% block content %}
 <main>
   <section class="section page-hero">
-    <p class="eyebrow">Калыстар</p>
-    <h1>Судьи</h1>
-    <p class="lead">Список судей, категории и текущие назначения.</p>
+    <p class="eyebrow" data-i18n="pageRefereesEyebrow">Калыстар</p>
+    <h1 data-i18n="pageRefereesTitle">Судьи</h1>
+    <p class="lead" data-i18n="pageRefereesLead">Список судей, категории и текущие назначения.</p>
   </section>
 
   <section class="section referees-section">
     <div class="section-head">
       <div>
-        <p class="eyebrow">Список</p>
-        <h2>Официальный состав судей</h2>
+        <p class="eyebrow" data-i18n="list">Список</p>
+        <h2 data-i18n="officialReferees">Официальный состав судей</h2>
       </div>
     </div>
     <div class="referee-grid">
       {% for referee in referees %}
       <article class="referee-card">
         {% if referee.photo_url %}
-        <img class="referee-avatar" src="{{ referee.photo_url }}" alt="{{ referee.name }}" />
+        <img class="referee-avatar" src="{{ referee.photo_url }}" alt="{{ referee.name }}" loading="lazy" />
         {% else %}
         <span class="referee-avatar">{{ referee.name[:1] }}</span>
         {% endif %}
@@ -50,11 +50,11 @@
   <section class="section">
     <div class="league-grid">
       <article class="league-card">
-        <strong>Категории</strong>
+        <strong data-i18n="categories">Категории</strong>
         <span>Башкы калыс, улуттук категория, аймактык калыс, катчы-калыс.</span>
       </article>
       <article class="league-card">
-        <strong>Назначения</strong>
+        <strong data-i18n="assignments">Назначения</strong>
         <span>Назначения формируются перед игровым туром и утверждаются федерацией.</span>
       </article>
     </div>

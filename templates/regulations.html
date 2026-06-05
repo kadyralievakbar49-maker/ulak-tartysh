@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Регламенттер | Улак тартыш{% endblock %}
+{% block description %}Регламенты, положения и официальные документы федерации улак тартыш.{% endblock %}
+
+{% block content %}
+<main>
+  <section class="section page-hero">
+    <p class="eyebrow" data-i18n="pageDocumentsEyebrow">Документы</p>
+    <h1 data-i18n="regulations">Регламенттер</h1>
+    <p class="lead" data-i18n="regulationsLead">Официальные положения турниров, заявок и проведения матчей.</p>
+  </section>
+
+  <section class="section">
+    <div class="responsive-table">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th data-i18n="titleLabel">Название</th>
+            <th data-i18n="dateLabel">Дата</th>
+            <th data-i18n="descriptionLabel">Описание</th>
+            <th data-i18n="fileLabel">Файл</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in regulations %}
+          <tr>
+            <td><strong>{{ item.title }}</strong></td>
+            <td>{{ item.date }}</td>
+            <td>{{ item.description }}</td>
+            <td><a class="primary table-action" href="{{ url_for('static', filename=item.file) }}" download data-i18n="download">Скачать</a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+{% endblock %}

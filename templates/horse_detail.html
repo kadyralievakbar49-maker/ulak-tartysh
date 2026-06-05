@@ -9,7 +9,7 @@
     <div class="horse-detail-grid">
       <div class="horse-detail-photo">
         {% if horse.photo_url %}
-        <img src="{{ horse.photo_url }}" alt="{{ horse.name }}" />
+        <img src="{{ horse.photo_url }}" alt="{{ horse.name }}" loading="lazy" />
         {% else %}
         <span>{{ horse.name[:1] }}</span>
         {% endif %}

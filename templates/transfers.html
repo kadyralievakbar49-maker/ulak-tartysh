@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Трансферлер | Улак тартыш{% endblock %}
+{% block description %}Список переходов игроков между командами федерации улак тартыш.{% endblock %}
+
+{% block content %}
+<main>
+  <section class="section page-hero">
+    <p class="eyebrow" data-i18n="pageTeamsEyebrow">Команды</p>
+    <h1 data-i18n="transfers">Трансферлер</h1>
+    <p class="lead" data-i18n="transfersLead">Переходы игроков между командами и статус подтверждения.</p>
+  </section>
+
+  <section class="section">
+    <div class="transfer-list">
+      {% for transfer in transfers %}
+      <article class="transfer-card">
+        <time datetime="{{ transfer.date }}">{{ transfer.date }}</time>
+        <h3>{{ transfer.player }}</h3>
+        <p>{{ transfer.from_team }} → {{ transfer.to_team }}</p>
+        <span>{{ transfer.status }}</span>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+</main>
+{% endblock %}

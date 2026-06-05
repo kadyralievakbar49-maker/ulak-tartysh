@@ -1,105 +1,117 @@
 {% extends "base.html" %}
 
-{% block title %}Документы | Улак тартыш{% endblock %}
+{% block title %}Документтер | Улак Тартыш{% endblock %}
 
 {% block content %}
-<main>
-  <section class="section page-hero">
-    <p class="eyebrow">Документы</p>
-    <h1>Документы федерации</h1>
-    <p class="lead">Уставы, правила, регламенты, трансферы и формы заявок.</p>
-  </section>
+<section class="section container" style="padding: 60px 20px; max-width: 1200px; margin: 0 auto;">
+  <div class="page-hero" style="padding-top: 0;">
+    <p class="eyebrow" data-i18n="pageDocumentsEyebrow">Документы</p>
+    <h1 data-i18n="pageDocumentsTitle">Официальные документы</h1>
+    <p class="lead" data-i18n="pageDocumentsLead">Уставы, правила, регламенты и формы федерации.</p>
+  </div>
+  
+  <!-- УСТАВНЫЕ ДОКУМЕНТЫ -->
+  <div style="margin-bottom: 60px;">
+    <span style="color: #f5b041; font-weight: 700; font-size: 14px; text-transform: uppercase;" data-i18n="charters">Уставы</span>
+    <h2 style="font-size: 36px; color: #1a2744; margin: 12px 0 32px;" data-i18n="charterDocuments">Уставные документы</h2>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+      
+      <!-- Карточка 1 -->
+      <article style="border: 2px solid #e0e0e0; border-radius: 12px; padding: 24px; transition: 0.3s;">
+        <span style="color: #666; font-size: 14px; display: block; margin-bottom: 8px;">Международный документ</span>
+        <h3 style="font-size: 18px; color: #1a2744; margin-bottom: 12px;">ULAK TARTYSH</h3>
+        <p style="color: #666; font-size: 14px; line-height: 1.6; margin-bottom: 16px;">
+          Международный стандарт игры Улак-Тартыш (Кок-Бору). Основные правила и регламент проведения международных соревнований.
+        </p>
+      </article>
 
-  <section class="section documents-strip" id="charters">
-    <div class="section-head compact-head">
-      <div>
-        <p class="eyebrow">Уставы</p>
-        <h2>Уставные документы</h2>
-      </div>
-    </div>
-    <div class="doc-grid">
-      {% for doc in db_documents if doc.category == 'Уставные документы' %}
-      <a href="/{{ doc.file_path }}" class="doc-link" target="_blank" rel="noopener noreferrer">
-        <span>{{ doc.category }}</span>
-        <strong>{{ doc.title }}</strong>
-      </a>
-      {% endfor %}
-      {% for doc in official_documents if doc.category == 'Уставные документы' or 'ULAK' in doc.title %}
-      <a href="{{ url_for('static', filename='uploads/' ~ doc.file) }}" class="doc-link" target="_blank" rel="noopener noreferrer">
-        <span>{{ doc.category }}</span>
-        <strong>{{ doc.title }}</strong>
-      </a>
-      {% endfor %}
-    </div>
-  </section>
+      <!-- Карточка 2 -->
+      <article style="border: 2px solid #e0e0e0; border-radius: 12px; padding: 24px; transition: 0.3s;">
+        <span style="color: #666; font-size: 14px; display: block; margin-bottom: 8px;">Уставные документы</span>
+        <h3 style="font-size: 18px; color: #1a2744; margin-bottom: 12px;">Выписка Минюст Федерации Улак тартыш</h3>
+        <p style="color: #666; font-size: 14px; line-height: 1.6; margin-bottom: 16px;">
+          Официальная выписка из Министерства юстиции Кыргызской Республики о регистрации Федерации Улак-Тартыш.
+        </p>
+      </article>
 
-  <section class="section" id="rules">
-    <div class="section-head compact-head">
-      <div>
-        <p class="eyebrow">Правила</p>
-        <h2>Правила игры</h2>
-      </div>
+      <!-- Карточка 3 -->
+      <article style="border: 2px solid #e0e0e0; border-radius: 12px; padding: 24px; transition: 0.3s;">
+        <span style="color: #666; font-size: 14px; display: block; margin-bottom: 8px;">Уставные документы</span>
+        <h3 style="font-size: 18px; color: #1a2744; margin-bottom: 12px;">Протокол №1 о создании федерации</h3>
+        <p style="color: #666; font-size: 14px; line-height: 1.6; margin-bottom: 16px;">
+          Протокол учредительного собрания о создании Федерации Улак-Тартыш Кыргызской Республики.
+        </p>
+      </article>
     </div>
-    <div class="doc-grid">
-      {% for doc in db_documents if doc.category == 'Правила' %}
-      <a href="/{{ doc.file_path }}" class="doc-link" target="_blank" rel="noopener noreferrer">
-        <span>{{ doc.category }}</span>
-        <strong>{{ doc.title }}</strong>
-      </a>
-      {% endfor %}
-      {% for doc in official_documents if doc.category == 'Правила' %}
-      <a href="{{ url_for('static', filename='uploads/' ~ doc.file) }}" class="doc-link" target="_blank" rel="noopener noreferrer">
-        <span>{{ doc.category }}</span>
-        <strong>{{ doc.title }}</strong>
-      </a>
-      {% endfor %}
-    </div>
-  </section>
+  </div>
 
-  <section class="section" id="regulations">
-    <div class="section-head compact-head">
-      <div>
-        <p class="eyebrow">Регламенты</p>
-        <h2>Положения и формы</h2>
-      </div>
-    </div>
-    <div class="doc-grid">
-      {% for doc in db_documents if doc.category != 'Правила' and doc.category != 'Уставные документы' %}
-      <a href="/{{ doc.file_path }}" class="doc-link" target="_blank" rel="noopener noreferrer">
-        <span>{{ doc.category }}</span>
-        <strong>{{ doc.title }}</strong>
-      </a>
-      {% endfor %}
-      {% for doc in official_documents if doc.category != 'Правила' and doc.category != 'Уставные документы' %}
-      <a href="{{ url_for('static', filename='uploads/' ~ doc.file) }}" class="doc-link" target="_blank" rel="noopener noreferrer">
-        <span>{{ doc.category }}</span>
-        <strong>{{ doc.title }}</strong>
-      </a>
-      {% endfor %}
-    </div>
-  </section>
+  <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 60px 0;">
 
-  <section class="section" id="transfers">
-    <div class="section-head compact-head">
-      <div>
-        <p class="eyebrow">Трансферы</p>
-        <h2>Переходы и заявки</h2>
-      </div>
+  <!-- ПРАВИЛА ИГРЫ -->
+  <div style="margin-bottom: 60px;">
+    <span style="color: #f5b041; font-weight: 700; font-size: 14px; text-transform: uppercase;" data-i18n="rules">Правила</span>
+    <h2 style="font-size: 36px; color: #1a2744; margin: 12px 0 32px;" data-i18n="gameRules">Правила игры</h2>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+      
+      <!-- Карточка 1 -->
+      <article style="border: 2px solid #e0e0e0; border-radius: 12px; padding: 24px;">
+        <span style="color: #666; font-size: 14px; display: block; margin-bottom: 8px;">Правила</span>
+        <h3 style="font-size: 18px; color: #1a2744; margin-bottom: 12px;">Улак-тарттыш оюнун эрежелери</h3>
+        <p style="color: #666; font-size: 14px; line-height: 1.6; margin-bottom: 16px;">
+          Официальные правила игры Улак-Тартыш. Основные положения, состав команд, игровое поле, нарушения.
+        </p>
+      </article>
+
+      <!-- Карточка 2 -->
+      <article style="border: 2px solid #e0e0e0; border-radius: 12px; padding: 24px;">
+        <span style="color: #666; font-size: 14px; display: block; margin-bottom: 8px;">Правила</span>
+        <h3 style="font-size: 18px; color: #1a2744; margin-bottom: 12px;">Жекеме-жеке эрежелери</h3>
+        <p style="color: #666; font-size: 14px; line-height: 1.6; margin-bottom: 16px;">
+          Правила личных соревнований. Индивидуальные зачёты, рейтинг игроков, система начисления очков.
+        </p>
+      </article>
+
+      <!-- Карточка 3 -->
+      <article style="border: 2px solid #e0e0e0; border-radius: 12px; padding: 24px;">
+        <span style="color: #666; font-size: 14px; display: block; margin-bottom: 8px;">Правила</span>
+        <h3 style="font-size: 18px; color: #1a2744; margin-bottom: 12px;">Улак тартыш эрежеси</h3>
+        <p style="color: #666; font-size: 14px; line-height: 1.6; margin-bottom: 16px;">
+          Классические правила национальной игры. Исторические аспекты и современные модификации.
+        </p>
+      </article>
     </div>
-    <div class="doc-grid">
-      {% for doc in db_documents if doc.category == 'Заявки' or doc.category == 'Команды' %}
-      <a href="/{{ doc.file_path }}" class="doc-link" target="_blank" rel="noopener noreferrer">
-        <span>{{ doc.category }}</span>
-        <strong>{{ doc.title }}</strong>
-      </a>
-      {% endfor %}
-      {% for doc in official_documents if doc.category == 'Заявки' or doc.category == 'Команды' %}
-      <a href="{{ url_for('static', filename='uploads/' ~ doc.file) }}" class="doc-link" target="_blank" rel="noopener noreferrer">
-        <span>{{ doc.category }}</span>
-        <strong>{{ doc.title }}</strong>
-      </a>
-      {% endfor %}
+  </div>
+
+  <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 60px 0;">
+
+  <!-- РЕГЛАМЕНТЫ -->
+  <div style="margin-bottom: 60px;">
+    <span style="color: #f5b041; font-weight: 700; font-size: 14px; text-transform: uppercase;" data-i18n="regulations">Регламенты</span>
+    <h2 style="font-size: 36px; color: #1a2744; margin: 12px 0 32px;" data-i18n="formsAndRules">Положения и формы</h2>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+      
+      <!-- Карточка 1 -->
+      <article style="border: 2px solid #e0e0e0; border-radius: 12px; padding: 24px;">
+        <span style="color: #666; font-size: 14px; display: block; margin-bottom: 8px;">Регламент</span>
+        <h3 style="font-size: 18px; color: #1a2744; margin-bottom: 12px;">Трансфердик эрежелер</h3>
+        <p style="color: #666; font-size: 14px; line-height: 1.6; margin-bottom: 16px;">
+          Правила перехода игроков между командами. Трансферные окна, комиссии, ограничения.
+        </p>
+      </article>
+
+      <!-- Карточка 2 -->
+      <article style="border: 2px solid #e0e0e0; border-radius: 12px; padding: 24px;">
+        <span style="color: #666; font-size: 14px; display: block; margin-bottom: 8px;">Положение</span>
+        <h3 style="font-size: 18px; color: #1a2744; margin-bottom: 12px;">Нооруз кубогу-2026 жобосу</h3>
+        <p style="color: #666; font-size: 14px; line-height: 1.6; margin-bottom: 16px;">
+          Положение о проведении турнира "Кубок Нооруз 2026". Даты проведения, участники, призовой фонд.
+        </p>
+      </article>
     </div>
-  </section>
-</main>
+  </div>
+
+</section>
 {% endblock %}

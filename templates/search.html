@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Издөө | Улак тартыш{% endblock %}
+{% block description %}Улак тартыш сайтындагы жаңылыктар, матчтар, оюнчулар, командалар жана аттар боюнча издөө.{% endblock %}
+
+{% block content %}
+<main>
+  <section class="section page-hero">
+    <p class="eyebrow" data-i18n="pageSearchEyebrow">Издөө</p>
+    <h1 data-i18n="pageSearchTitle">Издөө жыйынтыктары</h1>
+    <p class="lead">Суроо: <strong>{{ query or 'бош' }}</strong></p>
+  </section>
+
+  <section class="section search-results-section">
+    <form class="search-panel search-page-form" action="{{ url_for('search_page') }}" method="get">
+      <input name="q" type="search" value="{{ query }}" placeholder="Команда, жаңылык, оюнчу же ат издөө" data-i18n-placeholder="searchPlaceholder" />
+      <button class="primary" type="submit" data-i18n="searchButton">Издөө</button>
+    </form>
+
+    {% if not query %}
+    <div class="empty-search">
+      <h2 data-i18n="searchEmptyTitle">Издөө сөзүн жазыңыз</h2>
+      <p data-i18n="searchEmptyText">Жаңылыктар, матчтар, оюнчулар, командалар жана аттар боюнча издесеңиз болот.</p>
+    </div>
+    {% elif total == 0 %}
+    <div class="empty-search">
+      <h2 data-i18n="searchNothingTitle">Эч нерсе табылган жок</h2>
+      <p data-i18n="searchNothingText">Башка сөз менен издеп көрүңүз.</p>
+    </div>
+    {% else %}
+    <div class="search-groups">
+      {% if results.news %}
+      <section class="search-group">
+        <h2 data-i18n="navNews">Жаңылыктар</h2>
+        <div class="search-result-grid">
+          {% for item in results.news %}
+          <a class="search-result-card" href="{{ url_for('news_detail_page', news_id=item.id) }}">
+            <span>{{ item.date }}</span>
+            <h3>{{ highlight(item.title, query) }}</h3>
+            <p>{{ highlight(item.body or 'Федерация жаңылыктары.', query) }}</p>
+          </a>
+          {% endfor %}
+        </div>
+      </section>
+      {% endif %}
+
+      {% if results.matches %}
+      <section class="search-group">
+        <h2 data-i18n="matches">Матчтар</h2>
+        <div class="search-result-grid">
+          {% for match in results.matches %}
+          <a class="search-result-card" href="{{ url_for('home') }}#matches">
+            <span>{{ match.date }} · {{ match.time }}</span>
+            <h3>{{ highlight(match.team1, query) }} VS {{ highlight(match.team2, query) }}</h3>
+            <p>{{ highlight(match.league, query) }}</p>
+          </a>
+          {% endfor %}
+        </div>
+      </section>
+      {% endif %}
+
+      {% if results.players %}
+      <section class="search-group">
+        <h2 data-i18n="playersEyebrow">Оюнчулар</h2>
+        <div class="search-result-grid">
+          {% for player in results.players %}
+          <a class="search-result-card" href="{{ url_for('home') }}#players">
+            <h3>{{ highlight(player.name, query) }}</h3>
+            <p>{{ highlight(player.team or 'Команда көрсөтүлгөн эмес', query) }} · {{ player.position or 'Оюнчу' }}</p>
+          </a>
+          {% endfor %}
+        </div>
+      </section>
+      {% endif %}
+
+      {% if results.teams %}
+      <section class="search-group">
+        <h2 data-i18n="pageTeamsEyebrow">Командалар</h2>
+        <div class="search-result-grid">
+          {% for team in results.teams %}
+          <a class="search-result-card" href="{{ url_for('team_detail_page', team_id=team.id) }}">
+            <h3>{{ highlight(team.name, query) }}</h3>
+            <p>{{ highlight(team.region or 'Регион көрсөтүлгөн эмес', query) }} · {{ team.league or 'Лига' }}</p>
+          </a>
+          {% endfor %}
+        </div>
+      </section>
+      {% endif %}
+
+      {% if results.horses %}
+      <section class="search-group">
+        <h2 data-i18n="pageHorsesEyebrow">Аттар</h2>
+        <div class="search-result-grid">
+          {% for horse in results.horses %}
+          <a class="search-result-card" href="{{ url_for('horse_detail_page', horse_id=horse.id) }}">
+            <h3>{{ highlight(horse.name, query) }}</h3>
+            <p>{{ highlight(horse.breed or 'Порода көрсөтүлгөн эмес', query) }} · {{ horse.points or 0 }} упай</p>
+          </a>
+          {% endfor %}
+        </div>
+      </section>
+      {% endif %}
+    </div>
+    {% endif %}
+  </section>
+</main>
+{% endblock %}

@@ -102,15 +102,16 @@
             <div class="flash">{{ error }}</div>
             {% endif %}
             
-            <form method="POST" action="{{ url_for('admin_panel') }}">
-                <div class="form-group">
-                    <label for="password">Пароль</label>
-                    <input type="password" id="password" name="password" required
-                           placeholder="admin">
-                </div>
-                
-                <button type="submit" class="btn-primary">Войти в панель управления</button>
-            </form>
+             <form method="POST" action="{{ url_for('admin_panel') }}">
+                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                 <div class="form-group">
+                     <label for="password">Пароль</label>
+                     <input type="password" id="password" name="password" required
+                            placeholder="Админ пароль">
+                 </div>
+                 
+                 <button type="submit" class="btn-primary">Войти в панель управления</button>
+             </form>
             
             <div class="back-link">
                 <a href="{{ url_for('home') }}">← На главную</a>

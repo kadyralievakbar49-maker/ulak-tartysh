@@ -1,0 +1,349 @@
+{% extends "base.html" %}
+
+{% block title %}Правила игры | Улак Тартыш{% endblock %}
+
+{% block content %}
+<section class="rules-section container" style="max-width: 1000px; margin: 0 auto; padding: 60px 20px;">
+  
+  <!-- Заголовок -->
+  <div style="text-align: center; margin-bottom: 48px;">
+    <span style="color: #f5b041; font-weight: 700; font-size: 14px; text-transform: uppercase;" data-i18n="pageDocumentsEyebrow">Документтер</span>
+    <h1 style="font-size: 42px; color: #1a2744; margin: 12px 0;" data-i18n="rulesTitle">Правила игры Улак-Тартыш</h1>
+    <p style="color: #666; font-size: 16px;" data-i18n="rulesLead">Официальные правила и регламенты Федерации</p>
+  </div>
+
+  <!-- РАЗДЕЛ 1: Жалпы жоболор -->
+  <div id="rule-section-1" class="rule-content active" style="display: block;">
+    <div style="background: #fff; border-radius: 16px; padding: 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+      <h2 style="font-size: 28px; color: #1a2744; margin-bottom: 24px; border-bottom: 3px solid #f5b041; padding-bottom: 12px;">
+        1. Жалпы жоболор
+      </h2>
+      
+      <div class="rule-text" style="color: #555; line-height: 1.8; font-size: 16px;">
+        <p style="margin-bottom: 16px;">
+          Республиканын аймагында «Улак тартыш» оюну боюнча спорттук мелдештер <strong>«Улак тартыш» коомдук бирикмесинин</strong> чечими менен, дене тарбия жана спорт тармагындагы ыйгарым укуктуу мамлекеттик орган менен макулдашуу аркылуу өткөрүлөт.
+        </p>
+        
+        <h3 style="font-size: 20px; color: #1a2744; margin: 24px 0 16px;">Мелдештердин негизги максаттары:</h3>
+        <ul style="padding-left: 24px; margin-bottom: 16px;">
+          <li style="margin-bottom: 8px;">«Улак тартыш» оюнун кеңири жайылтуу;</li>
+          <li style="margin-bottom: 8px;">улуттук ат спорту түрлөрүн өнүктүрүү;</li>
+          <li style="margin-bottom: 8px;">көчмөн маданияттын салттарын сактоо;</li>
+          <li style="margin-bottom: 8px;">спортчулардын чеберчилигин жогорулатуу;</li>
+          <li>спорттук достукту жана кызматташууну чыңдоо.</li>
+        </ul>
+        
+        <p style="margin-top: 16px; color: #666; font-style: italic;">
+          Мелдештин аталышы, өткөрүү тартиби, убактысы жана жери регламент менен аныкталат.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- РАЗДЕЛ 2: Оюн аянтчасы -->
+  <div id="rule-section-2" class="rule-content" style="display: none;">
+    <div style="background: #fff; border-radius: 16px; padding: 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+      <h2 style="font-size: 28px; color: #1a2744; margin-bottom: 24px; border-bottom: 3px solid #f5b041; padding-bottom: 12px;">
+        2. Оюн аянтчасы
+      </h2>
+      
+      <div class="rule-text" style="color: #555; line-height: 1.8; font-size: 16px;">
+        <p style="margin-bottom: 16px;">
+          Оюн <strong>атайын даярдалган аянтчада</strong> өткөрүлөт.
+        </p>
+        
+        <h3 style="font-size: 20px; color: #1a2744; margin: 24px 0 16px;">Аянтчада төмөнкү элементтер болушу шарт:</h3>
+        <ul style="padding-left: 24px; margin-bottom: 16px;">
+          <li style="margin-bottom: 8px;"><strong>Борбордук сызык жана борбордук аймак</strong> — оюндун башталыш чекити;</li>
+          <li style="margin-bottom: 8px;"><strong>Бир эсептик аймак (маара)</strong> — эки команда бир учурда ылдыйкы тараптан оюнду башташат, жогорку маарага ким улакты биринчи таштаса жеңүүчү болот;</li>
+          <li style="margin-bottom: 8px;"><strong>Каптал жана маңдайкы чек аралар</strong> — оюн талаасынын чектери;</li>
+          <li><strong>Коопсуз аймак</strong> — калыстар жана техникалык кызматкерлер үчүн.</li>
+        </ul>
+        
+        <p style="margin-top: 16px; color: #666; font-style: italic;">
+          Аянтчанын өлчөмдөрү жана техникалык схемасы ушул Эрежелерге тиркеме жана регламент менен белгиленет.
+        </p>
+
+        <!-- СХЕМА ПОЛЯ (заглушка) -->
+        <div style="margin: 32px 0; text-align: center; background: #f8f9fa; padding: 24px; border-radius: 12px;">
+          <div style="width: 100%; max-width: 500px; height: 300px; margin: 0 auto; background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #2e7d32; font-weight: 600;">
+            🗺️ Схема аянтчасы (регламентте)
+          </div>
+          <p style="margin-top: 12px; color: #666; font-size: 14px;">Толук схема регламенттин тиркемесинде берилет</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- РАЗДЕЛ 3: Командалар, убакыт, объект -->
+  <div id="rule-section-3" class="rule-content" style="display: none;">
+    <div style="background: #fff; border-radius: 16px; padding: 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+      <h2 style="font-size: 28px; color: #1a2744; margin-bottom: 24px; border-bottom: 3px solid #f5b041; padding-bottom: 12px;">
+        3. Командалар, убакыт жана объект
+      </h2>
+      
+      <div class="rule-text" style="color: #555; line-height: 1.8; font-size: 16px;">
+        
+        <!-- Команды -->
+        <h3 style="font-size: 20px; color: #1a2744; margin: 0 0 16px;">👥 Командалар жана курамы</h3>
+        <ul style="padding-left: 24px; margin-bottom: 24px;">
+          <li style="margin-bottom: 8px;"><strong>6 негизги оюнчу</strong> талаада;</li>
+          <li><strong>4 запастагы оюнчу</strong> — алмаштыруу үчүн.</li>
+        </ul>
+        <p style="margin-bottom: 16px; color: #666;">
+          Оюндун форматы жана катышуучулардын саны регламент менен аныкталат.
+        </p>
+
+        <!-- Время -->
+        <h3 style="font-size: 20px; color: #1a2744; margin: 24px 0 16px;">⏱️ Оюндун узактыгы</h3>
+        <ul style="padding-left: 24px; margin-bottom: 24px;">
+          <li style="margin-bottom: 8px;"><strong>Негизги убакыт:</strong> 15 мүнөт;</li>
+          <li style="margin-bottom: 8px;"><strong>Кошумча тайм:</strong> 1 × 10 мүнөт;</li>
+          <li style="margin-bottom: 8px;">Эгер жеңүүчү аныкталбаса — <strong>конкурс 2×2</strong> (ар командадан 2 улакчы);</li>
+          <li>Тыныгуулардын узактыгы регламентте көрсөтүлөт.</li>
+        </ul>
+
+        <!-- Объект -->
+        <h3 style="font-size: 20px; color: #1a2744; margin: 24px 0 16px;">🐐 Оюндун негизги объектиси (Улак/Теке)</h3>
+        <ul style="padding-left: 24px;">
+          <li style="margin-bottom: 8px;"><strong>Текенин салмагы:</strong> 35–45 кг;</li>
+          <li>Ал оюнга <strong>жарактуу жана коопсуз</strong> абалда болушу керек.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- РАЗДЕЛ 4: Оюндун башталышы жана жүрүшү -->
+  <div id="rule-section-4" class="rule-content" style="display: none;">
+    <div style="background: #fff; border-radius: 16px; padding: 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+      <h2 style="font-size: 28px; color: #1a2744; margin-bottom: 24px; border-bottom: 3px solid #f5b041; padding-bottom: 12px;">
+        4. Оюндун башталышы жана жүрүшү
+      </h2>
+      
+      <div class="rule-text" style="color: #555; line-height: 1.8; font-size: 16px;">
+        
+        <h3 style="font-size: 20px; color: #1a2744; margin: 0 0 16px;">🚦 Оюндун башталышы</h3>
+        <ul style="padding-left: 24px; margin-bottom: 24px;">
+          <li style="margin-bottom: 8px;">Оюн аянтчасынын <strong>төмөнкү аймагынан</strong> башталат;</li>
+          <li style="margin-bottom: 8px;">Калыс текени белгиленген жерге коёт;</li>
+          <li>Белгиден кийин (ышкырык) улакчылар бирдей учурда күрөшкө киришет.</li>
+        </ul>
+
+        <h3 style="font-size: 20px; color: #1a2744; margin: 24px 0 16px;">❌ Салым эсептелбейт, эгер:</h3>
+        <ul style="padding-left: 24px; margin-bottom: 24px;">
+          <li style="margin-bottom: 8px;">🔻 Теке түшүп калса;</li>
+          <li style="margin-bottom: 8px;">🔻 Оюнчу маарага жетпей жыгылса;</li>
+          <li style="margin-bottom: 8px;">🔻 Теке толук киргизилбесе;</li>
+          <li>🔻 Оюнчу аутка чыгып кетсе.</li>
+        </ul>
+
+        <h3 style="font-size: 20px; color: #1a2744; margin: 24px 0 16px;">⏸️ Оюнду токтотуу</h3>
+        <p>
+          Кооптуу кырдаал жаралса, калыс оюнду <strong>дароо токтотот</strong>.
+        </p>
+
+        <!-- ИЛЛЮСТРАЦИЯ -->
+        <div style="margin: 32px 0; text-align: center;">
+          <img src="{{ url_for('static', filename='img/rules/gameplay.jpg') }}" 
+               alt="Оюндун жүрүшү" 
+               loading="lazy"
+               style="max-width: 100%; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);"
+               onerror="this.parentElement.innerHTML='<div style=\'background:#f8f9fa;padding:24px;border-radius:12px;color:#666\'>📷 Сүрөт жок</div>'">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- РАЗДЕЛ 5: Талаптар, коопсуздук, уюштуруу -->
+  <div id="rule-section-5" class="rule-content" style="display: none;">
+    <div style="background: #fff; border-radius: 16px; padding: 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+      <h2 style="font-size: 28px; color: #1a2744; margin-bottom: 24px; border-bottom: 3px solid #f5b041; padding-bottom: 12px;">
+        5. Талаптар, коопсуздук жана уюштуруу
+      </h2>
+      
+      <div class="rule-text" style="color: #555; line-height: 1.8; font-size: 16px;">
+        
+        <!-- Требования к участникам -->
+        <h3 style="font-size: 20px; color: #1a2744; margin: 0 0 16px;">🐎 Аттарга жана катышуучуларга талаптар</h3>
+        <ul style="padding-left: 24px; margin-bottom: 24px;">
+          <li style="margin-bottom: 8px;">Аттар <strong>ден соолугу чың</strong> жана даярдалган болушу керек;</li>
+          <li style="margin-bottom: 8px;">Жаш курак талаптары регламент менен белгиленет;</li>
+          <li><strong>Ветеринардык кароодон</strong> өтпөгөн аттар оюнга киргизилбейт.</li>
+        </ul>
+
+        <!-- Нарушения -->
+        <h3 style="font-size: 20px; color: #e11d48; margin: 24px 0 16px;">⚠️ Тартип бузуулар жана жазалар</h3>
+        <p style="margin-bottom: 12px;"><strong>Жазалар:</strong></p>
+        <ul style="padding-left: 24px; margin-bottom: 16px;">
+          <li style="margin-bottom: 8px;">🟡 <strong>2 мүнөт</strong> оюндан четтетүү — жеңил бузуу;</li>
+          <li>🔴 <strong>Толук четтетүү</strong> — орой бузуу (команда кем курамда улантат).</li>
+        </ul>
+        
+        <p style="margin-bottom: 12px;"><strong>Тыюу салынган аракеттер:</strong></p>
+        <ul style="padding-left: 24px; margin-bottom: 24px;">
+          <li style="margin-bottom: 8px;">❌ Ат менен сүздүрүү же сокку берүү;</li>
+          <li style="margin-bottom: 8px;">❌ Кармоо (кийимден, үзөңгүдөн ж.б.);</li>
+          <li style="margin-bottom: 8px;">❌ Агрессия жана одоно жүрүм-турум;</li>
+          <li>❌ Бут коюп оодаруу.</li>
+        </ul>
+
+        <!-- Безопасность -->
+        <h3 style="font-size: 20px; color: #22c55e; margin: 24px 0 16px;">🛡️ Коопсуздук талаптары</h3>
+        <ul style="padding-left: 24px; margin-bottom: 24px;">
+          <li style="margin-bottom: 8px;">Кооптуу кырдаалда калыс оюнду <strong>дароо токтотууга милдеттүү</strong>;</li>
+          <li>Оюнчунун текени эңкейип алып жаткан учурда ага <strong>сокку урууга тыюу салынат</strong>.</li>
+        </ul>
+
+        <!-- Организационные вопросы -->
+        <h3 style="font-size: 20px; color: #1a2744; margin: 24px 0 16px;">📋 Уюштуруу иштери</h3>
+        <p style="margin-bottom: 12px;">Оюн алдында уюштуруучу төмөнкүлөрдү камсыздайт:</p>
+        <ul style="padding-left: 24px; margin-bottom: 24px;">
+          <li style="margin-bottom: 8px;">✅ Аянтчаны даярдоо;</li>
+          <li style="margin-bottom: 8px;">✅ Текени текшерүү;</li>
+          <li style="margin-bottom: 8px;">✅ Аттарды ветеринардык кароо;</li>
+          <li style="margin-bottom: 8px;">✅ Медициналык камсыздоо;</li>
+          <li style="margin-bottom: 8px;">✅ Коопсуздук боюнча нускама берүү;</li>
+          <li>✅ (Зарыл учурда) камсыздандыруу.</li>
+        </ul>
+
+        <!-- Дополнительные правила -->
+        <h3 style="font-size: 20px; color: #1a2744; margin: 24px 0 16px;">📜 Кошумча жоболор</h3>
+        <ul style="padding-left: 24px;">
+          <li style="margin-bottom: 8px;">Алмаштыруу атайын белгиленген аймакта жүргүзүлөт;</li>
+          <li style="margin-bottom: 8px;">Жаңы оюнчу мурунку оюнчу толук чыккан соң гана талаага кирет;</li>
+          <li style="margin-bottom: 8px;">Ар бир ат бир команда үчүн гана колдонулат (бузуу → дисквалификация);</li>
+          <li style="margin-bottom: 8px;">Ауттан чыккан учурда оюн борбордон башталат;</li>
+          <li style="margin-bottom: 8px;">Каршы ат салууга тыюу салынат;</li>
+          <li>Оюн этикасы милдеттүү түрдө сакталууга тийиш.</li>
+        </ul>
+
+        <!-- Контакты -->
+        <div style="margin-top: 32px; padding: 20px; background: #f8f9fa; border-left: 4px solid #f5b041; border-radius: 0 8px 8px 0;">
+          <p style="margin: 0; color: #666; font-size: 14px;"><strong>Байланыш:</strong></p>
+          <p style="margin: 4px 0 0; color: #1a2744; font-weight: 600;">
+            Жооптуу: Арстанбеков С.А. | 📞 +0220544444
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Навигация Вперёд/Назад -->
+  <div style="display: flex; justify-content: space-between; margin-top: 32px;">
+    <button onclick="prevSection()" id="prevBtn" style="padding: 12px 24px; background: #fff; border: 2px solid #1a2744; color: #1a2744; border-radius: 8px; cursor: pointer; font-weight: 600; visibility: hidden;">
+      ← Артка
+    </button>
+    <button onclick="nextSection()" id="nextBtn" style="padding: 12px 24px; background: #1a2744; border: 2px solid #1a2744; color: #fff; border-radius: 8px; cursor: pointer; font-weight: 600;">
+      Алдыга →
+    </button>
+  </div>
+
+   <div class="rules-nav" style="display: flex; gap: 12px; margin-bottom: 40px; flex-wrap: wrap; justify-content: center;">
+    <button class="rule-tab active" onclick="showRuleSection(1)" style="padding: 12px 20px; border: 2px solid #1a2744; background: #1a2744; color: #fff; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.3s; font-size: 14px;">
+      1. Жалпы жоболор
+    </button>
+    <button class="rule-tab" onclick="showRuleSection(2)" style="padding: 12px 20px; border: 2px solid #1a2744; background: #fff; color: #1a2744; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.3s; font-size: 14px;">
+      2. Оюн аянтчасы
+    </button>
+    <button class="rule-tab" onclick="showRuleSection(3)" style="padding: 12px 20px; border: 2px solid #1a2744; background: #fff; color: #1a2744; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.3s; font-size: 14px;">
+      3. Командалар жана убакыт
+    </button>
+    <button class="rule-tab" onclick="showRuleSection(4)" style="padding: 12px 20px; border: 2px solid #1a2744; background: #fff; color: #1a2744; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.3s; font-size: 14px;">
+      4. Оюндун жүрүшү
+    </button>
+    <button class="rule-tab" onclick="showRuleSection(5)" style="padding: 12px 20px; border: 2px solid #1a2744; background: #fff; color: #1a2744; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.3s; font-size: 14px;">
+      5. Талаптар жана коопсуздук
+    </button>
+  </div>
+
+</section>
+
+<script>
+let currentSection = 1;
+const totalSections = 5;
+
+function showRuleSection(num) {
+  // Скрыть все разделы
+  for (let i = 1; i <= totalSections; i++) {
+    document.getElementById('rule-section-' + i).style.display = 'none';
+    const tab = document.querySelector('.rule-tab:nth-child(' + i + ')');
+    if (tab) {
+      tab.style.background = '#fff';
+      tab.style.color = '#1a2744';
+    }
+  }
+  
+  // Показать нужный
+  document.getElementById('rule-section-' + num).style.display = 'block';
+  const activeTab = document.querySelector('.rule-tab:nth-child(' + num + ')');
+  if (activeTab) {
+    activeTab.style.background = '#1a2744';
+    activeTab.style.color = '#fff';
+  }
+  
+  currentSection = num;
+  updateButtons();
+  
+  // Прокрутка к началу раздела
+  document.querySelector('.rules-section').scrollIntoView({ behavior: 'smooth' });
+}
+
+function nextSection() {
+  if (currentSection < totalSections) {
+    showRuleSection(currentSection + 1);
+  }
+}
+
+function prevSection() {
+  if (currentSection > 1) {
+    showRuleSection(currentSection - 1);
+  }
+}
+
+function updateButtons() {
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  if (prevBtn) prevBtn.style.visibility = currentSection === 1 ? 'hidden' : 'visible';
+  if (nextBtn) nextBtn.style.visibility = currentSection === totalSections ? 'hidden' : 'visible';
+}
+
+// Инициализация
+document.addEventListener('DOMContentLoaded', updateButtons);
+</script>
+
+<style>
+.rule-tab:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(26, 39, 68, 0.2);
+}
+
+.rule-content {
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.rule-text ul li {
+  position: relative;
+  padding-left: 4px;
+}
+
+.rule-text h3 {
+  margin-top: 28px;
+}
+
+@media (max-width: 768px) {
+  .rules-nav {
+    flex-direction: column;
+    align-items: center;
+  }
+  .rule-tab {
+    width: 100%;
+    max-width: 300px;
+  }
+}
+</style>
+{% endblock %}

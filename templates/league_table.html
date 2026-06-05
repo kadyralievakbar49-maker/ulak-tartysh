@@ -1,0 +1,66 @@
+<main>
+  <section class="section page-hero">
+    <p class="eyebrow" data-i18n="league">Лига</p>
+    <h1>{{ league_name }}</h1>
+    <p class="lead" data-i18n="pageTeamsLead">Составы, лиги и базовая статистика команд федерации.</p>
+  </section>
+
+  <section class="section league-page-grid">
+    <article>
+      <div class="section-head compact-head">
+        <div>
+          <p class="eyebrow" data-i18n="standings">Таблица</p>
+          <h2 data-i18n="standingsTitle">Турнирная таблица</h2>
+        </div>
+      </div>
+      <div class="responsive-table">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th data-i18n="team">Команда</th>
+              <th data-i18n="region">Регион</th>
+              <th data-i18n="players">Игроки</th>
+              <th data-i18n="wins">Победы</th>
+              <th data-i18n="points">Очки</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for team in standings %}
+            <tr>
+              <td>{{ loop.index }}</td>
+              <td><a href="{{ url_for('team_detail_page', team_id=team.id) }}"><strong>{{ team.name }}</strong></a></td>
+              <td>{{ team.region }}</td>
+              <td>{{ team.player_count or 0 }}</td>
+              <td>{{ team.wins or 0 }}</td>
+              <td>{{ team.points or 0 }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="6" data-i18n="noTeams">Команды пока не добавлены.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <article>
+      <div class="section-head compact-head">
+        <div>
+          <p class="eyebrow" data-i18n="schedule">Расписание</p>
+          <h2 data-i18n="matches">Матчи</h2>
+        </div>
+      </div>
+      <div class="league-schedule">
+        {% for match in matches %}
+        <article class="schedule-card">
+          <time datetime="{{ match.date }}">{{ match.date }} · {{ match.time }}</time>
+          <h3>{{ match.team1 }} VS {{ match.team2 }}</h3>
+          <p>{{ match.league }}</p>
+        </article>
+        {% else %}
+        <p class="empty-state" data-i18n="noMatches">Матчи пока не добавлены.</p>
+        {% endfor %}
+      </div>
+    </article>
+  </section>
+</main>

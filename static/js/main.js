@@ -1,349 +1,7 @@
-
-      const translations = {
-  kg: {
-    heroEyebrow: "Расмий портал",
-    heroTitle: "Улак тартыш оюндарын жаңы деңгээлде көрүңүз",
-    heroLead: "Матчтардын календары, лигалар, оюнчулар, жаңылыктар жана медиа бир жерде. Таза, тез жана мобилге ылайыкташкан интерфейс.",
-    heroPrimary: "Оюндарды көрүү",
-    heroSecondary: "Билет алуу",
-    brandName: "Улак тартыш",
-    navHome: "Башкы бет",
-    navHomeMain: "Башкы бет",
-    navAbout: "Федерация жөнүндө",
-    navNews: "Жаңылыктар",
-    navMedia: "Медиа",
-    navAccreditation: "Аккредитация",
-    navTickets: "Билеттер",
-    navContacts: "Байланыш",
-    navDocuments: "Документтер",
-    navLeagues: "Лигалар",
-    navUlak: "Улак тартыш",
-    navTeam: "Командалар",
-    navPlayers: "Оюнчулар",
-    navHorses: "Аттар",
-    navHippodromes: "Ипподромы",
-    navReferees: "Калыстар",
-    navPartners: "Партнерлор",
-    navGames: "Оюндар",
-    aboutEyebrow: "Федерация",
-    aboutTitle: "Улак тартыш федерациясы жөнүндө",
-    aboutMissionTitle: "Миссия",
-    aboutMissionText: "Улуттук оюнду заманбап спорттук форматта өнүктүрүү, расмий турнирлерди уюштуруу жана аймактардагы командаларга бирдей шарт түзүү.",
-    aboutWorkTitle: "Негизги багыттар",
-    aboutWorkOne: "Жогорку жана биринчи лигадагы оюндарды координациялоо",
-    aboutWorkTwo: "Калыстарды, оюнчуларды жана командаларды каттоо",
-    aboutWorkThree: "Эрежелерди, документтерди жана календарларды жарыялоо",
-    aboutLeagues: "расмий лига",
-    aboutRegions: "аймактык база",
-    aboutEvents: "турнир жылына",
-    docAssociation: "Эл аралык ассоциациянын уставы",
-    docFederation: "Федерациянын уставы",
-    docRules: "Улак тартыш эрежелери",
-    docDuelRules: "Жекеме-жеке эрежелери",
-    docTransfer: "Трансфер эрежелери",
-    docTournament: "Турнир жоболору",
-    nextMatch: "Кийинки оюн",
-    venueBishkek: "Бишкек ипподрому",
-    searchPlaceholder: "Команда, лига, жаңылык же оюнчу издөө",
-    searchButton: "Издөө",
-    matchesEyebrow: "Календарь",
-    matchesTitle: "Жакынкы беттештер",
-    filterAll: "Баары",
-    leagueTop: "Жогорку лига",
-    leagueFirst: "Биринчи лига",
-    leaguesTitle: "Турнирлер жана рейтингдер",
-    downloadCalendar: "Календарды жүктөө",
-    leagueTopMeta: "12 команда · расмий рейтинг",
-    leagueFirstMeta: "18 команда · плей-офф баскычы",
-    documentsTitle: "Расмий эрежелер жана жоболор",
-    mediaTitle: "Оюндан сүрөттөр жана обзорлор",
-    gallery: "Галерея",
-    videoReview: "Видео обзор",
-    photo: "Фото",
-    newsTitle: "Федерациядан акыркы маалыматтар",
-    subscribe: "Жазылуу",
-    playersTitle: "Рейтингдеги мыктылар",
-    fullRating: "Толук рейтинг",
-    horsesTitle: "Топ аттар жана оюндагы көрсөткүчтөр",
-    matchCalendar: "Оюн календары",
-    hippodromesTitle: "Оюн өтүүчү негизги аянтчалар",
-    venueCapacity: "Сыйымдуулук",
-    venueSurface: "Талаа",
-    refereesTitle: "Расмий калыстар курамы",
-    partnersTitle: "Федерациянын өнөктөштөрү",
-    accreditationTitle: "Оюндарга катышуу жана медиа уруксат",
-    accreditationButton: "Анкета толтуруу",
-    horseAge: "жаш",
-    horsePoints: "упай",
-    horseSpeed: "ылдамдык",
-    horseStamina: "чыдамкайлык",
-    footerTitle: "Улак тартыш федерациясы",
-    footerText: "Улуттук оюнду өнүктүрүү, турнирлерди уюштуруу жана расмий маалыматты заманбап форматта жеткирүү.",
-    questionnaire: "Анкета",
-    login: "Кирүү",
-    register: "Каттоо",
-    loginTitle: "Кирүү",
-    registerTitle: "Каттоодон өтүү",
-    ticketsTitle: "Билет алуу",
-    emailOrPhone: "Телефон же email",
-    password: "Сыр сөз",
-    rememberMe: "Эстеп калуу",
-    forgotPassword: "Сыр сөздү унуттуңузбу?",
-    close: "Жабуу",
-    noAccount: "Аккаунт жокпу?",
-    createAccount: "Каттоодон өтүү",
-    fullName: "Аты-жөнү *",
-    fullNamePlaceholder: "Атыңыз жана фамилияңыз",
-    email: "Email *",
-    passwordMin: "Минимум 6 символ",
-    confirmPassword: "Сыр сөздү кайталаңыз *",
-    acceptTermsPrefix: "Шарттарга жана купуялуулук саясатына макулмун",
-    hasAccount: "Аккаунт барбы?",
-    verifyTitle: "Email тастыктоо",
-    verifyLead: "Email дарегиңизге келген 6 орундуу кодду жазыңыз.",
-    verificationCode: "Тастыктоо коду",
-    confirm: "Тастыктоо",
-    booking: "Брондоо",
-    ticketCount: "Билеттер саны",
-    phone: "Телефон",
-    match: "Матч",
-    team: "Команда",
-    contact: "Байланыш",
-    send: "Жөнөтүү",
-    adminLogin: "Админ катары кирүү",
-  },
-  ru: {
-    heroEyebrow: "Официальный портал",
-    heroTitle: "Смотрите улак тартыш на новом уровне",
-    heroLead: "Календарь матчей, лиги, игроки, новости и медиа в одном месте. Чистый, быстрый и адаптивный интерфейс.",
-    heroPrimary: "Смотреть матчи",
-    heroSecondary: "Купить билет",
-    brandName: "Улак тартыш",
-    navHome: "Главная",
-    navHomeMain: "Главная",
-    navAbout: "О федерации",
-    navNews: "Новости",
-    navMedia: "Медиа",
-    navAccreditation: "Аккредитация",
-    navTickets: "Билеты",
-    navContacts: "Контакты",
-    navDocuments: "Документы",
-    navLeagues: "Лиги",
-    navUlak: "Улак тартыш",
-    navTeam: "Команды",
-    navPlayers: "Игроки",
-    navHorses: "Лошади",
-    navHippodromes: "Ипподромы",
-    navReferees: "Судьи",
-    navPartners: "Партнеры",
-    navGames: "Игры",
-    aboutEyebrow: "Федерация",
-    aboutTitle: "О федерации улак тартыш",
-    aboutMissionTitle: "Миссия",
-    aboutMissionText: "Развивать национальную игру в современном спортивном формате, проводить официальные турниры и создавать равные условия для региональных команд.",
-    aboutWorkTitle: "Основные направления",
-    aboutWorkOne: "Координация игр высшей и первой лиги",
-    aboutWorkTwo: "Регистрация судей, игроков и команд",
-    aboutWorkThree: "Публикация правил, документов и календарей",
-    aboutLeagues: "официальные лиги",
-    aboutRegions: "региональные базы",
-    aboutEvents: "турниров в год",
-    docAssociation: "Устав международной ассоциации",
-    docFederation: "Устав федерации",
-    docRules: "Правила улак тартыш",
-    docDuelRules: "Правила один на один",
-    docTransfer: "Правила трансфера",
-    docTournament: "Положения турниров",
-    nextMatch: "Следующая игра",
-    venueBishkek: "Бишкекский ипподром",
-    searchPlaceholder: "Поиск команды, лиги, новости или игрока",
-    searchButton: "Поиск",
-    matchesEyebrow: "Календарь",
-    matchesTitle: "Ближайшие матчи",
-    filterAll: "Все",
-    leagueTop: "Высшая лига",
-    leagueFirst: "Первая лига",
-    leaguesTitle: "Турниры и рейтинги",
-    downloadCalendar: "Скачать календарь",
-    leagueTopMeta: "12 команд · официальный рейтинг",
-    leagueFirstMeta: "18 команд · этап плей-офф",
-    documentsTitle: "Официальные правила и положения",
-    mediaTitle: "Фото и обзоры с игр",
-    gallery: "Галерея",
-    videoReview: "Видеообзор",
-    photo: "Фото",
-    newsTitle: "Последние новости федерации",
-    subscribe: "Подписаться",
-    playersTitle: "Лучшие в рейтинге",
-    fullRating: "Полный рейтинг",
-    horsesTitle: "Топ лошадей и игровые показатели",
-    matchCalendar: "Календарь игр",
-    hippodromesTitle: "Основные площадки для игр",
-    venueCapacity: "Вместимость",
-    venueSurface: "Поле",
-    refereesTitle: "Официальный состав судей",
-    partnersTitle: "Партнеры федерации",
-    accreditationTitle: "Участие в играх и медиа-доступ",
-    accreditationButton: "Заполнить анкету",
-    horseAge: "лет",
-    horsePoints: "очков",
-    horseSpeed: "скорость",
-    horseStamina: "выносливость",
-    footerTitle: "Федерация улак тартыш",
-    footerText: "Развитие национальной игры, организация турниров и публикация официальной информации в современном формате.",
-    questionnaire: "Анкета",
-    login: "Вход",
-    register: "Регистрация",
-    loginTitle: "Вход",
-    registerTitle: "Регистрация",
-    ticketsTitle: "Купить билет",
-    emailOrPhone: "Телефон или email",
-    password: "Пароль",
-    rememberMe: "Запомнить",
-    forgotPassword: "Забыли пароль?",
-    close: "Закрыть",
-    noAccount: "Нет аккаунта?",
-    createAccount: "Зарегистрироваться",
-    fullName: "ФИО *",
-    fullNamePlaceholder: "Ваше имя и фамилия",
-    email: "Email *",
-    passwordMin: "Минимум 6 символов",
-    confirmPassword: "Повторите пароль *",
-    acceptTermsPrefix: "Согласен с условиями и политикой конфиденциальности",
-    hasAccount: "Уже есть аккаунт?",
-    verifyTitle: "Подтверждение email",
-    verifyLead: "Введите 6-значный код, который пришёл на вашу почту.",
-    verificationCode: "Код подтверждения",
-    confirm: "Подтвердить",
-    booking: "Забронировать",
-    ticketCount: "Количество билетов",
-    phone: "Телефон",
-    match: "Матч",
-    team: "Команда",
-    contact: "Контакт",
-    send: "Отправить",
-    adminLogin: "Войти как админ",
-  },
-  en: {
-    heroEyebrow: "Official portal",
-    heroTitle: "Experience Ulak-Tartysh in a modern way",
-    heroLead: "Fixtures, leagues, players, news and media in one fast, clean and mobile-friendly interface.",
-    heroPrimary: "View matches",
-    heroSecondary: "Get tickets",
-    brandName: "Ulak tartysh",
-    navHome: "Home",
-    navHomeMain: "Home",
-    navAbout: "About federation",
-    navNews: "News",
-    navMedia: "Media",
-    navAccreditation: "Accreditation",
-    navTickets: "Tickets",
-    navContacts: "Contacts",
-    navDocuments: "Documents",
-    navLeagues: "Leagues",
-    navUlak: "Ulak tartysh",
-    navTeam: "Teams",
-    navPlayers: "Players",
-    navHorses: "Horses",
-    navHippodromes: "Hippodromes",
-    navReferees: "Referees",
-    navPartners: "Partners",
-    navGames: "Games",
-    aboutEyebrow: "Federation",
-    aboutTitle: "About the Ulak tartysh federation",
-    aboutMissionTitle: "Mission",
-    aboutMissionText: "Develop the national game in a modern sports format, run official tournaments and create equal conditions for regional teams.",
-    aboutWorkTitle: "Main areas",
-    aboutWorkOne: "Coordinate premier and first league games",
-    aboutWorkTwo: "Register referees, players and teams",
-    aboutWorkThree: "Publish rules, documents and calendars",
-    aboutLeagues: "official leagues",
-    aboutRegions: "regional bases",
-    aboutEvents: "tournaments per year",
-    docAssociation: "International association charter",
-    docFederation: "Federation charter",
-    docRules: "Ulak tartysh rules",
-    docDuelRules: "One-on-one rules",
-    docTransfer: "Transfer rules",
-    docTournament: "Tournament regulations",
-    nextMatch: "Next game",
-    venueBishkek: "Bishkek hippodrome",
-    searchPlaceholder: "Search team, league, news or player",
-    searchButton: "Search",
-    matchesEyebrow: "Calendar",
-    matchesTitle: "Upcoming matches",
-    filterAll: "All",
-    leagueTop: "Premier league",
-    leagueFirst: "First league",
-    leaguesTitle: "Tournaments and ratings",
-    downloadCalendar: "Download calendar",
-    leagueTopMeta: "12 teams · official rating",
-    leagueFirstMeta: "18 teams · playoff stage",
-    documentsTitle: "Official rules and regulations",
-    mediaTitle: "Game photos and recaps",
-    gallery: "Gallery",
-    videoReview: "Video recap",
-    photo: "Photo",
-    newsTitle: "Latest federation updates",
-    subscribe: "Subscribe",
-    playersTitle: "Top rated players",
-    fullRating: "Full rating",
-    horsesTitle: "Top horses and game stats",
-    matchCalendar: "Game calendar",
-    hippodromesTitle: "Main game venues",
-    venueCapacity: "Capacity",
-    venueSurface: "Surface",
-    refereesTitle: "Official referee team",
-    partnersTitle: "Federation partners",
-    accreditationTitle: "Game participation and media access",
-    accreditationButton: "Fill form",
-    horseAge: "years",
-    horsePoints: "points",
-    horseSpeed: "speed",
-    horseStamina: "stamina",
-    footerTitle: "Ulak tartysh federation",
-    footerText: "Developing the national game, organizing tournaments and sharing official information in a modern format.",
-    questionnaire: "Questionnaire",
-    login: "Log in",
-    register: "Register",
-    loginTitle: "Log in",
-    registerTitle: "Create account",
-    ticketsTitle: "Get tickets",
-    emailOrPhone: "Phone or email",
-    password: "Password",
-    rememberMe: "Remember me",
-    forgotPassword: "Forgot password?",
-    close: "Close",
-    noAccount: "No account?",
-    createAccount: "Register",
-    fullName: "Full name *",
-    fullNamePlaceholder: "Your first and last name",
-    email: "Email *",
-    passwordMin: "Minimum 6 characters",
-    confirmPassword: "Repeat password *",
-    acceptTermsPrefix: "I agree to the terms and privacy policy",
-    hasAccount: "Already have an account?",
-    verifyTitle: "Confirm email",
-    verifyLead: "Enter the 6-digit code sent to your email.",
-    verificationCode: "Confirmation code",
-    confirm: "Confirm",
-    booking: "Book",
-    ticketCount: "Ticket count",
-    phone: "Phone",
-    match: "Match",
-    team: "Team",
-    contact: "Contact",
-    send: "Send",
-    adminLogin: "Log in as admin",
-  }
-};
-
-      let currentLang = document.documentElement.lang || "kg";
       let activeModalType = null;
-      let pendingVerificationEmail = "";
 
       function t(key) {
-        return translations[currentLang]?.[key] || translations.kg[key] || key;
+        return window.siteI18n?.t(key) || key;
       }
 
       const modal = document.querySelector("#modal");
@@ -351,16 +9,100 @@
       const modalTitle = document.querySelector("#modalTitle");
       const modalBody = document.querySelector("#modalBody");
       const toast = document.querySelector("#toast");
+      const header = document.querySelector(".header");
       const nav = document.querySelector("#nav");
+      const drawerOverlay = document.querySelector("#drawerOverlay");
+      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || "";
+
+      function applyTheme(theme) {
+        const normalized = theme === "dark" ? "dark" : "light";
+        if (normalized === "dark") {
+          document.documentElement.setAttribute("data-theme", "dark");
+        } else {
+          document.documentElement.removeAttribute("data-theme");
+        }
+        localStorage.setItem("siteTheme", normalized);
+        document.querySelectorAll("[data-theme-toggle], #themeToggle").forEach((toggle) => {
+          toggle.textContent = normalized === "dark" ? "☀️" : "🌙";
+          toggle.setAttribute("aria-label", normalized === "dark" ? "Жарык темага өтүү" : "Караңгы темага өтүү");
+        });
+      }
+
+      applyTheme(localStorage.getItem("siteTheme") || "light");
 
       function showToast(message) {
+        if (!toast) return;
         toast.textContent = message;
         toast.classList.add("show");
         window.clearTimeout(showToast.timer);
         showToast.timer = window.setTimeout(() => toast.classList.remove("show"), 2600);
       }
 
+      async function normalizeImageFile(file, maxWidth = 1920, maxHeight = 1080, quality = 0.85) {
+        if (!file || !file.type.startsWith("image/")) return file;
+        if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) return file;
+
+        const bitmap = await createImageBitmap(file);
+        const targetRatio = maxWidth / maxHeight;
+        const sourceRatio = bitmap.width / bitmap.height;
+        let sx = 0;
+        let sy = 0;
+        let sw = bitmap.width;
+        let sh = bitmap.height;
+
+        if (sourceRatio > targetRatio) {
+          sw = Math.round(bitmap.height * targetRatio);
+          sx = Math.round((bitmap.width - sw) / 2);
+        } else if (sourceRatio < targetRatio) {
+          sh = Math.round(bitmap.width / targetRatio);
+          sy = Math.round((bitmap.height - sh) / 2);
+        }
+
+        const scale = Math.min(maxWidth / sw, maxHeight / sh, 1);
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(sw * scale);
+        canvas.height = Math.round(sh * scale);
+        const context = canvas.getContext("2d");
+        context.drawImage(bitmap, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+
+        const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
+        bitmap.close?.();
+        if (!blob) return file;
+
+        const normalizedName = file.name.replace(/\.[^.]+$/, "") + ".jpg";
+        return new File([blob], normalizedName, { type: "image/jpeg", lastModified: Date.now() });
+      }
+
+      async function normalizeImageInput(input) {
+        const file = input.files?.[0];
+        if (!file) return;
+        try {
+          const normalized = await normalizeImageFile(file);
+          if (normalized === file) return;
+          const transfer = new DataTransfer();
+          transfer.items.add(normalized);
+          input.files = transfer.files;
+          input.dataset.normalized = "true";
+        } catch (error) {
+          console.error("Image normalization failed:", error);
+        }
+      }
+
+      window.normalizeImageFile = normalizeImageFile;
+      window.normalizeImageInput = normalizeImageInput;
+
+      document.querySelectorAll('input[type="file"][accept*="image"]').forEach((input) => {
+        input.addEventListener("change", () => normalizeImageInput(input));
+      });
+
+      document.querySelectorAll('input[name="img_url"], input[name="photo_url"], input[name="thumbnail"], input[name="cover_url"]').forEach((input) => {
+        input.addEventListener("change", () => {
+          input.setCustomValidity("");
+        });
+      });
+
       function openModal(title, body, media = false) {
+        if (!modal || !modalTitle || !modalBody || !modalCard) return;
         modalTitle.textContent = title;
         modalBody.innerHTML = body;
         modalCard.classList.toggle("modal-media", media);
@@ -369,10 +111,21 @@
       }
 
       function closeModal() {
+        if (!modal) return;
         modal.classList.remove("show");
         document.body.classList.remove("locked");
         activeModalType = null;
       }
+
+      window.showLoginModal = function showLoginModal() {
+        activeModalType = "login";
+        openModal(t("loginTitle"), formMarkup("login"));
+      };
+
+      window.showRegisterModal = function showRegisterModal() {
+        activeModalType = "register";
+        openModal(t("registerTitle"), formMarkup("register"));
+      };
 function formMarkup(type) {
   // === ВХОД ===
   if (type === "login") {
@@ -390,7 +143,7 @@ function formMarkup(type) {
           <label style="font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px;">
             <input type="checkbox" name="remember" /> ${t("rememberMe")}
           </label>
-          <a href="#" style="font-size:13px;color:var(--green);text-decoration:none;" data-action="forgot">${t("forgotPassword")}</a>
+          <a href="#" style="font-size:13px;color:var(--red);text-decoration:none;" data-action="forgot">${t("forgotPassword")}</a>
         </div>
         <a class="admin-login-link" href="/admin">${t("adminLogin")}</a>
         <div class="modal-actions">
@@ -398,7 +151,7 @@ function formMarkup(type) {
           <button class="primary" type="submit">${t("login")}</button>
         </div>
         <p style="text-align:center;margin-top:16px;font-size:14px;color:var(--muted)">
-          ${t("noAccount")} <a href="#" style="color:var(--green);text-decoration:none;" data-open="register">${t("createAccount")}</a>
+          ${t("noAccount")} <a href="#" style="color:var(--red);text-decoration:none;" data-open="register">${t("createAccount")}</a>
         </p>
       </form>`;
   }
@@ -434,24 +187,8 @@ function formMarkup(type) {
           <button class="primary" type="submit">${t("register")}</button>
         </div>
         <p style="text-align:center;margin-top:16px;font-size:14px;color:var(--muted)">
-          ${t("hasAccount")} <a href="#" style="color:var(--green);text-decoration:none;" data-open="login">${t("login")}</a>
+          ${t("hasAccount")} <a href="#" style="color:var(--red);text-decoration:none;" data-open="login">${t("login")}</a>
         </p>
-      </form>`;
-  }
-
-  if (type === "verify_email") {
-    return `
-      <form class="form-grid" data-submit="verify_email">
-        <p style="margin:0;color:var(--muted)">${t("verifyLead")}</p>
-        <input type="hidden" name="email" value="${pendingVerificationEmail}" />
-        <div class="form-field">
-          <label for="verificationCode">${t("verificationCode")}</label>
-          <input id="verificationCode" name="code" type="text" required inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="123456" autocomplete="one-time-code" />
-        </div>
-        <div class="modal-actions">
-          <button class="ghost" type="button" data-close>${t("close")}</button>
-          <button class="primary" type="submit">${t("confirm")}</button>
-        </div>
       </form>`;
   }
 
@@ -478,45 +215,85 @@ function formMarkup(type) {
 }
 
       const menuToggle = document.querySelector("#menuToggle");
+      function closeDrawer() {
+        nav?.classList.remove("open");
+        document.body.classList.remove("drawer-open");
+      }
+
+      function openDrawer() {
+        header?.classList.remove("header-hidden");
+        nav?.classList.add("open");
+        document.body.classList.add("drawer-open");
+      }
+
       if (menuToggle && nav) {
         menuToggle.addEventListener("click", () => {
-          nav.classList.toggle("open");
+          if (nav.classList.contains("open")) {
+            closeDrawer();
+          } else {
+            openDrawer();
+          }
         });
       }
 
-      document.querySelectorAll(".nav a").forEach((link) => {
-        link.addEventListener("click", () => nav.classList.remove("open"));
-      });
-      document.querySelectorAll(".dropdown button[data-open]").forEach((button) => {
-        button.addEventListener("click", () => nav.classList.remove("open"));
+      document.querySelectorAll("[data-theme-toggle], #themeToggle").forEach((toggle) => {
+        toggle.addEventListener("click", () => {
+          const currentTheme = document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+          applyTheme(currentTheme === "dark" ? "light" : "dark");
+        });
       });
 
-      document.querySelectorAll(".lang").forEach((button) => {
-        button.addEventListener("click", () => {
-          document.querySelectorAll(".lang").forEach((item) => item.classList.remove("active"));
-          button.classList.add("active");
-          currentLang = button.dataset.lang;
-          document.documentElement.lang = currentLang;
-          Object.entries(translations[currentLang]).forEach(([key, value]) => {
-            document.querySelectorAll(`[data-i18n="${key}"]`).forEach((el) => {
-              el.textContent = value;
-            });
-            document.querySelectorAll(`[data-i18n-placeholder="${key}"]`).forEach((el) => {
-              el.setAttribute("placeholder", value);
-            });
-          });
-          if (activeModalType) {
-            const titles = {
-              login: t("loginTitle"),
-              register: t("registerTitle"),
-              tickets: t("ticketsTitle"),
-              questionnaire: t("questionnaire"),
-              verify_email: t("verifyTitle"),
-            };
-            openModal(titles[activeModalType], formMarkup(activeModalType));
+      document.querySelectorAll("[data-close-menu]").forEach((button) => {
+        button.addEventListener("click", closeDrawer);
+      });
+      drawerOverlay?.addEventListener("click", closeDrawer);
+
+      if (header) {
+        let lastScrollTop = window.scrollY || document.documentElement.scrollTop || 0;
+        const mobileHeaderQuery = window.matchMedia("(max-width: 768px)");
+
+        function syncMobileHeader() {
+          const scrollTop = window.scrollY || document.documentElement.scrollTop || 0;
+
+          if (!mobileHeaderQuery.matches || document.body.classList.contains("drawer-open")) {
+            header.classList.remove("header-hidden");
+            lastScrollTop = scrollTop;
+            return;
           }
-          showToast(`Тил өзгөрдү: ${button.dataset.lang.toUpperCase()}`);
-        });
+
+          if (scrollTop <= 0) {
+            header.classList.remove("header-hidden");
+          } else if (scrollTop > lastScrollTop && scrollTop > 100) {
+            header.classList.add("header-hidden");
+          } else if (scrollTop < lastScrollTop) {
+            header.classList.remove("header-hidden");
+          }
+
+          lastScrollTop = Math.max(scrollTop, 0);
+        }
+
+        window.addEventListener("scroll", syncMobileHeader, { passive: true });
+        mobileHeaderQuery.addEventListener?.("change", syncMobileHeader);
+        syncMobileHeader();
+      }
+
+      document.querySelectorAll(".nav a").forEach((link) => {
+        link.addEventListener("click", closeDrawer);
+      });
+      document.querySelectorAll(".dropdown button[data-open]").forEach((button) => {
+        button.addEventListener("click", closeDrawer);
+      });
+
+      window.addEventListener("site:languagechange", () => {
+        if (activeModalType) {
+          const titles = {
+            login: t("loginTitle"),
+            register: t("registerTitle"),
+            tickets: t("ticketsTitle"),
+            questionnaire: t("questionnaire"),
+          };
+          openModal(titles[activeModalType], formMarkup(activeModalType));
+        }
       });
 
       document.querySelectorAll("[data-filter]").forEach((button) => {
@@ -534,32 +311,78 @@ function formMarkup(type) {
       if (searchForm) {
         searchForm.addEventListener("submit", (event) => {
           event.preventDefault();
-          const query = document.querySelector("#searchInput").value.trim().toLowerCase();
-          const items = document.querySelectorAll(".match, .news-card, .player, .horse-card, .doc-link, .venue-card, .referee-card, .partner-card");
-          items.forEach((item) => {
-            const searchData = item.dataset.search || "";
-            item.classList.toggle("hidden", query && !searchData.includes(query));
-          });
-          showToast(query ? `Издөө аткарылды: ${query}` : "Бардык маалымат көрсөтүлдү");
+          const query = document.querySelector("#searchInput").value.trim();
+          window.location.href = `/search?q=${encodeURIComponent(query)}`;
         });
       }
 
-      const slides = Array.from(document.querySelectorAll(".home-slide"));
-      const dots = Array.from(document.querySelectorAll("[data-slide-dot]"));
-      let activeSlide = Math.max(0, slides.findIndex((slide) => slide.classList.contains("active")));
+      const newsRing = document.querySelector("[data-news-ring]");
+      const newsTrack = document.querySelector(".news-carousel-track");
+      let newsPosition = 0;
+      let newsInterval = null;
+      let newsTouchStartX = 0;
+      let newsTouchEndX = 0;
 
-      function showSlide(index) {
-        if (!slides.length) return;
-        activeSlide = (index + slides.length) % slides.length;
-        slides.forEach((slide, slideIndex) => slide.classList.toggle("active", slideIndex === activeSlide));
-        dots.forEach((dot, dotIndex) => dot.classList.toggle("active", dotIndex === activeSlide));
+      function getNewsCardsPerView() {
+        if (window.innerWidth <= 600) return 1;
+        if (window.innerWidth <= 1200) return 2;
+        return 3;
       }
 
-      if (slides.length) {
-        document.querySelector("[data-slide-prev]")?.addEventListener("click", () => showSlide(activeSlide - 1));
-        document.querySelector("[data-slide-next]")?.addEventListener("click", () => showSlide(activeSlide + 1));
-        dots.forEach((dot) => dot.addEventListener("click", () => showSlide(Number(dot.dataset.slideDot))));
-        window.setInterval(() => showSlide(activeSlide + 1), 4500);
+      function applyNewsRingTransform() {
+        if (!newsTrack) return;
+        const cards = newsTrack.querySelectorAll(".news-card-compact");
+        if (!cards.length) return;
+        const gap = Number.parseFloat(getComputedStyle(newsTrack).gap) || 20;
+        const cardWidth = cards[0].getBoundingClientRect().width + gap;
+        newsTrack.style.transform = `translateX(-${newsPosition * cardWidth}px)`;
+      }
+
+      function startNewsAutoPlay() {
+        window.clearInterval(newsInterval);
+        if (!newsTrack || newsTrack.querySelectorAll(".news-card-compact").length <= getNewsCardsPerView()) return;
+        newsInterval = window.setInterval(() => window.moveNews(1), 4000);
+      }
+
+      function resetNewsAutoPlay() {
+        window.clearInterval(newsInterval);
+        startNewsAutoPlay();
+      }
+
+      window.moveNews = function moveNews(direction) {
+        if (!newsTrack) return;
+        const cards = newsTrack.querySelectorAll(".news-card-compact");
+        const totalCards = Math.max(1, Math.floor(cards.length / 2));
+        if (!cards.length) return;
+
+        newsPosition += direction;
+        if (newsPosition >= totalCards) newsPosition = 0;
+        if (newsPosition < 0) newsPosition = totalCards - 1;
+
+        applyNewsRingTransform();
+        resetNewsAutoPlay();
+      };
+
+      if (newsRing && newsTrack) {
+        newsRing.addEventListener("mouseenter", () => window.clearInterval(newsInterval));
+        newsRing.addEventListener("mouseleave", startNewsAutoPlay);
+        newsTrack.addEventListener("touchstart", (event) => {
+          newsTouchStartX = event.changedTouches[0].screenX;
+          window.clearInterval(newsInterval);
+        }, { passive: true });
+        newsTrack.addEventListener("touchend", (event) => {
+          newsTouchEndX = event.changedTouches[0].screenX;
+          if (newsTouchEndX < newsTouchStartX - 50) window.moveNews(1);
+          if (newsTouchEndX > newsTouchStartX + 50) window.moveNews(-1);
+          startNewsAutoPlay();
+        }, { passive: true });
+        window.addEventListener("resize", () => {
+          newsPosition = 0;
+          applyNewsRingTransform();
+          resetNewsAutoPlay();
+        });
+        applyNewsRingTransform();
+        startNewsAutoPlay();
       }
 
       document.addEventListener("click", (event) => {
@@ -568,6 +391,7 @@ function formMarkup(type) {
 
         if (target.dataset.open) {
   event.preventDefault();
+  closeDrawer();
   const type = target.dataset.open;
   const titles = { 
     login: t("loginTitle"), 
@@ -621,9 +445,14 @@ function formMarkup(type) {
         if (target.hasAttribute("data-close")) closeModal();
       });
 
-      modal.addEventListener("click", (event) => { if (event.target === modal) closeModal(); });
-      document.querySelector("#modalClose").addEventListener("click", closeModal);
-      document.addEventListener("keydown", (event) => { if (event.key === "Escape") closeModal(); });
+      modal?.addEventListener("click", (event) => { if (event.target === modal) closeModal(); });
+      document.querySelector("#modalClose")?.addEventListener("click", closeModal);
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          closeModal();
+          closeDrawer();
+        }
+      });
 
       // ПЕРЕДАЧА ДАННЫХ НА PYTHON FLASK ЧЕРЕЗ FETCH API
       document.addEventListener("submit", (event) => {
@@ -635,23 +464,17 @@ function formMarkup(type) {
         const formData = new FormData(form);
         const payload = Object.fromEntries(formData.entries());
 
-        fetch('/api/submit', {
+        const endpoint = formType === "register" ? "/api/register" : "/api/submit";
+
+        fetch(endpoint, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
           body: JSON.stringify({ form_type: formType, payload: payload })
         })
         .then(response => response.json().then(data => ({ ok: response.ok, data })))
         .then(({ ok, data }) => {
           if (!ok || data.status === "error") {
             showToast(data.message || "Ката кетти.");
-            return;
-          }
-
-          if (data.status === "verification_required") {
-            pendingVerificationEmail = data.email || payload.email || "";
-            activeModalType = "verify_email";
-            openModal(t("verifyTitle"), formMarkup("verify_email"));
-            showToast(data.message);
             return;
           }
 
@@ -669,3 +492,220 @@ function formMarkup(type) {
           showToast("Байланыш катасы келип чыкты.");
         });
       });
+      /* ===== HERO SLIDER AUTO-ROTATION ===== */
+document.addEventListener('DOMContentLoaded', () => {
+  const slides = document.querySelectorAll('.hero-slider .slide');
+  if (slides.length <= 1) return;
+
+  let current = 0;
+  let intervalId = setInterval(nextSlide, 5000);
+
+  function nextSlide() {
+    slides[current].classList.remove('active');
+    current = (current + 1) % slides.length;
+    slides[current].classList.add('active');
+  }
+
+  // Пауза при наведении мыши
+  const heroSlider = document.querySelector('.hero-slider');
+  if (heroSlider) {
+    heroSlider.addEventListener('mouseenter', () => clearInterval(intervalId));
+    heroSlider.addEventListener('mouseleave', () => {
+      intervalId = setInterval(nextSlide, 5000);
+    });
+  }
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const animatedSections = document.querySelectorAll("main > section, .footer");
+  const observerOptions = {
+    threshold: 0.1,
+    rootMargin: "0px 0px -100px 0px",
+  };
+
+  const revealObserver = "IntersectionObserver" in window
+    ? new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+            revealObserver.unobserve(entry.target);
+          }
+        });
+      }, observerOptions)
+    : null;
+
+  animatedSections.forEach((section) => {
+    section.classList.add("fade-in");
+    if (revealObserver && !reduceMotion) {
+      revealObserver.observe(section);
+    } else {
+      section.classList.add("visible");
+    }
+  });
+
+  const hero = document.querySelector(".hero-slider");
+  const heroSlides = document.querySelector(".slides-container");
+  if (hero && heroSlides && !reduceMotion) {
+    window.addEventListener("scroll", () => {
+      const offset = Math.min(window.pageYOffset * 0.18, 120);
+      heroSlides.style.transform = `translate3d(0, ${offset}px, 0)`;
+    }, { passive: true });
+  }
+
+  document.querySelectorAll(".primary, .secondary, .btn-primary, .btn-outline, .ghost").forEach((button) => {
+    button.classList.add("magnetic-btn");
+  });
+
+  if (!reduceMotion) {
+    document.querySelectorAll(".magnetic-btn").forEach((button) => {
+      button.addEventListener("mousemove", (event) => {
+        const rect = button.getBoundingClientRect();
+        const x = event.clientX - rect.left - rect.width / 2;
+        const y = event.clientY - rect.top - rect.height / 2;
+        button.style.transform = `translate(${x * 0.18}px, ${y * 0.18}px)`;
+      });
+
+      button.addEventListener("mouseleave", () => {
+        button.style.transform = "";
+      });
+    });
+  }
+
+  function animateCounter(element, target, duration = 2000) {
+    let start = 0;
+    const increment = target / (duration / 16);
+    const timer = window.setInterval(() => {
+      start += increment;
+      if (start >= target) {
+        element.textContent = target;
+        window.clearInterval(timer);
+      } else {
+        element.textContent = Math.floor(start);
+      }
+    }, 16);
+  }
+
+  if ("IntersectionObserver" in window && !reduceMotion) {
+    document.querySelectorAll(".stat-number").forEach((stat) => {
+      const target = Number(stat.dataset.target || stat.textContent);
+      if (!Number.isFinite(target)) return;
+      stat.textContent = "0";
+      const counterObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            animateCounter(entry.target, target);
+            counterObserver.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.5 });
+      counterObserver.observe(stat);
+    });
+  }
+
+  if (hero && !reduceMotion && !hero.querySelector(".particles")) {
+    const particlesContainer = document.createElement("div");
+    particlesContainer.className = "particles";
+    hero.appendChild(particlesContainer);
+
+    for (let index = 0; index < 20; index += 1) {
+      const particle = document.createElement("span");
+      particle.className = "particle";
+      particle.style.left = `${Math.random() * 100}%`;
+      particle.style.animationDelay = `${Math.random() * 20}s`;
+      particle.style.animationDuration = `${Math.random() * 20 + 10}s`;
+      particlesContainer.appendChild(particle);
+    }
+  }
+
+  document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+    anchor.addEventListener("click", (event) => {
+      const target = document.querySelector(anchor.getAttribute("href"));
+      if (!target) return;
+      event.preventDefault();
+      target.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+    });
+  });
+
+  const profileForm = document.querySelector("#profileUpdateForm");
+  profileForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const formData = new FormData(profileForm);
+    const payload = Object.fromEntries(formData.entries());
+    try {
+      const response = await fetch("/api/profile/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken },
+        body: JSON.stringify(payload),
+      });
+      const data = await response.json();
+      alert(data.message || "Жооп алынды.");
+      if (response.ok && data.status === "success") {
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Байланыш катасы.");
+    }
+  });
+
+  const passwordForm = document.querySelector("#passwordChangeForm");
+  passwordForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const formData = new FormData(passwordForm);
+    const payload = Object.fromEntries(formData.entries());
+    try {
+      const response = await fetch("/api/profile/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken },
+        body: JSON.stringify(payload),
+      });
+      const data = await response.json();
+      alert(data.message || "Жооп алынды.");
+      if (response.ok && data.status === "success") {
+        passwordForm.reset();
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Байланыш катасы.");
+    }
+  });
+
+  let deferredInstallPrompt = null;
+  const installButton = document.querySelector("#installAppBtn");
+
+  window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    deferredInstallPrompt = event;
+    installButton?.classList.add("show");
+  });
+
+  installButton?.addEventListener("click", async () => {
+    if (!deferredInstallPrompt) return;
+    deferredInstallPrompt.prompt();
+    await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt = null;
+    installButton.classList.remove("show");
+  });
+
+  window.addEventListener("appinstalled", () => {
+    deferredInstallPrompt = null;
+    installButton?.classList.remove("show");
+  });
+
+  document.querySelectorAll(".copy-contact").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const value = button.dataset.copy || "";
+      try {
+        await navigator.clipboard.writeText(value);
+        button.textContent = "Көчүрүлдү";
+        window.setTimeout(() => {
+          button.textContent = "Көчүрүү";
+        }, 1600);
+      } catch (error) {
+        console.error(error);
+        alert(value);
+      }
+    });
+  });
+});

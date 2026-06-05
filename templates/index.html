@@ -4,22 +4,42 @@
 
 {% block content %}
 <main id="home">
-  <section class="hero">
-    <div>
-      <p class="eyebrow" data-i18n="heroEyebrow">Расмий портал</p>
-      <h1 data-i18n="heroTitle">Улак тартыш оюндарын жаңы деңгээлде көрүңүз</h1>
-      <p class="lead" data-i18n="heroLead">
-        Матчтардын календары, лигалар, оюнчулар, жаңылыктар жана медиа бир жерде.
-        
-      </p>
+  <!-- HERO С ПЛАВНЫМ СЛАЙДЕРОМ -->
+  <section class="hero hero-slider">
+    <div class="slides-container">
+      {% if homepage_settings and homepage_settings.background_image %}
+      <div class="slide active" style="background-image: url('{{ homepage_settings.background_image }}');"></div>
+      {% else %}
+      <div class="slide active" style="background-image: url('{{ url_for('static', filename='img/slider/slide1.jpg') }}');"></div>
+      <div class="slide" style="background-image: url('{{ url_for('static', filename='img/slider/slide2.jpg') }}');"></div>
+      <div class="slide" style="background-image: url('{{ url_for('static', filename='img/slider/slide3.jpg') }}');"></div>
+      {% endif %}
+    </div>
+    <div class="hero-overlay" {% if homepage_settings and homepage_settings.overlay_color %}style="background: {{ homepage_settings.overlay_color }};"{% endif %}></div>
+    
+    <div class="hero-content">
+      <p class="eyebrow">{{ homepage_settings.subtitle if homepage_settings else 'Расмий портал' }}</p>
+      <h1>{{ homepage_settings.title if homepage_settings else 'Улак тартыш оюндарын жаңы деңгээлде көрүңүз' }}</h1>
+      <p class="lead">{{ homepage_settings.description if homepage_settings else 'Матчтардын календары, лигалар, оюнчулар, жаңылыктар жана медиа бир жерде.' }}</p>
       <div class="hero-actions">
-        <a class="primary" href="#matches" data-i18n="heroPrimary">Оюндарды көрүү</a>
-        <button class="secondary" data-open="tickets" data-i18n="heroSecondary">Билет алуу</button>
+        <a class="primary magnetic-btn" href="{{ homepage_settings.button1_link if homepage_settings else '#matches' }}">{{ homepage_settings.button1_text if homepage_settings else 'Оюндарды көрүү' }}</a>
+        <a href="{{ homepage_settings.button2_link if homepage_settings else '#news' }}" class="secondary magnetic-btn">{{ homepage_settings.button2_text if homepage_settings else 'Жаңылыктар' }}</a>
+      </div>
+      <div class="hero-stats glass" aria-label="Site statistics">
+        {% if homepage_stats %}
+        {% for stat in homepage_stats %}
+        <span><strong class="stat-number" data-target="{{ stat.value }}">0</strong><small>{{ stat.label }}</small></span>
+        {% endfor %}
+        {% else %}
+        <span><strong class="stat-number" data-target="{{ matches|length }}">0</strong><small>Оюн</small></span>
+        <span><strong class="stat-number" data-target="{{ total_news or news|length }}">0</strong><small>Жаңылык</small></span>
+        <span><strong class="stat-number" data-target="{{ players|length }}">0</strong><small>Оюнчу</small></span>
+        {% endif %}
       </div>
     </div>
 
     <aside class="scoreboard">
-      <span data-i18n="nextMatch">Кийинки оюн</span>
+      <span class="scoreboard-kicker"><i class="live-indicator" aria-hidden="true"></i><span data-i18n="nextMatch">Кийинки оюн</span></span>
       {% if next_match %}
       <div class="teams">
         <div class="team">
@@ -40,55 +60,69 @@
       <p style="color: rgba(255,255,255,0.5); text-align: center; margin: 20px 0;">Оюндар азырынча жок</p>
       {% endif %}
     </aside>
+    <a class="scroll-indicator" href="#matches" aria-label="Scroll to matches"></a>
   </section>
 
+  <!-- ПОИСК -->
   <section class="section">
-    <form class="search-panel" id="searchForm">
-      <input id="searchInput" type="search" placeholder="Команда, лига, жаңылык же оюнчу издөө" data-i18n-placeholder="searchPlaceholder" />
-      <button class="primary" type="submit" data-i18n="searchButton">Издөө</button>
+    <form class="search-panel" id="searchForm" action="{{ url_for('search_page') }}" method="get">
+      <input id="searchInput" name="q" type="search" placeholder="Команда, лига, жаңылык же оюнчу издөө" data-i18n-placeholder="searchPlaceholder" />
+      <button class="primary magnetic-btn" type="submit" data-i18n="searchButton">Издөө</button>
     </form>
   </section>
 
-  <section class="section home-slider-section" aria-label="Ulak tartysh slider">
-    <div class="home-slider" id="homeSlider">
-      <div class="slide-track">
-        {% for item in news[:3] %}
-        <article class="home-slide{% if loop.first %} active{% endif %}">
-          {% if item.img_url %}
-          <img src="{{ item.img_url }}" alt="{{ item.title }}" />
-          {% endif %}
-          <div>
-            <span>{{ item.date }}</span>
-            <h2>{{ item.title }}</h2>
-            <p>{{ item.body or 'Федерация жаңылыктары жана расмий маалыматтар.' }}</p>
-            <a class="primary" href="{{ url_for('news_detail_page', news_id=item.id) }}">Окуу</a>
-          </div>
-        </article>
-        {% else %}
-        <article class="home-slide active">
-          <div>
-            <span data-i18n="heroEyebrow">Расмий портал</span>
-            <h2 data-i18n="heroTitle">Улак тартыш оюндарын жаңы деңгээлде көрүңүз</h2>
-            <p data-i18n="heroLead">Матчтардын календары, лигалар, оюнчулар, жаңылыктар жана медиа бир жерде.</p>
-            <a class="primary" href="#matches" data-i18n="heroPrimary">Оюндарды көрүү</a>
-          </div>
-        </article>
-        {% endfor %}
+  <section class="section news-section" id="news">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow" data-i18n="newsEyebrow">ЖАҢЫЛЫКТАР</p>
+          <h2 data-i18n="newsTitle">Федерациядан акыркы маалыматтар</h2>
+        </div>
+        <a href="{{ url_for('news_page') }}" class="btn-ghost">Баарын көрүү →</a>
       </div>
-      <div class="slider-controls">
-        <button type="button" data-slide-prev aria-label="Previous slide">‹</button>
-        <div class="slider-dots">
-          {% for item in news[:3] %}
-          <button type="button" class="{% if loop.first %}active{% endif %}" data-slide-dot="{{ loop.index0 }}" aria-label="Slide {{ loop.index }}"></button>
+
+      <div class="news-carousel-container" data-news-ring>
+        <div class="news-carousel-track">
+          {% for item in news %}
+          <div class="news-card-compact">
+            <a href="{{ url_for('news_detail_page', news_id=item.id) }}">
+              {% if item.img_url %}
+                <img src="{{ item.img_url }}" alt="{{ item.title }}" loading="lazy">
+              {% else %}
+                <div class="news-img-placeholder"></div>
+              {% endif %}
+              <h3>{{ item.title }}</h3>
+              <span class="date">{{ item.date }}</span>
+            </a>
+          </div>
           {% else %}
-          <button type="button" class="active" data-slide-dot="0" aria-label="Slide 1"></button>
+          <p class="empty-news" data-i18n="noNews">Жаңылыктар азырынча жок.</p>
+          {% endfor %}
+
+          {% for item in news %}
+          <div class="news-card-compact" aria-hidden="true">
+            <a href="{{ url_for('news_detail_page', news_id=item.id) }}" tabindex="-1">
+              {% if item.img_url %}
+                <img src="{{ item.img_url }}" alt="" loading="lazy">
+              {% else %}
+                <div class="news-img-placeholder"></div>
+              {% endif %}
+              <h3>{{ item.title }}</h3>
+              <span class="date">{{ item.date }}</span>
+            </a>
+          </div>
           {% endfor %}
         </div>
-        <button type="button" data-slide-next aria-label="Next slide">›</button>
+
+        {% if news|length > 1 %}
+        <button class="carousel-btn prev" type="button" onclick="moveNews(-1)" aria-label="Мурунку жаңылыктар">‹</button>
+        <button class="carousel-btn next" type="button" onclick="moveNews(1)" aria-label="Кийинки жаңылыктар">›</button>
+        {% endif %}
       </div>
     </div>
   </section>
 
+  <!-- МАТЧИ -->
   <section class="section" id="matches">
     <div class="section-head">
       <div>
@@ -118,32 +152,11 @@
     </div>
   </section>
 
-  <section class="section" id="leagues">
-    <div class="section-head">
-      <div>
-        <p class="eyebrow" data-i18n="navLeagues">Лигалар</p>
-        <h2 data-i18n="leaguesTitle">Турнирлер жана рейтингдер</h2>
-      </div>
-      <button class="ghost" data-action="calendar" data-i18n="downloadCalendar">Календарды жүктөө</button>
-    </div>
-    <div class="league-grid">
-      <a class="league-card" href="#matches">
-        <strong data-i18n="leagueTop">Жогорку лига</strong>
-        <span data-i18n="leagueTopMeta">12 команда · расмий рейтинг</span>
-        <small data-i18n="heroPrimary">Оюндарды көрүү</small>
-      </a>
-      <a class="league-card" href="#matches">
-        <strong data-i18n="leagueFirst">Биринчи лига</strong>
-        <span data-i18n="leagueFirstMeta">18 команда · плей-офф баскычы</span>
-        <small data-i18n="heroPrimary">Оюндарды көрүү</small>
-      </a>
-    </div>
-  </section>
-
+  <!-- МЕДИА -->
   <section class="section dark" id="media">
     <div class="section-head">
       <div>
-        <p class="eyebrow" data-i18n="navMedia">Медиа</p>
+        <p class="eyebrow" data-i18n="mediaEyebrow">Медиа</p>
         <h2 data-i18n="mediaTitle">Оюндан сүрөттөр жана обзорлор</h2>
       </div>
       <button class="secondary" data-action="gallery" data-i18n="gallery">Галерея</button>
@@ -152,7 +165,7 @@
       {% for video in videos %}
       <a class="media" href="{{ video.video_url }}" target="_blank" rel="noopener noreferrer">
         {% if video.thumbnail %}
-        <img class="media-photo" src="{{ video.thumbnail }}" alt="{{ video.title }}" />
+        <img class="media-photo" src="{{ video.thumbnail }}" alt="{{ video.title }}" loading="lazy" />
         {% elif video.video_url.endswith('.mp4') or video.video_url.endswith('.webm') or video.video_url.endswith('.mov') %}
         <video class="media-photo" src="{{ video.video_url }}" muted playsinline preload="metadata"></video>
         {% else %}
@@ -165,7 +178,7 @@
       {% for album in albums %}
       <button class="media" data-action="gallery">
         {% if album.cover_url %}
-        <img class="media-photo" src="{{ album.cover_url }}" alt="{{ album.title }}" />
+        <img class="media-photo" src="{{ album.cover_url }}" alt="{{ album.title }}" loading="lazy" />
         {% else %}
         <span class="media-photo" aria-hidden="true"></span>
         {% endif %}
@@ -190,39 +203,11 @@
     </div>
   </section>
 
-  <section class="section" id="news">
-    <div class="section-head">
-      <div>
-        <p class="eyebrow" data-i18n="navNews">Жаңылыктар</p>
-        <h2 data-i18n="newsTitle">Федерациядан акыркы маалыматтар</h2>
-      </div>
-      <button class="ghost" data-action="subscribe" data-i18n="subscribe">Жазылуу</button>
-    </div>
-    <div class="news-grid" id="newsGrid">
-      {% for item in news %}
-      <article class="news-card" data-search="{{ item.search_tags }}">
-        {% if item.img_url %}
-        <img src="{{ item.img_url }}" alt="News Image" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';" />
-        <div class="news-photo" aria-hidden="true" style="display: none;">NEWS</div>
-        {% else %}
-        <div class="news-photo" aria-hidden="true">NEWS</div>
-        {% endif %}
-        <div>
-          <span>{{ item.date }}</span>
-          <h3>{{ item.title }}</h3>
-          <a class="ghost" href="{{ url_for('news_detail_page', news_id=item.id) }}">Окуу</a>
-        </div>
-      </article>
-      {% else %}
-      <p style="text-align: center; color: var(--muted); padding: 20px;">Жаңылыктар азырынча жок.</p>
-      {% endfor %}
-    </div>
-  </section>
-
+  <!-- ИГРОКИ -->
   <section class="section" id="players">
     <div class="section-head">
       <div>
-        <p class="eyebrow" data-i18n="navPlayers">Оюнчулар</p>
+        <p class="eyebrow" data-i18n="playersEyebrow">Оюнчулар</p>
         <h2 data-i18n="playersTitle">Рейтингдеги мыктылар</h2>
       </div>
       <button class="ghost" data-action="rating" data-i18n="fullRating">Толук рейтинг</button>
@@ -231,7 +216,7 @@
       {% for player in players %}
       <article class="player" data-search="{{ player.name }} {{ player.team }} {{ player.position }}">
         {% if player.photo_url %}
-        <img class="player-img" src="{{ player.photo_url }}" alt="{{ player.name }}" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';" />
+        <img class="player-img" src="{{ player.photo_url }}" alt="{{ player.name }}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';" />
         <div class="player-photo" aria-hidden="true" style="display: none;">{{ player.name[:1] }}</div>
         {% else %}
         <div class="player-photo" aria-hidden="true">{{ player.name[:1] }}</div>
@@ -242,7 +227,7 @@
         </div>
       </article>
       {% else %}
-      <p style="text-align: center; color: var(--muted); padding: 20px;">Оюнчулар азырынча жок.</p>
+      <p style="text-align: center; color: var(--muted); padding: 20px;" data-i18n="noPlayers">Оюнчулар азырынча жок.</p>
       {% endfor %}
     </div>
   </section>
