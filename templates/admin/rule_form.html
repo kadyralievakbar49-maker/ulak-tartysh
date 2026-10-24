@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ 'Редактирование' if section else 'Новый раздел' }} | Правила</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}" />
+  </head>
+  <body class="admin-standalone">
+    <main class="admin-card-page admin-card-wide">
+      <div class="admin-page-actions">
+        <a class="admin-link-button" href="{{ url_for('admin_rules') }}">← К списку правил</a>
+      </div>
+      <article class="panel">
+        <p class="eyebrow">Правила игры</p>
+        <h1>{{ 'Редактировать раздел' if section else 'Добавить раздел' }}</h1>
+        {% if error %}<p class="admin-alert error">{{ error }}</p>{% endif %}
+        <form class="form-grid cms-form" method="post">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          <label>Заголовок
+            <input name="title" value="{{ request.form.get('title', section.title if section else '') }}" required />
+          </label>
+          {% if section %}
+          <label>Порядок
+            <input name="order_num" type="number" min="1" value="{{ request.form.get('order_num', section.order_num) }}" />
+          </label>
+          {% endif %}
+          <label>Содержимое
+            <textarea name="content" rows="18" required>{{ request.form.get('content', section.content if section else '') }}</textarea>
+            <span class="hint">Можно использовать HTML: &lt;p&gt;, &lt;h3&gt;, &lt;ul&gt;, &lt;strong&gt;.</span>
+          </label>
+          <label class="check">
+            <input name="is_active" type="checkbox" {% if request.form.get('is_active') or (not request.form and (not section or section.is_active)) %}checked{% endif %} />
+            Показывать на сайте
+          </label>
+          <button type="submit">Сохранить раздел</button>
+        </form>
+      </article>
+    </main>
+  </body>
+</html>

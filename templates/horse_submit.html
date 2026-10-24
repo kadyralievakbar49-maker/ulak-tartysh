@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}Подать объявление | Улак тартыш{% endblock %}
+{% block content %}
+<main class="member-page">
+  <section class="section page-hero"><p class="eyebrow" data-i18n="personalAccount">Личный кабинет</p><h1 data-i18n="submitHorse">Подать объявление о лошади</h1><p class="lead" data-i18n="submitHorseLead">Объявление появится в каталоге после проверки администратором.</p></section>
+  <section class="section member-form-section"><form class="info-panel form-grid" method="post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    {% for error in errors %}<p class="form-error" role="alert" data-i18n="{{ error }}">Проверьте заполненные поля.</p>{% endfor %}
+    {% for name,key,required in [('name','horseName',true),('breed','horseBreed',false),('color','horseColorLabel',false),('owner_name','horseOwner',true),('region','regionLabel',true),('phone','phone',true)] %}
+    <div class="form-field"><label for="submission-{{ name }}" data-i18n="{{ key }}">{{ name }}</label><input id="submission-{{ name }}" name="{{ name }}" type="{{ 'tel' if name == 'phone' else 'text' }}" value="{{ request.form.get(name,'') }}" maxlength="200" {% if required %}required{% endif %} /></div>
+    {% endfor %}
+    <div class="form-field"><label for="submission-age" data-i18n="horseAge">Возраст, лет</label><input id="submission-age" name="age" type="number" min="1" max="50" value="{{ request.form.get('age','') }}" /></div>
+    <div class="form-field"><label for="submission-price" data-i18n="horsePrice">Цена, сом</label><input id="submission-price" name="price" type="number" min="1" max="1000000000" value="{{ request.form.get('price','') }}" /><small data-i18n="priceOptional">Оставьте пустым, если цена по запросу.</small></div>
+    <div class="form-field"><label for="submission-description" data-i18n="horseDescriptionTitle">Описание лошади</label><textarea id="submission-description" name="description" rows="6" maxlength="4000" required>{{ request.form.get('description','') }}</textarea></div>
+    <div class="form-field"><label for="submission-photo" data-i18n="horsePhoto">Фото лошади</label><input id="submission-photo" name="photo" type="file" accept="image/jpeg,image/png,image/webp" /><small data-i18n="photoLimit">JPG, PNG или WebP, до 10 МБ.</small></div>
+    <p class="form-hint" data-i18n="submissionContactNotice">Указанный телефон будет опубликован в объявлении для связи с вами.</p>
+    <button class="primary" type="submit" data-i18n="sendForReview">Отправить на проверку</button>
+    <a href="{{ url_for('portal.saved') }}" data-i18n="backToAccount">Вернуться в кабинет</a>
+  </form></section>
+</main>
+{% endblock %}

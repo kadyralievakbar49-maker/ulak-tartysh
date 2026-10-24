@@ -1,6 +1,8 @@
 (() => {
   const supportedLangs = ["kg", "ru", "en"];
   const dictionary = typeof translations === "undefined" ? { kg: {} } : translations;
+  const originalHtml = new WeakMap();
+  const originalText = new WeakMap();
 
   function getInitialLang() {
     const urlLang = new URLSearchParams(window.location.search).get("lang");
@@ -28,9 +30,21 @@
       item.classList.toggle("active", itemLang === lang);
     });
 
+    document.querySelectorAll("[data-i18n]").forEach((el) => {
+      const key = el.dataset.i18n;
+      if (!originalText.has(el)) originalText.set(el, el.textContent.trim());
+      if (el.hasAttribute("data-i18n-preserve-custom") && !el.dataset.i18nManaged) {
+        const knownValues = supportedLangs.map((itemLang) => dictionary[itemLang]?.[key]).filter(Boolean);
+        if (!knownValues.includes(originalText.get(el))) return;
+        el.dataset.i18nManaged = "true";
+      }
+      el.textContent = dictionary[currentLang]?.[key] || dictionary.kg?.[key] || originalText.get(el);
+    });
+
     Object.entries(dictionary[lang] || {}).forEach(([key, value]) => {
-      document.querySelectorAll(`[data-i18n="${key}"]`).forEach((el) => {
-        el.textContent = value;
+      document.querySelectorAll(`[data-i18n-html="${key}"]`).forEach((el) => {
+        if (!originalHtml.has(el)) originalHtml.set(el, el.innerHTML);
+        el.innerHTML = lang === "kg" ? originalHtml.get(el) : value;
       });
       document.querySelectorAll(`[data-i18n-placeholder="${key}"]`).forEach((el) => {
         el.setAttribute("placeholder", value);
@@ -42,6 +56,9 @@
         el.setAttribute("aria-label", value);
       });
     });
+
+    const pageTitleKey = document.body.dataset.i18nPageTitle;
+    if (pageTitleKey) document.title = t(pageTitleKey);
 
     window.dispatchEvent(new CustomEvent("site:languagechange", { detail: { lang } }));
   }

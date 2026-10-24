@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Правила игры | Админ-панель</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}" />
+  </head>
+  <body>
+    <aside class="admin-sidebar">
+      <a class="admin-brand" href="{{ url_for('admin_panel') }}">
+        <img src="{{ url_for('static', filename='img/logo.jpg') }}" alt="Улак тартыш" />
+        <span><small>Управление сайтом</small><strong>Админ-панель</strong></span>
+      </a>
+      <nav class="admin-tabs">
+        <span class="admin-nav-label">Главное</span>
+        <a href="{{ url_for('admin_panel') }}">Обзор</a>
+        <a href="{{ url_for('admin_panel') }}#news">Новости</a>
+        <a href="{{ url_for('admin_panel') }}#documents">Документы</a>
+        <span class="admin-nav-label">Справочник</span>
+        <a class="active" href="{{ url_for('admin_rules') }}">Правила игры</a>
+        <a href="{{ url_for('admin_regulations') }}">Регламенты</a>
+        <a href="{{ url_for('admin_transfers') }}">Трансферы</a>
+        <span class="admin-nav-label">Доступ</span>
+        <a href="{{ url_for('admin_users') }}">Пользователи</a>
+      </nav>
+      <div class="sidebar-actions">
+        <a href="{{ url_for('rules_page') }}" target="_blank">Открыть страницу</a>
+        <a class="danger" href="{{ url_for('admin_logout') }}">Выйти</a>
+      </div>
+    </aside>
+    <main class="admin-main">
+      <header class="admin-topbar">
+        <div><p class="eyebrow">Контент сайта</p><h1>Правила игры</h1></div>
+        <a class="open-site" href="{{ url_for('admin_rule_add') }}">Добавить раздел</a>
+      </header>
+      <section class="panel">
+        <div class="cms-list">
+          {% for section in sections %}
+          <article class="cms-row">
+            <div class="cms-order">{{ section.order_num }}</div>
+            <div class="cms-row-content">
+              <h2>{{ section.title }}</h2>
+              <p>{{ section.content|striptags|truncate(180) }}</p>
+              <span class="status-badge {{ 'active' if section.is_active else 'blocked' }}">{{ 'Опубликован' if section.is_active else 'Скрыт' }}</span>
+            </div>
+            <div class="cms-actions">
+              <form method="post" action="{{ url_for('admin_rule_move', section_id=section.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                <input type="hidden" name="direction" value="up" />
+                <button type="submit" title="Переместить вверх">↑</button>
+              </form>
+              <form method="post" action="{{ url_for('admin_rule_move', section_id=section.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                <input type="hidden" name="direction" value="down" />
+                <button type="submit" title="Переместить вниз">↓</button>
+              </form>
+              <a class="admin-link-button" href="{{ url_for('admin_rule_edit', section_id=section.id) }}">Редактировать</a>
+              <form class="confirm-delete" method="post" action="{{ url_for('admin_rule_delete', section_id=section.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                <button class="btn-danger" type="submit">Удалить</button>
+              </form>
+            </div>
+          </article>
+          {% else %}
+          <p class="empty">Разделов пока нет.</p>
+          {% endfor %}
+        </div>
+      </section>
+    </main>
+    <script>
+      document.querySelectorAll(".confirm-delete").forEach((form) => {
+        form.addEventListener("submit", (event) => {
+          if (!confirm("Удалить раздел правил?")) event.preventDefault();
+        });
+      });
+    </script>
+  </body>
+</html>

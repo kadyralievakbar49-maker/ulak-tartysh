@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}Улак тартыш Федерациясы{% endblock %}</title>
     <meta name="description" content="{% block description %}Улак тартыш федерациясы: матчи, лиги, новости, медиа, игроки и документы.{% endblock %}" />
+    <link rel="canonical" href="{% block canonical_url %}{{ request.url }}{% endblock %}" />
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}" />
+    <meta property="og:title" content="{% block og_title %}Улак тартыш Федерациясы{% endblock %}" />
+    <meta property="og:description" content="{% block og_description %}Улак тартыш федерациясы: матчи, лиги, новости, медиа, игроки и документы.{% endblock %}" />
+    <meta property="og:url" content="{% block og_url %}{{ request.url }}{% endblock %}" />
+    <meta property="og:image" content="{% block og_image %}{{ url_for('static', filename='img/logo.jpg', _external=True) }}{% endblock %}" />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
     <meta name="theme-color" content="#1a2744" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -12,36 +19,37 @@
     <meta name="apple-mobile-web-app-title" content="Улак Тартыш" />
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}" />
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/logo.jpg') }}" />
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=64">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/portal.css') }}?v=1">
   </head>
-  <body>
-    <header class="header">
+  <body data-i18n-page-title="{% block page_title_key %}siteTitle{% endblock %}">
+  <header class="header">
       <a class="brand" href="{{ url_for('home') }}">
         <!-- ОСНОВНОЙ ЛОГОТИП В ШАПКЕ -->
         <img src="{{ url_for('static', filename='img/logo.jpg') }}" alt="Улак тартыш" class="brand-logo" aria-hidden="true" loading="lazy" />
         <span class="brand-text">
-          <span>федерация</span>
+          <span data-i18n="federationLabel">федерация</span>
           <strong data-i18n="brandName">Улак тартыш</strong>
         </span>
       </a>
       <nav class="nav" id="nav">
-        <button class="drawer-close" type="button" data-close-menu aria-label="Жабуу">×</button>
+        <button class="drawer-close" type="button" data-close-menu aria-label="Жабуу" data-i18n-aria-label="closeMenu">×</button>
         <div class="nav-item">
           <button class="nav-trigger" type="button"><span data-i18n="navHome">Башкы бет</span></button>
           <div class="dropdown">
             <a href="{{ url_for('home') }}" data-i18n="navHomeMain">Башкы бет</a>
             <a href="{{ url_for('about_page') }}" data-i18n="navAbout">Федерация жөнүндө</a>
-            <a href="{{ url_for('home') }}#news" data-i18n="navNews">Жаңылыктар</a>
-            <a href="{{ url_for('home') }}#media" data-i18n="navMedia">Медиа</a>
+            <a href="{{ url_for('news_page') }}" data-i18n="navNews">Жаңылыктар</a>
+            <a href="{{ url_for('media_page') }}" data-i18n="navMedia">Медиа</a>
             <a href="{{ url_for('contacts_page') }}" data-i18n="navContacts">Байланыш</a>
-            <button data-open="tickets" data-i18n="navTickets">Билеттер</button>
           </div>
         </div>
         <div class="nav-item">
           <button class="nav-trigger" type="button"><span data-i18n="navDocuments">Документтер</span></button>
           <div class="dropdown">
             <a href="{{ url_for('documents_page') }}#charters" data-i18n="docAssociation">Уставдар</a>
-            <a href="{{ url_for('rules_page') }}" class="dropdown-item">Эрежелер</a>
+            <a href="{{ url_for('rules_page') }}" class="dropdown-item" data-i18n="docRules">Эрежелер</a>
+            <a href="{{ url_for('all_documents') }}" data-i18n="docAllDocuments">Бардык документтер</a>
             <a href="{{ url_for('pages.regulations_page') }}" data-i18n="docTournament">Регламенттер</a>
             <a href="{{ url_for('pages.transfers_page') }}" data-i18n="docTransfer">Трансферлер</a>
           </div>
@@ -57,28 +65,30 @@
           <button class="nav-trigger" type="button"><span data-i18n="navUlak">Улак тартыш</span></button>
           <div class="dropdown">
             <a href="{{ url_for('teams_page') }}" data-i18n="navTeam">Командалар</a>
-            <a href="{{ url_for('home') }}#players" data-i18n="navPlayers">Оюнчулар</a>
+            <a href="{{ url_for('archive') }}" data-i18n="portalUi0">Архив</a>
+            <a href="{{ url_for('players_page') }}" data-i18n="navPlayers">Оюнчулар</a>
+            <a href="{{ url_for('statistics_page') }}" data-i18n="portalUi1">Статистика</a>
             <a href="{{ url_for('horses_page') }}" data-i18n="navHorses">Аттар</a>
             <a href="{{ url_for('hippodromes_page') }}" data-i18n="navHippodromes">Ипподромы</a>
             <a href="{{ url_for('referees_page') }}" data-i18n="navReferees">Калыстар</a>
           </div>
         </div>
-        <div class="mobile-drawer-tools" aria-label="Мобилдик меню орнотуулары">
+        <div class="mobile-drawer-tools" aria-label="Мобилдик меню орнотуулары" data-i18n-aria-label="mobileMenuSettings">
           <div class="drawer-tool-row">
-            <span>Тил</span>
+            <span data-i18n="language">Тил</span>
             <div class="lang-switcher drawer-lang-switcher">
               <a href="?lang=kg" class="lang-btn active" data-lang="kg">KG</a>
               <a href="?lang=ru" class="lang-btn" data-lang="ru">RU</a>
               <a href="?lang=en" class="lang-btn" data-lang="en">EN</a>
             </div>
           </div>
-          <button class="drawer-theme-toggle theme-toggle" type="button" data-theme-toggle aria-label="Теманы алмаштыруу">🌙</button>
           <div class="mobile-drawer-auth">
             {% if session.get('user_id') %}
             <div class="drawer-user-card">
               <span class="user-avatar-small">{{ (session.get('user_name') or 'U')[:1] }}</span>
               <strong>{{ session.get('user_name') }}</strong>
             </div>
+            <a class="member-action" href="{{ url_for('portal.saved') }}" data-i18n="myCollection">Моё избранное</a>
             <a class="btn-outline" href="{{ url_for('profile_page') }}" data-i18n="profile">Профиль</a>
             <a class="btn-primary" href="{{ url_for('user_logout') }}" data-i18n="logout">Чыгуу</a>
             {% else %}
@@ -88,17 +98,18 @@
           </div>
         </div>
       </nav>
-      <button class="drawer-overlay" type="button" id="drawerOverlay" data-close-menu aria-label="Менюну жабуу"></button>
+      <button class="drawer-overlay" type="button" id="drawerOverlay" data-close-menu aria-label="Менюну жабуу" data-i18n-aria-label="closeMenu"></button>
       <div class="auth-buttons">
         {% if session.get('user_id') %}
-        <div class="user-menu-compact" aria-label="Колдонуучу менюсу">
+        <div class="user-menu-compact" aria-label="Колдонуучу менюсу" data-i18n-aria-label="userMenu">
           <div class="user-avatar-name">
             <span class="user-avatar-small">{{ (session.get('user_name') or 'U')[:1] }}</span>
             <span class="user-name-text">{{ session.get('user_name') }}</span>
           </div>
           <div class="user-actions">
-            <a href="{{ url_for('profile_page') }}" class="btn-icon" title="Профиль" aria-label="Профиль">👤</a>
-            <a href="{{ url_for('user_logout') }}" class="btn-icon danger" title="Чыгуу" aria-label="Чыгуу">↪</a>
+            <a href="{{ url_for('portal.saved') }}" class="btn-icon" aria-label="Избранное" title="Избранное" data-i18n-aria-label="myCollection" data-i18n-title="myCollection">☆</a>
+            <a href="{{ url_for('profile_page') }}" class="btn-icon" title="Профиль" aria-label="Профиль" data-i18n-title="profile" data-i18n-aria-label="profile">👤</a>
+            <a href="{{ url_for('user_logout') }}" class="btn-icon danger" title="Чыгуу" aria-label="Чыгуу" data-i18n-title="logout" data-i18n-aria-label="logout">↪</a>
           </div>
         </div>
         {% else %}
@@ -111,25 +122,27 @@
         <a href="?lang=ru" class="lang-btn" data-lang="ru">RU</a>
         <a href="?lang=en" class="lang-btn" data-lang="en">EN</a>
       </div>
-      <button class="theme-toggle" type="button" id="themeToggle" data-theme-toggle aria-label="Теманы алмаштыруу">🌙</button>
-      <button class="icon-button menu-toggle" aria-label="Меню" id="menuToggle">☰</button>
+      <button class="icon-button menu-toggle" aria-label="Меню" data-i18n-aria-label="menu" id="menuToggle">☰</button>
     </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="site-flashes" role="status" aria-live="polite">
+        {% for category, message in messages %}
+        <p class="site-flash {{ 'error' if category == 'error' else 'success' }}">{{ message }}</p>
+        {% endfor %}
+      </div>
+      {% endif %}
+    {% endwith %}
 
     {% block content %}{% endblock %}
 
-    <footer class="footer">
+  <footer class="footer">
       <!-- Логотип в футере -->
       <img src="{{ url_for('static', filename='img/logo.jpg') }}" alt="УТ" class="footer-logo" aria-hidden="true" loading="lazy" />
       <div>
         <h2 data-i18n="footerTitle">Улак тартыш федерациясы</h2>
         <p data-i18n="footerDesc">Улуттук оюнду өнүктүрүү, турнирлерди уюштуруу жана расмий маалыматты заманбап форматта жеткирүү.</p>
-      </div>
-      <div class="footer-links">
-        <a href="{{ url_for('home') }}#matches" data-i18n="navGames">Оюндар</a>
-        <a href="{{ url_for('documents_page') }}" data-i18n="navDocuments">Документтер</a>
-        <a href="{{ url_for('referees_page') }}" data-i18n="navReferees">Калыстар</a>
-        <a href="{{ url_for('contacts_page') }}" data-i18n="navContacts">Байланыш</a>
-        <a href="{{ url_for('horses_page') }}" data-i18n="navHorses">Аттар</a>
       </div>
       <address class="footer-contact">
         <strong data-i18n="footerContact">Байланыш маалыматы</strong>
@@ -145,30 +158,61 @@
           <a href="mailto:ulaktartys@gmail.com" data-i18n="contactEmail">ulaktartys@gmail.com</a>
         {% endif %}
       </address>
-      <div class="social-links" aria-label="Социальные сети">
-        <a href="https://www.instagram.com/ulak_tartysh_official?igsh=aWJrcHF5a3Rkem1w" target="_blank" rel="noopener noreferrer">Instagram</a>
-        <a href="https://youtube.com/channel/UCSlqV4SGqzS2rdlTFlpMVNQ?si=bdjnYZtXHQbRJg4B" target="_blank" rel="noopener noreferrer">YouTube</a>
-        <a href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer">Facebook</a>
+      <div class="social-links" aria-label="Социальные сети" data-i18n-aria-label="socialNetworks">
+        <a href="https://www.instagram.com/ulak_tartysh_official?igsh=aWJrcHF5a3Rkem1w" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="Instagram">
+          <svg class="social-icon" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+            <defs>
+              <linearGradient id="instagramGradient" x1="7" y1="41" x2="41" y2="7" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stop-color="#feda75"></stop>
+                <stop offset="0.25" stop-color="#fa7e1e"></stop>
+                <stop offset="0.5" stop-color="#d62976"></stop>
+                <stop offset="0.75" stop-color="#962fbf"></stop>
+                <stop offset="1" stop-color="#4f5bd5"></stop>
+              </linearGradient>
+            </defs>
+            <rect x="4" y="4" width="40" height="40" rx="12" fill="url(#instagramGradient)"></rect>
+            <rect x="14" y="14" width="20" height="20" rx="6" fill="none" stroke="#fff" stroke-width="3"></rect>
+            <circle cx="24" cy="24" r="5.2" fill="none" stroke="#fff" stroke-width="3"></circle>
+            <circle cx="32" cy="16" r="2.2" fill="#fff"></circle>
+          </svg>
+          <span class="sr-only">Instagram</span>
+        </a>
+        <a href="https://youtube.com/channel/UCSlqV4SGqzS2rdlTFlpMVNQ?si=bdjnYZtXHQbRJg4B" target="_blank" rel="noopener noreferrer" aria-label="YouTube" title="YouTube">
+          <svg class="social-icon social-icon-youtube" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+            <rect x="2" y="10" width="44" height="28" rx="8" fill="#ff0000"></rect>
+            <path d="M20 18.2v11.6L31 24 20 18.2Z" fill="#fff"></path>
+          </svg>
+          <span class="sr-only">YouTube</span>
+        </a>
+        <a href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer" aria-label="Facebook" title="Facebook">
+          <svg class="social-icon" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+            <rect x="4" y="4" width="40" height="40" rx="10" fill="#1877f2"></rect>
+            <path d="M27.4 44V28.7h5.1l.8-6h-5.9v-3.8c0-1.7.5-2.9 3-2.9h3.1v-5.4c-.5-.1-2.4-.2-4.6-.2-4.6 0-7.8 2.8-7.8 8v4.3h-5.2v6h5.2V44h6.3Z" fill="#fff"></path>
+          </svg>
+          <span class="sr-only">Facebook</span>
+        </a>
       </div>
-    </footer>
+  </footer>
 
-    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
     <div class="modal" id="modal">
       <div class="modal-card" id="modalCard">
         <div class="modal-head">
-          <h3 id="modalTitle">Маалымат</h3>
-          <button class="close" id="modalClose" aria-label="Жабуу">×</button>
+          <h3 id="modalTitle" data-i18n="information">Маалымат</h3>
+          <button class="close" id="modalClose" aria-label="Жабуу" data-i18n-aria-label="close">×</button>
         </div>
         <div class="modal-body" id="modalBody"></div>
       </div>
     </div>
 
-    <button class="install-app-btn" id="installAppBtn" type="button">📱 Тиркемени орнотуу</button>
+    <button class="install-app-btn" id="installAppBtn" type="button"><span aria-hidden="true">📱</span> <span data-i18n="installApp">Тиркемени орнотуу</span></button>
 
-    <script src="{{ url_for('static', filename='js/translations.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/i18n.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/translations.js') }}?v=56"></script>
+    <script src="{{ url_for('static', filename='js/i18n.js') }}?v=52"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}?v=54"></script>
+    <script src="{{ url_for('static', filename='js/portal.js') }}?v=1"></script>
+    {% block scripts %}{% endblock %}
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {

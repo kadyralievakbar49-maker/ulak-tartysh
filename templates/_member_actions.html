@@ -1,0 +1,14 @@
+{% macro favorite(kind, entity_id) -%}
+{% set saved = (kind, entity_id) in favorite_entities %}
+<button type="button" class="member-action" data-favorite="{{ kind }}" data-entity-id="{{ entity_id }}" aria-pressed="{{ 'true' if saved else 'false' }}">
+  <span aria-hidden="true">{{ '★' if saved else '☆' }}</span>
+  <span data-member-label data-i18n="{{ 'savedFavorite' if saved else 'saveFavorite' }}">{{ 'В избранном' if saved else 'В избранное' }}</span>
+</button>
+{%- endmacro %}
+{% macro subscription(team_id) -%}
+{% set subscribed = team_id in subscribed_teams %}
+<button type="button" class="member-action" data-subscription="{{ team_id }}" aria-pressed="{{ 'true' if subscribed else 'false' }}">
+  <span data-member-label data-i18n="{{ 'subscribedTeam' if subscribed else 'subscribeTeam' }}">{{ 'Расписание в кабинете' if subscribed else 'Следить за командой' }}</span>
+</button>
+<a class="member-action" href="{{ url_for('portal.calendar',team_id=team_id) }}" data-i18n="downloadCalendar">Скачать календарь</a>
+{%- endmacro %}

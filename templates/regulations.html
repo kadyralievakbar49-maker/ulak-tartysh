@@ -4,14 +4,14 @@
 {% block description %}Регламенты, положения и официальные документы федерации улак тартыш.{% endblock %}
 
 {% block content %}
-<main>
-  <section class="section page-hero">
+<main class="content-page">
+  <header class="content-page-header">
     <p class="eyebrow" data-i18n="pageDocumentsEyebrow">Документы</p>
     <h1 data-i18n="regulations">Регламенттер</h1>
-    <p class="lead" data-i18n="regulationsLead">Официальные положения турниров, заявок и проведения матчей.</p>
-  </section>
+    <p data-i18n="regulationsLead">Официальные положения турниров, заявок и проведения матчей.</p>
+  </header>
 
-  <section class="section">
+  <section class="content-page-body">
     <div class="responsive-table">
       <table class="data-table">
         <thead>
@@ -26,10 +26,18 @@
           {% for item in regulations %}
           <tr>
             <td><strong>{{ item.title }}</strong></td>
-            <td>{{ item.date }}</td>
+            <td>{{ item.regulation_date }}</td>
             <td>{{ item.description }}</td>
-            <td><a class="primary table-action" href="{{ url_for('static', filename=item.file) }}" download data-i18n="download">Скачать</a></td>
+            <td>
+              {% if item.file_path and file_available(item.file_path) %}
+              <a class="primary table-action" href="{{ item.file_path }}" target="_blank" rel="noopener noreferrer" data-i18n="download">Скачать</a>
+              {% else %}
+              <span data-i18n="fileMissing">Файл не добавлен</span>
+              {% endif %}
+            </td>
           </tr>
+          {% else %}
+          <tr><td colspan="4" class="empty-state" data-i18n="regulationsEmpty">Регламенты пока не добавлены.</td></tr>
           {% endfor %}
         </tbody>
       </table>

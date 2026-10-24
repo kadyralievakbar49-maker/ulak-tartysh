@@ -1,0 +1,29 @@
+{% macro video_player(video, classes='media-card-visual', fallback_label='Открыть видео') -%}
+{% set player = video_embed(video.video_url) %}
+{% if not file_available(video.video_url) %}
+<div class="{{ classes }} media-unavailable"><span data-i18n="mediaFileMissing">Файл видео пока недоступен.</span></div>
+{% elif player.type == 'direct' %}
+<div class="{{ classes }} media-player">
+  <video src="{{ player.src }}" controls preload="metadata" playsinline{% if video.thumbnail and file_available(video.thumbnail) %} poster="{{ video.thumbnail }}"{% endif %}></video>
+</div>
+{% elif player.type == 'embed' %}
+<div class="{{ classes }} media-player">
+  <iframe
+    src="{{ player.src }}"
+    title="{{ video.title or 'Видео' }}"
+    loading="lazy"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+    allowfullscreen></iframe>
+</div>
+{% else %}
+<a class="{{ classes }}" href="{{ player.src or video.video_url }}" target="_blank" rel="noopener noreferrer">
+  {% if video.thumbnail and file_available(video.thumbnail) %}
+  <img src="{{ video.thumbnail }}" alt="{{ video.title }}" loading="lazy" />
+  {% else %}
+  <span class="media-card-placeholder"></span>
+  {% endif %}
+  <span class="media-play" aria-hidden="true"></span>
+  <span class="sr-only">{{ fallback_label }}</span>
+</a>
+{% endif %}
+{%- endmacro %}

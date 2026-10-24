@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}Архив игр | Улак Тартыш{% endblock %}
+
+{% block content %}
+<main class="archive-page">
+  <section class="archive-section">
+    <header class="archive-header">
+      <p class="eyebrow" data-i18n="portalUi0">Архив</p>
+      <h1 data-i18n="portalUi14">Архив игр</h1>
+      <p data-i18n="portalUi15">Результаты прошедших матчей, турниров и плей-офф стадий.</p>
+    </header>
+
+    <div class="archive-panel">
+      <form class="archive-filters" role="search" aria-label="Фильтры архива игр" data-i18n-aria-label="archiveFiltersLabel">
+        <label>
+          <span data-i18n="portalUi28">Сезон</span>
+          <select id="seasonFilter">
+            <option value="all" data-i18n="portalUi16">Все сезоны</option>
+            {% for item in seasons %}
+            <option value="{{ item.season }}">{{ item.season }}</option>
+            {% endfor %}
+          </select>
+        </label>
+
+        <label>
+          <span data-i18n="portalUi51">Лига</span>
+          <select id="leagueFilter">
+            <option value="all" data-i18n="portalUi17">Все лиги</option>
+            {% for item in leagues %}
+            <option value="{{ item.league }}">{{ item.league }}</option>
+            {% endfor %}
+          </select>
+        </label>
+
+        <label>
+          <span data-i18n="portalUi29">Турнир</span>
+          <select id="tournamentFilter">
+            <option value="all" data-i18n="portalUi18">Все турниры</option>
+            {% for item in tournaments %}
+            <option value="{{ item.tournament_name }}">{{ item.tournament_name }}</option>
+            {% endfor %}
+          </select>
+        </label>
+
+        <label class="archive-search">
+          <span data-i18n="portalUi87">Поиск</span>
+          <input id="archiveSearch" type="search" placeholder="Команда, место, турнир" data-i18n-placeholder="archiveSearchPlaceholder" autocomplete="off" />
+        </label>
+      </form>
+
+      <div class="archive-list" id="archiveList">
+        {% for match in matches %}
+        <article
+          class="archive-match-card"
+          data-season="{{ match.season or '' }}"
+          data-league="{{ match.league or '' }}"
+          data-tournament="{{ match.tournament_name or '' }}"
+          data-search="{{ (match.team1_name ~ ' ' ~ match.team2_name ~ ' ' ~ (match.location or '') ~ ' ' ~ (match.league or '') ~ ' ' ~ (match.tournament_name or ''))|lower }}">
+          <div class="archive-match-meta">
+            <span>{{ match.match_date }}{% if match.match_time %} · {{ match.match_time }}{% endif %}</span>
+            {% if match.league %}<span>{{ match.league }}</span>{% endif %}
+            {% if match.tournament_name %}<span>{{ match.tournament_name }}</span>{% endif %}
+            {% if match.stage %}<span>{{ match.stage }}</span>{% endif %}
+          </div>
+
+          <div class="archive-score-row">
+            <div class="archive-team archive-team-left">
+              {% if match.winner_team in ['team1', match.team1_name] %}<span class="winner-badge" aria-label="Победитель">🏆</span>{% endif %}
+              <strong>{{ match.team1_name }}</strong>
+            </div>
+
+            <div class="archive-score">
+              <span>{{ match.team1_score }}</span>
+              <b>:</b>
+              <span>{{ match.team2_score }}</span>
+            </div>
+
+            <div class="archive-team archive-team-right">
+              <strong>{{ match.team2_name }}</strong>
+              {% if match.winner_team in ['team2', match.team2_name] %}<span class="winner-badge" aria-label="Победитель">🏆</span>{% endif %}
+            </div>
+          </div>
+
+          <div class="archive-match-footer">
+            <span>{{ match.location or 'Место не указано' }}</span>
+            <div class="archive-actions">
+              {% if match.video_url %}
+              <a class="archive-watch" href="{{ url_for('match_detail', match_id=match.id) }}#match-video" data-i18n="portalUi19">Смотреть видео</a>
+              {% endif %}
+              <a class="archive-details" href="{{ url_for('match_detail', match_id=match.id) }}" data-i18n="portalUi20">Подробнее</a>
+            </div>
+          </div>
+        </article>
+        {% else %}
+        <div class="archive-empty">
+          <h2 data-i18n="portalUi21">Архив пока пуст</h2>
+          <p data-i18n="portalUi22">Матчи появятся здесь после добавления в админ-панели.</p>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="archive-empty archive-empty-filtered" id="archiveEmptyFiltered" hidden>
+        <h2 data-i18n="portalUi23">Матчи не найдены</h2>
+        <p data-i18n="portalUi24">Попробуйте изменить сезон, лигу, турнир или поисковый запрос.</p>
+      </div>
+    </div>
+  </section>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  (() => {
+    const filters = {
+      season: document.getElementById("seasonFilter"),
+      league: document.getElementById("leagueFilter"),
+      tournament: document.getElementById("tournamentFilter"),
+      search: document.getElementById("archiveSearch"),
+    };
+    const cards = [...document.querySelectorAll(".archive-match-card")];
+    const empty = document.getElementById("archiveEmptyFiltered");
+
+    function matchesFilter(card) {
+      const search = filters.search.value.trim().toLowerCase();
+      return (
+        (filters.season.value === "all" || card.dataset.season === filters.season.value) &&
+        (filters.league.value === "all" || card.dataset.league === filters.league.value) &&
+        (filters.tournament.value === "all" || card.dataset.tournament === filters.tournament.value) &&
+        (!search || card.dataset.search.includes(search))
+      );
+    }
+
+    function filterArchive() {
+      let visible = 0;
+      cards.forEach((card) => {
+        const show = matchesFilter(card);
+        card.hidden = !show;
+        if (show) visible += 1;
+      });
+      if (empty) empty.hidden = visible > 0 || cards.length === 0;
+    }
+
+    Object.values(filters).forEach((field) => field && field.addEventListener("input", filterArchive));
+    filterArchive();
+  })();
+</script>
+{% endblock %}

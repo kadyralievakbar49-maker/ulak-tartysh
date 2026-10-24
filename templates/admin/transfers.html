@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Трансферы | Админ-панель</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}" />
+  </head>
+  <body>
+    <aside class="admin-sidebar">
+      <a class="admin-brand" href="{{ url_for('admin_panel') }}">
+        <img src="{{ url_for('static', filename='img/logo.jpg') }}" alt="Улак тартыш" />
+        <span><small>Управление сайтом</small><strong>Админ-панель</strong></span>
+      </a>
+      <nav class="admin-tabs">
+        <span class="admin-nav-label">Главное</span>
+        <a href="{{ url_for('admin_panel') }}">Обзор</a>
+        <a href="{{ url_for('admin_panel') }}#people">Игроки и судьи</a>
+        <a href="{{ url_for('admin_panel') }}#matches">Матчи</a>
+        <span class="admin-nav-label">Справочник</span>
+        <a href="{{ url_for('admin_rules') }}">Правила игры</a>
+        <a href="{{ url_for('admin_regulations') }}">Регламенты</a>
+        <a class="active" href="{{ url_for('admin_transfers') }}">Трансферы</a>
+        <span class="admin-nav-label">Доступ</span>
+        <a href="{{ url_for('admin_users') }}">Пользователи</a>
+      </nav>
+      <div class="sidebar-actions">
+        <a href="{{ url_for('pages.transfers_page') }}" target="_blank">Открыть страницу</a>
+        <a class="danger" href="{{ url_for('admin_logout') }}">Выйти</a>
+      </div>
+    </aside>
+    <main class="admin-main">
+      <header class="admin-topbar">
+        <div><p class="eyebrow">Команды и игроки</p><h1>Трансферы</h1></div>
+        <a class="open-site" href="{{ url_for('admin_transfer_add') }}">Добавить трансфер</a>
+      </header>
+      <section class="panel">
+        <div class="responsive-table">
+          <table class="admin-user-table cms-table">
+            <thead><tr><th>Игрок</th><th>Из команды</th><th>В команду</th><th>Дата</th><th>Статус</th><th>Действия</th></tr></thead>
+            <tbody>
+              {% for item in transfers %}
+              <tr>
+                <td><strong>{{ item.player }}</strong></td><td>{{ item.from_team }}</td><td>{{ item.to_team }}</td><td>{{ item.transfer_date }}</td>
+                <td>
+                  <form class="status-form" method="post" action="{{ url_for('admin_transfer_status', transfer_id=item.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                    <select name="status" onchange="this.form.submit()">
+                      {% for status in ['На рассмотрении', 'Подтверждён', 'Отклонён'] %}
+                      <option value="{{ status }}" {% if item.status == status %}selected{% endif %}>{{ status }}</option>
+                      {% endfor %}
+                    </select>
+                  </form>
+                </td>
+                <td><div class="user-actions-grid">
+                  <a href="{{ url_for('admin_transfer_edit', transfer_id=item.id) }}">Редактировать</a>
+                  <form class="confirm-delete" method="post" action="{{ url_for('admin_transfer_delete', transfer_id=item.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                    <button class="link-button danger-text" type="submit">Удалить</button>
+                  </form>
+                </div></td>
+              </tr>
+              {% else %}
+              <tr><td colspan="6" class="empty">Трансферов пока нет.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+    <script>
+      document.querySelectorAll(".confirm-delete").forEach((form) => {
+        form.addEventListener("submit", (event) => {
+          if (!confirm("Удалить трансфер?")) event.preventDefault();
+        });
+      });
+    </script>
+  </body>
+</html>

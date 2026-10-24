@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Пользователи | Админ-панель</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}" />
+  </head>
+  <body>
+    <aside class="admin-sidebar">
+      <a class="admin-brand" href="{{ url_for('admin_panel') }}">
+        <img src="{{ url_for('static', filename='img/logo.jpg') }}" alt="Улак тартыш" />
+        <span><small>Управление сайтом</small><strong>Админ-панель</strong></span>
+      </a>
+      <nav class="admin-tabs">
+        <span class="admin-nav-label">Главное</span>
+        <a href="{{ url_for('admin_panel') }}">Обзор</a>
+        <a href="{{ url_for('admin_panel') }}#news">Новости</a>
+        <a href="{{ url_for('admin_panel') }}#media">Медиа</a>
+        <span class="admin-nav-label">Справочник</span>
+        <a href="{{ url_for('admin_rules') }}">Правила игры</a>
+        <a href="{{ url_for('admin_regulations') }}">Регламенты</a>
+        <a href="{{ url_for('admin_transfers') }}">Трансферы</a>
+        <span class="admin-nav-label">Доступ</span>
+        <a class="active" href="{{ url_for('admin_users') }}">Пользователи</a>
+      </nav>
+      <div class="sidebar-actions">
+        <a href="{{ url_for('home') }}">Открыть сайт</a>
+        <a class="danger" href="{{ url_for('admin_logout') }}">Выйти</a>
+      </div>
+    </aside>
+
+    <main class="admin-main">
+      <header class="admin-topbar">
+        <div>
+          <p class="eyebrow">Администрирование</p>
+          <h1>Пользователи</h1>
+        </div>
+        <a class="open-site" href="{{ url_for('admin_panel') }}">Назад в панель</a>
+      </header>
+
+      <section class="stats-grid user-stats">
+        <article><span>Всего</span><strong>{{ totals.total or 0 }}</strong></article>
+        <article><span>Администраторы</span><strong>{{ totals.admins or 0 }}</strong></article>
+        <article><span>Заблокированы</span><strong>{{ totals.blocked or 0 }}</strong></article>
+      </section>
+
+      {% if request.args.get('error') %}
+      <p class="admin-alert error">{{ request.args.get('error') }}</p>
+      {% endif %}
+
+      <section class="panel">
+        <form class="user-filters" method="get">
+          <label>
+            <span>Поиск</span>
+            <input name="q" type="search" value="{{ query }}" placeholder="Имя, email или телефон" />
+          </label>
+          <label>
+            <span>Роль</span>
+            <select name="role">
+              <option value="">Все роли</option>
+              <option value="user" {% if role_filter == 'user' %}selected{% endif %}>Пользователь</option>
+              <option value="admin" {% if role_filter == 'admin' %}selected{% endif %}>Администратор</option>
+            </select>
+          </label>
+          <label>
+            <span>Статус</span>
+            <select name="status">
+              <option value="">Все статусы</option>
+              <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Активные</option>
+              <option value="blocked" {% if status_filter == 'blocked' %}selected{% endif %}>Заблокированные</option>
+            </select>
+          </label>
+          <button type="submit">Найти</button>
+          <a class="admin-link-button" href="{{ url_for('admin_users') }}">Сбросить</a>
+        </form>
+      </section>
+
+      <section class="panel">
+        <div class="responsive-table">
+          <table class="admin-user-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Имя</th>
+                <th>Email</th>
+                <th>Телефон</th>
+                <th>Дата регистрации</th>
+                <th>Роль</th>
+                <th>Статус</th>
+                <th>Действия</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for user in users %}
+              <tr>
+                <td>#{{ user.id }}</td>
+                <td><strong>{{ user.full_name }}</strong></td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.phone or '—' }}</td>
+                <td>{{ user.created_at }}</td>
+                <td><span class="status-badge role-{{ user.role }}">{{ 'Администратор' if user.role == 'admin' else 'Пользователь' }}</span></td>
+                <td><span class="status-badge {{ 'active' if user.is_active else 'blocked' }}">{{ 'Активен' if user.is_active else 'Заблокирован' }}</span></td>
+                <td>
+                  <div class="user-actions-grid">
+                    <a href="{{ url_for('admin_user_detail', user_id=user.id) }}">Детали</a>
+                    <a href="{{ url_for('admin_user_edit', user_id=user.id) }}">Редактировать</a>
+                    <form method="post" action="{{ url_for('admin_user_toggle_role', user_id=user.id) }}">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                      <button class="link-button" type="submit">Сменить роль</button>
+                    </form>
+                    <form method="post" action="{{ url_for('admin_user_toggle_block', user_id=user.id) }}">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                      <button class="link-button" type="submit">{{ 'Заблокировать' if user.is_active else 'Разблокировать' }}</button>
+                    </form>
+                    <form class="delete-user-form" method="post" action="{{ url_for('admin_user_delete', user_id=user.id) }}">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                      <button class="link-button danger-text" type="submit">Удалить</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              {% else %}
+              <tr><td colspan="8" class="empty">Пользователи не найдены.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      document.querySelectorAll(".delete-user-form").forEach((form) => {
+        form.addEventListener("submit", (event) => {
+          if (!confirm("Удалить пользователя без возможности восстановления?")) event.preventDefault();
+        });
+      });
+    </script>
+  </body>
+</html>

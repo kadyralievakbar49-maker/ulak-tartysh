@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Новости | Улак тартыш Федерациясы{% endblock %}
+{% block description %}Все опубликованные новости федерации Улак тартыш.{% endblock %}
+
+{% block content %}
+<main class="news-list-page">
+  <section class="section">
+    <div class="section-head news-list-head">
+      <div>
+        <p class="eyebrow" data-i18n="newsEyebrow">НОВОСТИ</p>
+        <h1 data-i18n="allNewsPageTitle">Все новости федерации</h1>
+        <p class="news-list-lead" data-i18n="allNewsPageLead">Официальные новости, объявления и материалы федерации Улак тартыш.</p>
+      </div>
+      <a class="btn-ghost" href="{{ url_for('home') }}">← <span data-i18n="navHomeMain">Главная</span></a>
+    </div>
+
+    {% if news %}
+    <div class="news-grid-modern">
+      {% for item in news %}
+      <a class="news-card-modern" href="{{ url_for('news_detail_page', news_id=item.id) }}">
+        <span class="news-image-wrapper">
+          {% if item.img_url and file_available(item.img_url) %}
+          <img src="{{ item.img_url }}" alt="{{ item.title }}" loading="lazy" />
+          {% else %}
+          <span class="news-placeholder" aria-hidden="true">UT</span>
+          {% endif %}
+        </span>
+        <span class="news-content">
+          <time datetime="{{ item.date }}">{{ item.date|display_date }}</time>
+          <h3>{{ item.title }}</h3>
+          <p>
+            {% if item.body %}
+            {{ item.body|striptags|truncate(180) }}
+            {% else %}
+            <span data-i18n="newsSummaryFallback">Новости федерации.</span>
+            {% endif %}
+          </p>
+        </span>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="empty-news" data-i18n="noNews">Новостей пока нет.</p>
+    {% endif %}
+  </section>
+</main>
+{% endblock %}

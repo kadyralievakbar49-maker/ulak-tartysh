@@ -13,29 +13,25 @@
       const nav = document.querySelector("#nav");
       const drawerOverlay = document.querySelector("#drawerOverlay");
       const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || "";
-
-      function applyTheme(theme) {
-        const normalized = theme === "dark" ? "dark" : "light";
-        if (normalized === "dark") {
-          document.documentElement.setAttribute("data-theme", "dark");
-        } else {
-          document.documentElement.removeAttribute("data-theme");
-        }
-        localStorage.setItem("siteTheme", normalized);
-        document.querySelectorAll("[data-theme-toggle], #themeToggle").forEach((toggle) => {
-          toggle.textContent = normalized === "dark" ? "☀️" : "🌙";
-          toggle.setAttribute("aria-label", normalized === "dark" ? "Жарык темага өтүү" : "Караңгы темага өтүү");
-        });
-      }
-
-      applyTheme(localStorage.getItem("siteTheme") || "light");
+      const siteFlashes = document.querySelector(".site-flashes");
 
       function showToast(message) {
         if (!toast) return;
         toast.textContent = message;
         toast.classList.add("show");
         window.clearTimeout(showToast.timer);
-        showToast.timer = window.setTimeout(() => toast.classList.remove("show"), 2600);
+        showToast.timer = window.setTimeout(() => toast.classList.remove("show"), 5200);
+      }
+
+      function hideSiteFlashes() {
+        if (!siteFlashes) return;
+        siteFlashes.classList.add("is-hiding");
+        window.setTimeout(() => siteFlashes.remove(), 260);
+      }
+
+      if (siteFlashes) {
+        window.setTimeout(hideSiteFlashes, 5200);
+        siteFlashes.addEventListener("click", hideSiteFlashes);
       }
 
       async function normalizeImageFile(file, maxWidth = 1920, maxHeight = 1080, quality = 0.85) {
@@ -43,27 +39,14 @@
         if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) return file;
 
         const bitmap = await createImageBitmap(file);
-        const targetRatio = maxWidth / maxHeight;
-        const sourceRatio = bitmap.width / bitmap.height;
-        let sx = 0;
-        let sy = 0;
-        let sw = bitmap.width;
-        let sh = bitmap.height;
-
-        if (sourceRatio > targetRatio) {
-          sw = Math.round(bitmap.height * targetRatio);
-          sx = Math.round((bitmap.width - sw) / 2);
-        } else if (sourceRatio < targetRatio) {
-          sh = Math.round(bitmap.width / targetRatio);
-          sy = Math.round((bitmap.height - sh) / 2);
-        }
-
-        const scale = Math.min(maxWidth / sw, maxHeight / sh, 1);
+        const scale = Math.min(maxWidth / bitmap.width, maxHeight / bitmap.height, 1);
         const canvas = document.createElement("canvas");
-        canvas.width = Math.round(sw * scale);
-        canvas.height = Math.round(sh * scale);
+        canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+        canvas.height = Math.max(1, Math.round(bitmap.height * scale));
         const context = canvas.getContext("2d");
-        context.drawImage(bitmap, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+        context.fillStyle = "#fff";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
 
         const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
         bitmap.close?.();
@@ -143,7 +126,7 @@ function formMarkup(type) {
           <label style="font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px;">
             <input type="checkbox" name="remember" /> ${t("rememberMe")}
           </label>
-          <a href="#" style="font-size:13px;color:var(--red);text-decoration:none;" data-action="forgot">${t("forgotPassword")}</a>
+          <a href="/forgot-password" style="font-size:13px;color:var(--red);text-decoration:none;">${t("forgotPassword")}</a>
         </div>
         <a class="admin-login-link" href="/admin">${t("adminLogin")}</a>
         <div class="modal-actions">
@@ -159,7 +142,7 @@ function formMarkup(type) {
   // === РЕГИСТРАЦИЯ ===
   if (type === "register") {
     return `
-      <form class="form-grid" data-submit="register">
+      <form class="form-grid" data-submit="register"><p class="form-hint">${t("registerBenefits")}</p>
         <div class="form-field">
           <label for="regFullname">${t("fullName")}</label>
           <input id="regFullname" name="fullname" type="text" required placeholder="${t("fullNamePlaceholder")}" autocomplete="name" />
@@ -189,18 +172,6 @@ function formMarkup(type) {
         <p style="text-align:center;margin-top:16px;font-size:14px;color:var(--muted)">
           ${t("hasAccount")} <a href="#" style="color:var(--red);text-decoration:none;" data-open="login">${t("login")}</a>
         </p>
-      </form>`;
-  }
-
-  // === БИЛЕТЫ ===
-  if (type === "tickets") {
-    return `
-      <form class="form-grid" data-submit="tickets">
-        <div class="form-field"><label>${t("match")}</label><select name="match"><option>Достук - Ынтымак</option><option>Сары-Өзөн - Мурас</option><option>Бакубат - Ак-Суу</option></select></div>
-        <div class="form-field"><label>${t("ticketCount")}</label><input name="count" type="number" min="1" max="10" value="2" /></div>
-        <div class="form-field"><label>${t("phone")}</label><input name="phone" required placeholder="+996 700 000 000" /></div>
-        <div class="form-field"><label>Email</label><input name="email" type="email" placeholder="email@example.com" /></div>
-        <div class="modal-actions"><button class="ghost" type="button" data-close>${t("close")}</button><button class="primary" type="submit">${t("booking")}</button></div>
       </form>`;
   }
 
@@ -235,13 +206,6 @@ function formMarkup(type) {
           }
         });
       }
-
-      document.querySelectorAll("[data-theme-toggle], #themeToggle").forEach((toggle) => {
-        toggle.addEventListener("click", () => {
-          const currentTheme = document.documentElement.dataset.theme === "dark" ? "dark" : "light";
-          applyTheme(currentTheme === "dark" ? "light" : "dark");
-        });
-      });
 
       document.querySelectorAll("[data-close-menu]").forEach((button) => {
         button.addEventListener("click", closeDrawer);
@@ -289,7 +253,6 @@ function formMarkup(type) {
           const titles = {
             login: t("loginTitle"),
             register: t("registerTitle"),
-            tickets: t("ticketsTitle"),
             questionnaire: t("questionnaire"),
           };
           openModal(titles[activeModalType], formMarkup(activeModalType));
@@ -324,7 +287,7 @@ function formMarkup(type) {
       let newsTouchEndX = 0;
 
       function getNewsCardsPerView() {
-        if (window.innerWidth <= 600) return 1;
+        if (window.innerWidth <= 768) return 1;
         if (window.innerWidth <= 1200) return 2;
         return 3;
       }
@@ -352,12 +315,12 @@ function formMarkup(type) {
       window.moveNews = function moveNews(direction) {
         if (!newsTrack) return;
         const cards = newsTrack.querySelectorAll(".news-card-compact");
-        const totalCards = Math.max(1, Math.floor(cards.length / 2));
         if (!cards.length) return;
+        const maxPosition = Math.max(0, cards.length - getNewsCardsPerView());
 
         newsPosition += direction;
-        if (newsPosition >= totalCards) newsPosition = 0;
-        if (newsPosition < 0) newsPosition = totalCards - 1;
+        if (newsPosition > maxPosition) newsPosition = 0;
+        if (newsPosition < 0) newsPosition = maxPosition;
 
         applyNewsRingTransform();
         resetNewsAutoPlay();
@@ -396,7 +359,6 @@ function formMarkup(type) {
   const titles = { 
     login: t("loginTitle"), 
     register: t("registerTitle"), 
-    tickets: t("ticketsTitle"), 
     questionnaire: t("questionnaire") 
   };
   activeModalType = type;
@@ -406,37 +368,36 @@ function formMarkup(type) {
         if (target.dataset.match) {
           openModal(
             target.dataset.match,
-            `<p><strong>${target.dataset.match}</strong> беттеши боюнча маалымат.</p>
-             <p>Өтчү күнү: Календардан караңыз. Дареги: Бишкек Реалдуу убакытта билеттерди азыр брондосо болот.</p>
-             <div class="modal-actions"><button class="primary" data-open="tickets">Билет алуу</button></div>`
+            `<p><strong>${target.dataset.match}</strong> ${t("matchInformationSuffix")}</p>
+             <p>${t("matchDetailsText")}</p>`
           );
         }
 
         if (target.dataset.news) {
           openModal(
             target.dataset.news,
-            `<p>Бул бөлүм жаңылыктын толук текстин көрсөтөт. Бэкендге кошулгандан кийин маалыматтар ушул жерде жаңыртылат.</p>`
+            `<p>${t("newsModalText")}</p>`
           );
         }
 
         if (target.dataset.image) {
-          openModal("Галерея", `<img src="${target.dataset.image}" alt="Галерея" />`, true);
+          openModal(t("gallery"), `<img src="${target.dataset.image}" alt="${t("gallery")}" />`, true);
         }
 
         if (target.dataset.action) {
           if (target.dataset.action === "subscribe") {
             openModal(
-              "Жаңылыктарга жазылуу",
+              t("subscribeTitle"),
               `<form class="form-grid" data-submit="subscribe">
-                <div class="form-field"><label>Email</label><input name="email" type="email" required placeholder="you@example.com" /></div>
-                <div class="modal-actions"><button class="ghost" type="button" data-close>Жабуу</button><button class="primary" type="submit">Жазылуу</button></div>
+                <div class="form-field"><label>${t("emailLabel")}</label><input name="email" type="email" required placeholder="you@example.com" /></div>
+                <div class="modal-actions"><button class="ghost" type="button" data-close>${t("close")}</button><button class="primary" type="submit">${t("subscribe")}</button></div>
               </form>`
             );
           } else {
             const messages = {
-              calendar: "Календарь жүктөө даяр.",
-              gallery: "Галерея үчүн сүрөттү басыңыз.",
-              rating: "Рейтинг бөлүмү көрсөтүлдү.",
+              calendar: t("calendarReady"),
+              gallery: t("galleryHint"),
+              rating: t("ratingShown"),
             };
             showToast(messages[target.dataset.action]);
           }
@@ -474,7 +435,7 @@ function formMarkup(type) {
         .then(response => response.json().then(data => ({ ok: response.ok, data })))
         .then(({ ok, data }) => {
           if (!ok || data.status === "error") {
-            showToast(data.message || "Ката кетти.");
+            showToast(data.message || t("genericError"));
             return;
           }
 
@@ -489,7 +450,7 @@ function formMarkup(type) {
         })
         .catch(error => {
           console.error("Ката кетти:", error);
-          showToast("Байланыш катасы келип чыкты.");
+          showToast(t("connectionError"));
         });
       });
       /* ===== HERO SLIDER AUTO-ROTATION ===== */
@@ -537,6 +498,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   animatedSections.forEach((section) => {
     section.classList.add("fade-in");
+    if (section.classList.contains("hero")) {
+      section.classList.add("visible");
+      return;
+    }
     if (revealObserver && !reduceMotion) {
       revealObserver.observe(section);
     } else {
@@ -639,13 +604,13 @@ document.addEventListener("DOMContentLoaded", () => {
         body: JSON.stringify(payload),
       });
       const data = await response.json();
-      alert(data.message || "Жооп алынды.");
+      alert(data.message || t("responseReceived"));
       if (response.ok && data.status === "success") {
         window.location.reload();
       }
     } catch (error) {
       console.error(error);
-      alert("Байланыш катасы.");
+      alert(t("connectionError"));
     }
   });
 
@@ -661,13 +626,13 @@ document.addEventListener("DOMContentLoaded", () => {
         body: JSON.stringify(payload),
       });
       const data = await response.json();
-      alert(data.message || "Жооп алынды.");
+      alert(data.message || t("responseReceived"));
       if (response.ok && data.status === "success") {
         passwordForm.reset();
       }
     } catch (error) {
       console.error(error);
-      alert("Байланыш катасы.");
+      alert(t("connectionError"));
     }
   });
 
@@ -698,9 +663,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const value = button.dataset.copy || "";
       try {
         await navigator.clipboard.writeText(value);
-        button.textContent = "Көчүрүлдү";
+        button.textContent = t("copied");
         window.setTimeout(() => {
-          button.textContent = "Көчүрүү";
+          button.textContent = t("copy");
         }, 1600);
       } catch (error) {
         console.error(error);

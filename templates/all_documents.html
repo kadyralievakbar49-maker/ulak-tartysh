@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Официальные документы | Улак Тартыш{% endblock %}
+{% block description %}Уставы, правила, регламенты и формы федерации Улак Тартыш в одной таблице.{% endblock %}
+{% block page_title_key %}pageDocumentsTitle{% endblock %}
+
+{% block content %}
+<main class="content-page all-documents-page">
+  <header class="content-page-header">
+    <p class="eyebrow" data-i18n="pageDocumentsEyebrow">Документы</p>
+    <h1 data-i18n="pageDocumentsTitle">Официальные документы</h1>
+    <p data-i18n="pageDocumentsLead">Уставы, правила, регламенты и формы федерации.</p>
+  </header>
+
+  <section class="content-page-body all-documents-body">
+    <div class="document-filters" aria-label="Фильтры документов">
+      <button class="document-filter active" type="button" data-doc-filter="all" data-i18n="portalUi74">Все</button>
+      <button class="document-filter" type="button" data-doc-filter="charters" data-i18n="portalUi75">Уставы</button>
+      <button class="document-filter" type="button" data-doc-filter="applications" data-i18n="portalUi76">Заявки</button>
+      <button class="document-filter" type="button" data-doc-filter="legal" data-i18n="portalUi77">Юридические</button>
+      <button class="document-filter" type="button" data-doc-filter="rules" data-i18n="portalUi78">Правила</button>
+    </div>
+
+    <div class="responsive-table all-documents-table-card">
+      <table class="data-table all-documents-table">
+        <thead>
+          <tr>
+            <th data-i18n="titleLabel">Название</th>
+            <th data-i18n="dateLabel">Дата</th>
+            <th data-i18n="descriptionLabel">Описание</th>
+            <th data-i18n="fileLabel">Файл</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for document in documents %}
+          <tr data-doc-category="{{ document.category }}">
+            <td><strong>{{ document.title }}</strong></td>
+            <td><time datetime="{{ document.official_date or document.upload_date }}">{{ document.official_date or document.upload_date }}</time></td>
+            <td class="document-description">{{ document.description }}</td>
+            <td>
+              {% if file_available(document.file_url or ('/' ~ document.file_path)) %}<a class="primary table-action download-document-btn" href="{{ document.file_url or ('/' ~ document.file_path) }}" data-i18n="download">Скачать</a>{% else %}<span data-i18n="fileMissing">Файл не добавлен</span>{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.querySelectorAll('[data-doc-filter]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const filter = button.dataset.docFilter;
+      document.querySelectorAll('[data-doc-filter]').forEach((item) => {
+        item.classList.toggle('active', item === button);
+      });
+      document.querySelectorAll('[data-doc-category]').forEach((row) => {
+        row.hidden = filter !== 'all' && row.dataset.docCategory !== filter;
+      });
+    });
+  });
+</script>
+{% endblock %}

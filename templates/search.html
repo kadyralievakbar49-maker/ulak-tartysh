@@ -8,7 +8,7 @@
   <section class="section page-hero">
     <p class="eyebrow" data-i18n="pageSearchEyebrow">Издөө</p>
     <h1 data-i18n="pageSearchTitle">Издөө жыйынтыктары</h1>
-    <p class="lead">Суроо: <strong>{{ query or 'бош' }}</strong></p>
+    <p class="lead"><span data-i18n="queryLabel">Запрос</span>: <strong>{{ query or '-' }}</strong></p>
   </section>
 
   <section class="section search-results-section">
@@ -35,9 +35,9 @@
         <div class="search-result-grid">
           {% for item in results.news %}
           <a class="search-result-card" href="{{ url_for('news_detail_page', news_id=item.id) }}">
-            <span>{{ item.date }}</span>
+            <span>{{ item.date|display_date }}</span>
             <h3>{{ highlight(item.title, query) }}</h3>
-            <p>{{ highlight(item.body or 'Федерация жаңылыктары.', query) }}</p>
+            <p>{% if item.body %}{{ highlight(item.body, query) }}{% else %}<span data-i18n="newsSummaryFallback">Федерация жаңылыктары.</span>{% endif %}</p>
           </a>
           {% endfor %}
         </div>
@@ -64,9 +64,13 @@
         <h2 data-i18n="playersEyebrow">Оюнчулар</h2>
         <div class="search-result-grid">
           {% for player in results.players %}
-          <a class="search-result-card" href="{{ url_for('home') }}#players">
+          <a class="search-result-card" href="{{ url_for('player_detail_page', player_id=player.id) }}">
             <h3>{{ highlight(player.name, query) }}</h3>
-            <p>{{ highlight(player.team or 'Команда көрсөтүлгөн эмес', query) }} · {{ player.position or 'Оюнчу' }}</p>
+            <p>
+              {% if player.team %}{{ highlight(player.team, query) }}{% else %}<span data-i18n="teamNotSpecified">Команда көрсөтүлгөн эмес</span>{% endif %}
+              ·
+              {% if player.position %}{{ player.position }}{% else %}<span data-i18n="playerLabel">Оюнчу</span>{% endif %}
+            </p>
           </a>
           {% endfor %}
         </div>
@@ -80,7 +84,11 @@
           {% for team in results.teams %}
           <a class="search-result-card" href="{{ url_for('team_detail_page', team_id=team.id) }}">
             <h3>{{ highlight(team.name, query) }}</h3>
-            <p>{{ highlight(team.region or 'Регион көрсөтүлгөн эмес', query) }} · {{ team.league or 'Лига' }}</p>
+            <p>
+              {% if team.region %}{{ highlight(team.region, query) }}{% else %}<span data-i18n="regionNotSpecified">Регион көрсөтүлгөн эмес</span>{% endif %}
+              ·
+              {% if team.league %}{{ team.league }}{% else %}<span data-i18n="leagueNotSpecified">Лига</span>{% endif %}
+            </p>
           </a>
           {% endfor %}
         </div>
@@ -94,7 +102,10 @@
           {% for horse in results.horses %}
           <a class="search-result-card" href="{{ url_for('horse_detail_page', horse_id=horse.id) }}">
             <h3>{{ highlight(horse.name, query) }}</h3>
-            <p>{{ highlight(horse.breed or 'Порода көрсөтүлгөн эмес', query) }} · {{ horse.points or 0 }} упай</p>
+            <p>
+              {% if horse.breed %}{{ highlight(horse.breed, query) }}{% else %}<span data-i18n="breedNotSpecified">Порода көрсөтүлгөн эмес</span>{% endif %}
+              · {{ horse.points or 0 }} <span data-i18n="pointsUnit">упай</span>
+            </p>
           </a>
           {% endfor %}
         </div>

@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Админ-панель | Улак тартыш</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}?v=3" />
     <style>
       /* 🔧 FIX: Ограничение высоты textarea + скролл */
       .inline-edit textarea,
@@ -20,7 +20,7 @@
       /* 🔧 FIX: Кнопки всегда видны при прокрутке формы */
       .inline-edit {
         display: grid;
-        grid-template-columns: 1fr auto;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
         gap: 12px 16px;
         align-items: start;
       }
@@ -126,18 +126,26 @@
       </a>
 
       <nav class="admin-tabs" aria-label="Разделы админ-панели">
+        <span class="admin-nav-label">Главное</span>
         <button class="active" type="button" data-section="overview">Обзор</button>
         <button type="button" data-section="homepage">Главная страница</button>
+        <span class="admin-nav-label">Игры и контент</span>
         <button type="button" data-section="matches">Матчи</button>
+        <button type="button" data-section="archive">Архив игр</button>
         <button type="button" data-section="news">Новости</button>
         <button type="button" data-section="media">Медиа</button>
+        <span class="admin-nav-label">Участники</span>
         <button type="button" data-section="people">Игроки и судьи</button>
         <button type="button" data-section="horses">Лошади</button>
-        <button type="button" data-section="documents">Документы</button>
         <button type="button" data-section="venues">Ипподромы</button>
+        <span class="admin-nav-label">Справочник</span>
+        <button type="button" data-section="all-documents">📄 Все документы</button>
+        <a href="{{ url_for('admin_rules') }}">Правила игры</a>
+        <a href="{{ url_for('admin_regulations') }}">Регламенты</a>
+        <a href="{{ url_for('admin_transfers') }}">Трансферы</a>
         <button type="button" data-section="contact-cards">Контактные карточки</button>
-        <button type="button" data-section="tickets">Билеты</button>
-        <button type="button" data-section="users">Пользователи</button>
+        <span class="admin-nav-label">Доступ</span>
+        <a href="{{ url_for('admin_users') }}">Пользователи</a><a href="{{ url_for('portal.review_submissions') }}">Объявления на проверку</a><a href="{{ url_for('portal.readiness') }}">Проверка данных и файлов</a>
       </nav>
 
       <div class="sidebar-actions">
@@ -152,32 +160,91 @@
           <p class="eyebrow">Федерация улак тартыш</p>
           <h1>Панель управления сайтом</h1>
         </div>
-        <a class="open-site" href="{{ url_for('home') }}">На сайт</a>
+        <div class="admin-topbar-actions">
+          <a class="admin-link-button" href="{{ url_for('admin_homepage_preview') }}" target="_blank" rel="noopener noreferrer">Превью главной</a>
+          <a class="open-site" href="{{ url_for('home') }}">На сайт</a>
+        </div>
       </header>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="admin-flashes" role="status" aria-live="polite">
+        {% for category, message in messages %}
+        <p class="admin-alert {{ 'error' if category == 'error' else 'success' }}">{{ message }}</p>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% endwith %}
 
       <!-- Обзор -->
       <section class="admin-section active" id="overview">
         <div class="stats-grid">
           <article><span>Матчи</span><strong>{{ matches|length }}</strong></article>
+          <article><span>Архив</span><strong>{{ archive_matches|length }}</strong></article>
           <article><span>Новости</span><strong>{{ news|length }}</strong></article>
           <article><span>Игроки</span><strong>{{ players|length }}</strong></article>
           <article><span>Лошади</span><strong>{{ horses|length }}</strong></article>
           <article><span>Видео</span><strong>{{ videos|length }}</strong></article>
           <article><span>Альбомы</span><strong>{{ albums|length }}</strong></article>
           <article><span>Документы</span><strong>{{ documents|length }}</strong></article>
-          <article><span>Заявки</span><strong>{{ ticket_requests|length }}</strong></article>
+          <article><span>Пользователи</span><strong>{{ users|length }}</strong></article>
         </div>
 
-        <div class="panel">
-          <h2>Быстрые действия</h2>
-          <div class="quick-actions">
-            <button type="button" data-section="matches">Добавить матч</button>
-            <button type="button" data-section="homepage">Настроить главную</button>
-            <button type="button" data-section="news">Опубликовать новость</button>
-            <button type="button" data-section="media">Загрузить медиа</button>
-            <button type="button" data-section="horses">Добавить лошадь</button>
-            <button type="button" data-section="documents">Добавить документ</button>
-            <button type="button" data-section="tickets">Заявки на билеты</button>
+        <div class="overview-layout">
+          <div class="panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Работа с сайтом</p>
+                <h2>Быстрые действия</h2>
+              </div>
+            </div>
+            <div class="quick-actions action-card-grid">
+              <button class="action-card" type="button" data-section="matches">
+                <span>Матчи</span>
+                <strong>Добавить матч</strong>
+                <small>{{ matches|length }} на сайте</small>
+              </button>
+              <button class="action-card" type="button" data-section="news">
+                <span>Новости</span>
+                <strong>Опубликовать новость</strong>
+                <small>{{ news|length }} записей</small>
+              </button>
+              <button class="action-card" type="button" data-section="media">
+                <span>Медиа</span>
+                <strong>Загрузить видео или фото</strong>
+                <small>{{ videos|length }} видео, {{ albums|length }} альбомов</small>
+              </button>
+              <button class="action-card" type="button" data-section="all-documents">
+                <span>Документы</span>
+                <strong>Добавить документ</strong>
+                <small>{{ documents|length }} файлов</small>
+              </button>
+              <button class="action-card" type="button" data-section="homepage">
+                <span>Главная</span>
+                <strong>Настроить первый экран</strong>
+                <small>Hero, кнопки и статистика</small>
+              </button>
+              <button class="action-card" type="button" data-section="horses">
+                <span>Лошади</span>
+                <strong>Добавить лошадь</strong>
+                <small>{{ horses|length }} карточек</small>
+              </button>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Отдельные разделы</p>
+                <h2>Справочники</h2>
+              </div>
+            </div>
+            <div class="quick-links">
+              <a href="{{ url_for('admin_rules') }}"><span>Правила игры</span><strong>Разделы и порядок</strong></a>
+              <a href="{{ url_for('admin_regulations') }}"><span>Регламенты</span><strong>Документы соревнований</strong></a>
+              <a href="{{ url_for('admin_transfers') }}"><span>Трансферы</span><strong>Статусы переходов</strong></a>
+              <a href="{{ url_for('admin_users') }}"><span>Пользователи</span><strong>Роли и блокировки</strong></a>
+            </div>
           </div>
         </div>
       </section>
@@ -211,7 +278,7 @@
                   <input name="button2_text" type="text" value="{{ homepage_settings.button2_text if homepage_settings else 'Жаңылыктар' }}" required />
                 </label>
                 <label>Ссылка кнопки 2
-                  <input name="button2_link" type="text" value="{{ homepage_settings.button2_link if homepage_settings else '#news' }}" required />
+                  <input name="button2_link" type="text" value="{{ homepage_settings.button2_link if homepage_settings else '/news' }}" required />
                 </label>
               </div>
               <label class="file-field homepage-dropzone">Фоновое изображение
@@ -219,7 +286,7 @@
                 <span class="hint">Можно перетащить файл сюда. Рекомендуется 1920×1080 px.</span>
               </label>
               <label>Overlay цвет
-                <input name="overlay_color" type="text" value="{{ homepage_settings.overlay_color if homepage_settings else 'linear-gradient(135deg, rgba(26, 39, 68, 0.58) 0%, rgba(26, 39, 68, 0.36) 55%, rgba(26, 39, 68, 0.21) 100%)' }}" placeholder="rgba(26, 39, 68, 0.45)" />
+                <input name="overlay_color" type="text" value="{{ homepage_settings.overlay_color if homepage_settings else 'linear-gradient(90deg, rgba(8, 13, 24, 0.78) 0%, rgba(10, 18, 32, 0.58) 48%, rgba(10, 18, 32, 0.32) 100%)' }}" placeholder="rgba(10, 18, 32, 0.55)" />
               </label>
 
               <div class="homepage-stats-editor">
@@ -255,7 +322,7 @@
             <h2>Превью главной</h2>
             <div class="homepage-preview" id="homepagePreview"
                  style="background-image: url('{{ homepage_settings.background_image if homepage_settings else '/static/img/slider/slide1.jpg' }}');">
-              <div class="homepage-preview-overlay" style="background: {{ homepage_settings.overlay_color if homepage_settings else 'linear-gradient(135deg, rgba(26, 39, 68, 0.58) 0%, rgba(26, 39, 68, 0.36) 55%, rgba(26, 39, 68, 0.21) 100%)' }};"></div>
+              <div class="homepage-preview-overlay" style="background: {{ homepage_settings.overlay_color if homepage_settings else 'linear-gradient(90deg, rgba(8, 13, 24, 0.78) 0%, rgba(10, 18, 32, 0.58) 48%, rgba(10, 18, 32, 0.32) 100%)' }};"></div>
               <div class="homepage-preview-content">
                 <p>{{ homepage_settings.subtitle if homepage_settings else 'Расмий портал' }}</p>
                 <h3>{{ homepage_settings.title if homepage_settings else 'Улак тартыш оюндарын жаңы деңгээлде көрүңүз' }}</h3>
@@ -283,6 +350,17 @@
               <label>Лига<input name="league" type="text" required placeholder="Жогорку лига" /></label>
               <label>Команда 1<input name="team1" type="text" required placeholder="Достук" /></label>
               <label>Команда 2<input name="team2" type="text" required placeholder="Ынтымак" /></label>
+              <label>Статус
+                <select name="status">
+                  <option value="scheduled">Запланирован</option>
+                  <option value="live">Идёт</option>
+                  <option value="postponed">Перенесён</option>
+                  <option value="finished">Завершён</option>
+                </select>
+              </label>
+              <label>Место<input name="location" type="text" placeholder="Бишкек ипподрому" /></label>
+              <label>Турнир<input name="tournament_name" type="text" placeholder="Кубок / сезон" /></label>
+              <label>Тур<input name="round_name" type="text" placeholder="1-тур, Финал" /></label>
               <label class="check"><input name="is_next" type="checkbox" /> Сделать следующим матчем</label>
               <button type="submit">Сохранить матч</button>
             </form>
@@ -300,10 +378,19 @@
                   <input name="league" value="{{ match.league }}" required />
                   <input name="team1" value="{{ match.team1 }}" required />
                   <input name="team2" value="{{ match.team2 }}" required />
+                  <select name="status">
+                    <option value="scheduled" {% if match.status == 'scheduled' %}selected{% endif %}>Запланирован</option>
+                    <option value="live" {% if match.status == 'live' %}selected{% endif %}>Идёт</option>
+                    <option value="postponed" {% if match.status == 'postponed' %}selected{% endif %}>Перенесён</option>
+                    <option value="finished" {% if match.status == 'finished' %}selected{% endif %}>Завершён</option>
+                  </select>
+                  <input name="location" value="{{ match.location or '' }}" placeholder="Место" />
+                  <input name="tournament_name" value="{{ match.tournament_name or '' }}" placeholder="Турнир" />
+                  <input name="round_name" value="{{ match.round_name or '' }}" placeholder="Тур" />
                   <label class="check"><input name="is_next" type="checkbox" {% if match.is_next %}checked{% endif %} /> следующий</label>
                   <button type="submit">Сохранить</button>
                 </form>
-                <a class="delete" href="{{ url_for('delete_item', table_name='matches', item_id=match.id) }}">Удалить</a>
+                <form class="inline-delete-form" method="post" action="{{ url_for('delete_item', table_name='matches', item_id=match.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}" /><button class="delete" type="submit">Удалить</button></form>
               </div>
               {% else %}
               <p class="empty">Матчей пока нет.</p>
@@ -313,64 +400,220 @@
         </div>
       </section>
 
-      <!-- 🔧 НОВОСТИ (исправлено) -->
-      <section class="admin-section" id="news">
+      <!-- Архив игр -->
+      <section class="admin-section" id="archive">
         <div class="section-layout">
           <article class="panel">
-            <h2>Добавить новость</h2>
-             <form action="{{ url_for('add_news') }}" method="post" enctype="multipart/form-data" class="form-grid">
-                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-              <label>Дата<input name="date" type="date" required /></label>
-              <label>Заголовок<input name="title" type="text" required placeholder="Заголовок новости" /></label>
-              <label>Полный текст
-                <textarea name="body" rows="6" placeholder="Текст новости" style="max-height:120px;overflow-y:auto;"></textarea>
+            <h2>Архив игр</h2>
+            <form method="post" action="{{ url_for('add_match') }}" class="form-grid">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+              <input type="hidden" name="archive_form" value="1" />
+
+              <div class="two-col">
+                <label>Команда 1
+                  <input type="text" name="team1_name" required placeholder="Достук" />
+                </label>
+                <label>Счет
+                  <input type="number" name="team1_score" value="0" min="0" />
+                </label>
+              </div>
+
+              <div class="two-col">
+                <label>Команда 2
+                  <input type="text" name="team2_name" required placeholder="Ынтымак" />
+                </label>
+                <label>Счет
+                  <input type="number" name="team2_score" value="0" min="0" />
+                </label>
+              </div>
+
+              <div class="two-col">
+                <label>Дата матча
+                  <input type="date" name="match_date" required />
+                </label>
+                <label>Время
+                  <input type="time" name="match_time" />
+                </label>
+              </div>
+
+              <div class="two-col">
+                <label>Лига
+                  <select name="league">
+                    <option>Жогорку лига</option>
+                    <option>Биринчи лига</option>
+                    <option>Экинчи лига</option>
+                    <option>Жеңиш Кубогу</option>
+                  </select>
+                </label>
+                <label>Сезон
+                  <input type="text" name="season" value="2026" />
+                </label>
+              </div>
+
+              <label>Турнир
+                <input type="text" name="tournament_name" placeholder="Например: Жеңиш Кубогу - 2026" />
               </label>
-              <label class="file-field">Фото новости
-                <input name="image" type="file" accept="image/*" />
-                <span class="hint">Рекомендуемый размер: 1200×630 px</span>
+
+              <label>Стадия
+                <input type="text" name="stage" placeholder="Финал, Полуфинал и т.д." />
               </label>
-              <label>Ссылка на фото
-                <input name="img_url" type="url" placeholder="https://..." />
-                <span class="hint">Или вставьте ссылку вместо загрузки файла</span>
+
+              <label>Место проведения
+                <input type="text" name="location" placeholder="Бишкек ипподрому" />
               </label>
-              <button type="submit">Опубликовать</button>
+
+              <label>Описание
+                <textarea name="description" rows="4" placeholder="Короткое описание игры"></textarea>
+              </label>
+
+              <label>Ссылка на видео
+                <input type="url" name="video_url" placeholder="https://youtube.com/..." />
+              </label>
+
+              <label>Победитель
+                <select name="winner_team">
+                  <option value="">Нет</option>
+                  <option value="team1">Команда 1</option>
+                  <option value="team2">Команда 2</option>
+                </select>
+              </label>
+
+              <label class="check"><input name="is_playoff" type="checkbox" /> Плей-офф матч</label>
+
+              <button type="submit">Добавить матч</button>
             </form>
           </article>
 
           <article class="panel">
-            <h2>Новости</h2>
+            <h2>Матчи в архиве</h2>
             <div class="table-list">
-              {% for item in news %}
+              {% for match in archive_matches %}
               <div class="row">
-                 <form action="{{ url_for('update_news', news_id=item.id) }}" method="post" enctype="multipart/form-data" class="inline-edit">
-                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                  <input name="date" type="date" value="{{ item.date }}" required />
-                  <input name="title" value="{{ item.title }}" required />
-                  <textarea name="body" rows="4" placeholder="Полный текст" style="max-height:100px;overflow-y:auto;">{{ item.body or '' }}</textarea>
-                  <input name="img_url" value="{{ item.img_url or '' }}" placeholder="Ссылка на фото" />
-                  
-                  <!-- 🔧 Отображение текущего изображения -->
-                  {% if item.img_url %}
-                  <div style="grid-column: 1 / -1;">
-                    <img src="{{ item.img_url }}" alt="Current" class="current-image" loading="lazy" />
-                    <div class="image-actions">
-                      <button type="button" class="btn-small btn-danger" onclick="deleteNewsImage({{ item.id }}, '{{ item.title|replace("'", "\\'") }}')">
-                        🗑 Удалить фото
-                      </button>
-                      <span class="hint">Или загрузите новое — старое заменится автоматически</span>
-                    </div>
-                  </div>
-                  {% endif %}
-                  
-                  <label class="file-field" style="grid-column: 1 / -1;">
-                    Заменить фото
-                    <input name="image" type="file" accept="image/*" />
-                  </label>
-                  <button type="submit">Сохранить</button>
-                </form>
-                <a href="{{ url_for('news_detail_page', news_id=item.id) }}" target="_blank" rel="noopener noreferrer">Открыть</a>
-                <a class="delete" href="{{ url_for('delete_item', table_name='news', item_id=item.id) }}">Удалить</a>
+                <strong>{{ match.team1_name }} {{ match.team1_score }}:{{ match.team2_score }} {{ match.team2_name }}</strong>
+                <small>{{ match.match_date }}{% if match.match_time %} · {{ match.match_time }}{% endif %} · {{ match.league or 'Лига не указана' }}{% if match.tournament_name %} · {{ match.tournament_name }}{% endif %}</small>
+                <a href="{{ url_for('match_detail', match_id=match.id) }}" target="_blank" rel="noopener noreferrer">Открыть</a>
+                <form class="inline-delete-form" method="post" action="{{ url_for('delete_item', table_name='match_archive', item_id=match.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}" /><button class="delete" type="submit">Удалить</button></form>
               </div>
+              {% else %}
+              <p class="empty">Архивных матчей пока нет.</p>
+              {% endfor %}
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- 🔧 НОВОСТИ (исправлено) -->
+      <section class="admin-section" id="news">
+        <div class="news-admin-layout">
+          <article class="panel news-editor-panel">
+            <div class="panel-heading">
+              <div>
+                <h2>Добавить новость</h2>
+                <p class="panel-lead">Заполните заголовок, текст и фото. SEO-поля можно оставить пустыми.</p>
+              </div>
+            </div>
+            <form action="{{ url_for('add_news') }}" method="post" enctype="multipart/form-data" class="form-grid news-editor-form">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+              <div class="news-main-fields">
+                <label>Дата<input name="date" type="date" required /></label>
+                <label>Заголовок<input name="title" type="text" required placeholder="Заголовок новости" /></label>
+                <label class="news-body-field">Полный текст
+                  <textarea name="body" rows="14" placeholder="Пишите новость здесь. Можно вставлять несколько абзацев с новой строки."></textarea>
+                </label>
+              </div>
+              <aside class="news-side-fields"><label>Команда<select name="news_team_id"><option value="">Не привязана</option>{% for team in teams %}<option value="{{ team.id }}">{{ team.name }}</option>{% endfor %}</select></label><label>Архивный матч<select name="news_archive_match_id"><option value="">Не привязан</option>{% for match in archive_matches %}<option value="{{ match.id }}">{{ match.match_date }} · {{ match.team1_name }} — {{ match.team2_name }}</option>{% endfor %}</select></label>
+                <label>SEO title
+                  <input name="meta_title" type="text" placeholder="Заголовок для поисковиков и соцсетей" />
+                </label>
+                <label>SEO description
+                  <textarea name="meta_description" rows="4" placeholder="Короткое описание для Telegram, WhatsApp и Google"></textarea>
+                </label>
+                <label class="file-field">Фото новости
+                  <input name="image" type="file" accept="image/*" />
+                  <span class="hint">Рекомендуемый размер: 1200x630 px</span>
+                </label>
+                <label>Ссылка на фото
+                  <input name="img_url" type="url" placeholder="https://..." />
+                  <span class="hint">Или вставьте ссылку вместо загрузки файла</span>
+                </label>
+                <label class="check"><input name="is_published" type="checkbox" checked /> Опубликовать сразу</label>
+                <button type="submit">Сохранить новость</button>
+              </aside>
+            </form>
+          </article>
+
+          <article class="panel news-list-panel">
+            <div class="panel-heading">
+              <div>
+                <h2>Новости</h2>
+                <p class="panel-lead">Открывайте карточку и редактируйте текст в большом поле.</p>
+              </div>
+            </div>
+            <div class="admin-mini-stats">
+              <span>Опубликовано: <strong>{{ news_totals.published or 0 }}</strong></span>
+              <span>Черновики: <strong>{{ news_totals.drafts or 0 }}</strong></span>
+            </div>
+            <div class="news-admin-list">
+              {% for item in news %}
+              <details class="news-admin-card" {% if loop.first %}open{% endif %}>
+                <summary>
+                  <span class="news-admin-thumb">
+                    {% if item.img_url %}
+                    <img src="{{ item.img_url }}" alt="{{ item.title }}" loading="lazy" />
+                    {% else %}
+                    <span>NEWS</span>
+                    {% endif %}
+                  </span>
+                  <span class="news-admin-summary">
+                    <strong>{{ item.title }}</strong>
+                    <small>{{ item.date }} · {{ 'Опубликовано' if item.is_published else 'Черновик' }}</small>
+                  </span>
+                  <span class="status-badge {{ 'active' if item.is_published else 'blocked' }}">{{ 'Опубликовано' if item.is_published else 'Черновик' }}</span>
+                </summary>
+
+                <form action="{{ url_for('update_news', news_id=item.id) }}" method="post" enctype="multipart/form-data" class="news-editor-form news-update-form">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                  <div class="news-main-fields">
+                    <label>Дата<input name="date" type="date" value="{{ item.date }}" required /></label>
+                    <label>Заголовок<input name="title" value="{{ item.title }}" required /></label>
+                    <label class="news-body-field">Полный текст
+                      <textarea name="body" rows="14" placeholder="Полный текст новости">{{ item.body or '' }}</textarea>
+                    </label>
+                  </div>
+                  <aside class="news-side-fields"><label>Команда<select name="news_team_id"><option value="">Не привязана</option>{% for team in teams %}<option value="{{ team.id }}" {% if item.team_id==team.id %}selected{% endif %}>{{ team.name }}</option>{% endfor %}</select></label><label>Архивный матч<select name="news_archive_match_id"><option value="">Не привязан</option>{% for match in archive_matches %}<option value="{{ match.id }}" {% if item.archive_match_id==match.id %}selected{% endif %}>{{ match.match_date }} · {{ match.team1_name }} — {{ match.team2_name }}</option>{% endfor %}</select></label>
+                    <label>SEO title
+                      <input name="meta_title" value="{{ item.meta_title or '' }}" placeholder="SEO title" />
+                    </label>
+                    <label>SEO description
+                      <textarea name="meta_description" rows="4" placeholder="SEO description">{{ item.meta_description or '' }}</textarea>
+                    </label>
+                    <label>Ссылка на фото
+                      <input name="img_url" value="{{ item.img_url or '' }}" placeholder="Ссылка на фото" />
+                    </label>
+                    {% if item.img_url %}
+                    <div class="news-current-image">
+                      <img src="{{ item.img_url }}" alt="{{ item.title }}" class="current-image" loading="lazy" />
+                      <div class="image-actions">
+                        <button type="button" class="btn-small btn-danger" onclick="deleteNewsImage({{ item.id }}, '{{ item.title|replace("'", "\\'") }}')">
+                          Удалить фото
+                        </button>
+                      </div>
+                    </div>
+                    {% endif %}
+                    <label class="file-field">
+                      Заменить фото
+                      <input name="image" type="file" accept="image/*" />
+                      <span class="hint">Новое фото автоматически заменит старое</span>
+                    </label>
+                    <label class="check"><input name="is_published" type="checkbox" {% if item.is_published %}checked{% endif %} /> опубликовано</label>
+                    <div class="news-card-actions">
+                      <a href="{{ url_for('news_detail_page', news_id=item.id) }}" target="_blank" rel="noopener noreferrer">Открыть</a>
+                      <form class="inline-delete-form" method="post" action="{{ url_for('delete_item', table_name='news', item_id=item.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}" /><button class="delete" type="submit">Удалить</button></form>
+                      <button type="submit">Сохранить</button>
+                    </div>
+                  </aside>
+                </form>
+              </details>
               {% else %}
               <p class="empty">Новостей пока нет.</p>
               {% endfor %}
@@ -389,6 +632,7 @@
               <label>Название<input name="title" type="text" required placeholder="Название видео" /></label>
               <label>Категория
                 <select name="category">
+                  <option value="Видео" selected>Видео</option>
                   <option value="Обзор">Обзор</option>
                   <option value="Матч">Матч</option>
                   <option value="Интервью">Интервью</option>
@@ -397,17 +641,38 @@
               </label>
               <label>Матч
                 <select name="match_id">
-                  <option value="">Без привязки</option>
+                  <option value="">Без будущего матча</option>
                   {% for match in matches %}
                   <option value="{{ match.id }}">{{ match.date }} · {{ match.team1 }} - {{ match.team2 }}</option>
                   {% endfor %}
                 </select>
+              </label>
+              <label>Архивный матч
+                <select name="archive_match_id">
+                  <option value="">Без архивного матча</option>
+                  {% for match in archive_matches %}
+                  <option value="{{ match.id }}">{{ match.match_date }} · {{ match.team1_name }} {{ match.team1_score }}:{{ match.team2_score }} {{ match.team2_name }}</option>
+                  {% endfor %}
+                </select>
+              </label>
+              <label>Команда
+                <select name="team_id">
+                  <option value="">Без команды</option>
+                  {% for team in teams %}
+                  <option value="{{ team.id }}">{{ team.name }}</option>
+                  {% endfor %}
+                </select>
+              </label>
+              <label>Турнир<input name="tournament_name" type="text" placeholder="Название турнира" /></label>
+              <label>Описание
+                <textarea name="description" rows="3" placeholder="Короткое описание видео"></textarea>
               </label>
               <label class="file-field">Видео файл<input name="video_file" type="file" accept="video/*" /></label>
               <label>Ссылка на видео<input name="video_url" type="url" placeholder="https://..." /></label>
               <label class="file-field">Обложка<input name="thumbnail_file" type="file" accept="image/*" /></label>
               <label>Ссылка на обложку<input name="thumbnail" type="url" placeholder="https://..." /></label>
               <label>Дата<input name="upload_date" type="date" /></label>
+              <label class="check"><input name="is_active" type="checkbox" checked /> Показывать на сайте</label>
               <button type="submit">Добавить видео</button>
             </form>
           </article>
@@ -419,15 +684,38 @@
               <label>Название<input name="title" type="text" required placeholder="Название альбома" /></label>
               <label>Матч
                 <select name="match_id">
-                  <option value="">Без привязки</option>
+                  <option value="">Без будущего матча</option>
                   {% for match in matches %}
                   <option value="{{ match.id }}">{{ match.date }} · {{ match.team1 }} - {{ match.team2 }}</option>
                   {% endfor %}
                 </select>
               </label>
+              <label>Архивный матч
+                <select name="archive_match_id">
+                  <option value="">Без архивного матча</option>
+                  {% for match in archive_matches %}
+                  <option value="{{ match.id }}">{{ match.match_date }} · {{ match.team1_name }} {{ match.team1_score }}:{{ match.team2_score }} {{ match.team2_name }}</option>
+                  {% endfor %}
+                </select>
+              </label>
+              <label>Команда
+                <select name="team_id">
+                  <option value="">Без команды</option>
+                  {% for team in teams %}
+                  <option value="{{ team.id }}">{{ team.name }}</option>
+                  {% endfor %}
+                </select>
+              </label>
+              <label>Турнир<input name="tournament_name" type="text" placeholder="Название турнира" /></label>
+              <label>Описание
+                <textarea name="description" rows="3" placeholder="Описание альбома"></textarea>
+              </label>
+              <label>SEO title<input name="meta_title" type="text" placeholder="Заголовок для соцсетей" /></label>
+              <label>SEO description<textarea name="meta_description" rows="3" placeholder="Короткое описание альбома"></textarea></label>
               <label class="file-field">Обложка<input name="cover_file" type="file" accept="image/*" /></label>
               <label>Ссылка на обложку<input name="cover_url" type="url" placeholder="https://..." /></label>
               <label>Дата<input name="upload_date" type="date" /></label>
+              <label class="check"><input name="is_active" type="checkbox" checked /> Показывать на сайте</label>
               <button type="submit">Создать альбом</button>
             </form>
           </article>
@@ -440,9 +728,45 @@
               {% for video in videos %}
               <div class="row media-row">
                 {% if video.thumbnail %}<img src="{{ video.thumbnail }}" alt="{{ video.title }}" loading="lazy" />{% else %}<span class="media-fallback">VIDEO</span>{% endif %}
-                <strong>{{ video.title }}</strong>
-                <small>{{ video.category or 'Видео' }} · {{ video.upload_date }}</small>
-                <a class="delete" href="{{ url_for('delete_item', table_name='videos', item_id=video.id) }}">Удалить</a>
+                <form action="{{ url_for('update_video', video_id=video.id) }}" method="post" enctype="multipart/form-data" class="inline-edit">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                  <input name="title" value="{{ video.title }}" required />
+                  <select name="category">
+                    {% for category in ['Видео', 'Обзор', 'Матч', 'Интервью', 'Тренировка'] %}
+                    <option value="{{ category }}" {% if video.category == category %}selected{% endif %}>{{ category }}</option>
+                    {% endfor %}
+                  </select>
+                  <textarea name="description" rows="3" placeholder="Описание">{{ video.description or '' }}</textarea>
+                  <select name="match_id">
+                    <option value="">Без будущего матча</option>
+                    {% for match in matches %}
+                    <option value="{{ match.id }}" {% if video.match_id == match.id %}selected{% endif %}>{{ match.date }} · {{ match.team1 }} - {{ match.team2 }}</option>
+                    {% endfor %}
+                  </select>
+                  <select name="archive_match_id">
+                    <option value="">Без архивного матча</option>
+                    {% for match in archive_matches %}
+                    <option value="{{ match.id }}" {% if video.archive_match_id == match.id %}selected{% endif %}>{{ match.match_date }} · {{ match.team1_name }} {{ match.team1_score }}:{{ match.team2_score }} {{ match.team2_name }}</option>
+                    {% endfor %}
+                  </select>
+                  <select name="team_id">
+                    <option value="">Без команды</option>
+                    {% for team in teams %}
+                    <option value="{{ team.id }}" {% if video.team_id == team.id %}selected{% endif %}>{{ team.name }}</option>
+                    {% endfor %}
+                  </select>
+                  <input name="tournament_name" value="{{ video.tournament_name or '' }}" placeholder="Турнир" />
+                  <input name="video_url" value="{{ video.video_url or '' }}" placeholder="Ссылка на видео" />
+                  <input name="thumbnail" value="{{ video.thumbnail or '' }}" placeholder="Ссылка на обложку" />
+                  <input name="upload_date" type="date" value="{{ video.upload_date or '' }}" />
+                  <label class="file-field" style="grid-column: 1 / -1;">Заменить видео<input name="video_file" type="file" accept="video/*" /></label>
+                  <label class="file-field" style="grid-column: 1 / -1;">Заменить обложку<input name="thumbnail_file" type="file" accept="image/*" /></label>
+                  <label class="check"><input name="is_active" type="checkbox" {% if video.is_active %}checked{% endif %} /> показывать</label>
+                  <button type="submit">Сохранить</button>
+                </form>
+                <span class="status-badge {{ 'active' if video.is_active else 'blocked' }}">{{ 'Показывается' if video.is_active else 'Скрыто' }}</span>
+                <small>{{ video.category or 'Видео' }} · {{ video.upload_date }}{% if video.team_name %} · {{ video.team_name }}{% endif %}{% if video.tournament_name %} · {{ video.tournament_name }}{% endif %}</small>
+                <form class="inline-delete-form" method="post" action="{{ url_for('delete_item', table_name='videos', item_id=video.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}" /><button class="delete" type="submit">Удалить</button></form>
               </div>
               {% else %}
               <p class="empty">Видео пока нет.</p>
@@ -455,16 +779,65 @@
             <div class="table-list">
               {% for album in albums %}
               <div class="row media-row">
-                {% if album.cover_url %}<img src="{{ album.cover_url }}" alt="{{ album.title }}" loading="lazy" />{% else %}<span class="media-fallback">PHOTO</span>{% endif %}
-                <strong>{{ album.title }}</strong>
-                <small>{{ album.photo_count }} фото · {{ album.upload_date }}</small>
+                {% if album.cover_image %}<img src="{{ album.cover_image }}" alt="{{ album.title }}" loading="lazy" />{% else %}<span class="media-fallback">PHOTO</span>{% endif %}
+                <form action="{{ url_for('update_album', album_id=album.id) }}" method="post" enctype="multipart/form-data" class="inline-edit">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                  <input name="title" value="{{ album.title }}" required />
+                  <textarea name="description" rows="3" placeholder="Описание">{{ album.description or '' }}</textarea>
+                  <input name="meta_title" value="{{ album.meta_title or '' }}" placeholder="SEO title" />
+                  <textarea name="meta_description" rows="3" placeholder="SEO description">{{ album.meta_description or '' }}</textarea>
+                  <select name="match_id">
+                    <option value="">Без будущего матча</option>
+                    {% for match in matches %}
+                    <option value="{{ match.id }}" {% if album.match_id == match.id %}selected{% endif %}>{{ match.date }} · {{ match.team1 }} - {{ match.team2 }}</option>
+                    {% endfor %}
+                  </select>
+                  <select name="archive_match_id">
+                    <option value="">Без архивного матча</option>
+                    {% for match in archive_matches %}
+                    <option value="{{ match.id }}" {% if album.archive_match_id == match.id %}selected{% endif %}>{{ match.match_date }} · {{ match.team1_name }} {{ match.team1_score }}:{{ match.team2_score }} {{ match.team2_name }}</option>
+                    {% endfor %}
+                  </select>
+                  <select name="team_id">
+                    <option value="">Без команды</option>
+                    {% for team in teams %}
+                    <option value="{{ team.id }}" {% if album.team_id == team.id %}selected{% endif %}>{{ team.name }}</option>
+                    {% endfor %}
+                  </select>
+                  <input name="tournament_name" value="{{ album.tournament_name or '' }}" placeholder="Турнир" />
+                  <input name="cover_url" value="{{ album.cover_url or '' }}" placeholder="Ссылка на обложку" />
+                  <input name="upload_date" type="date" value="{{ album.upload_date or '' }}" />
+                  <label class="file-field" style="grid-column: 1 / -1;">Заменить обложку<input name="cover_file" type="file" accept="image/*" /></label>
+                  <label class="check"><input name="is_active" type="checkbox" {% if album.is_active %}checked{% endif %} /> показывать</label>
+                  <button type="submit">Сохранить альбом</button>
+                </form>
+                <span class="status-badge {{ 'active' if album.is_active else 'blocked' }}">{{ 'Показывается' if album.is_active else 'Скрыто' }}</span>
+                <small>{{ album.actual_photo_count or album.photo_count or 0 }} фото · {{ album.upload_date }}{% if album.team_name %} · {{ album.team_name }}{% endif %}{% if album.tournament_name %} · {{ album.tournament_name }}{% endif %}</small>
+                <a href="{{ url_for('album_detail', album_id=album.id) }}" target="_blank" rel="noopener noreferrer">Открыть альбом</a>
                 <form action="{{ url_for('add_photo', album_id=album.id) }}" method="post" enctype="multipart/form-data" class="mini-upload">
                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                   <input name="caption" type="text" placeholder="Подпись к фото" />
                   <input name="photo" type="file" accept="image/*" required />
                   <button type="submit">Загрузить фото</button>
                 </form>
-                <a class="delete" href="{{ url_for('delete_item', table_name='photo_albums', item_id=album.id) }}">Удалить альбом</a>
+                <div class="admin-photo-list">
+                  {% for photo in album_photos if photo.album_id == album.id %}
+                  <div class="admin-photo-item">
+                    <img src="{{ photo.photo_url }}" alt="{{ photo.caption or album.title }}" loading="lazy" />
+                    <form action="{{ url_for('update_photo', photo_id=photo.id) }}" method="post" class="mini-upload">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                      <input name="caption" value="{{ photo.caption or '' }}" placeholder="Подпись" />
+                      <input name="order_num" type="number" min="0" value="{{ photo.order_num or 0 }}" />
+                      <button type="submit">Сохранить фото</button>
+                    </form>
+                    <form action="{{ url_for('delete_photo', photo_id=photo.id) }}" method="post" class="confirm-delete">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                      <button class="btn-danger" type="submit">Удалить фото</button>
+                    </form>
+                  </div>
+                  {% endfor %}
+                </div>
+                <form class="inline-delete-form" method="post" action="{{ url_for('delete_item', table_name='photo_albums', item_id=album.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}" /><button class="delete" type="submit">Удалить альбом</button></form>
               </div>
               {% else %}
               <p class="empty">Альбомов пока нет.</p>
@@ -483,11 +856,15 @@
                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
               <label>Имя<input name="name" type="text" required placeholder="Имя игрока" /></label>
               <label>Команда<input name="team" type="text" placeholder="Команда" /></label>
+              <label>Номер<input name="jersey_number" type="number" min="0" max="999" placeholder="7" /></label>
               <label>Позиция<input name="position" type="text" placeholder="Позиция" /></label>
               <label>Очки<input name="stats_points" type="number" min="0" placeholder="0" /></label>
               <label>Матчи<input name="stats_matches" type="number" min="0" placeholder="0" /></label>
               <label>Год рождения<input name="birth_year" type="number" min="1900" max="2026" /></label>
               <label>Регион<input name="region" type="text" placeholder="Бишкек" /></label>
+              <label>Описание
+                <textarea name="bio" rows="4" placeholder="Краткая биография, достижения, особенности игры"></textarea>
+              </label>
               <label class="file-field">Фото игрока
                 <input name="photo" type="file" accept="image/*" />
                 <span class="hint">Рекомендуемый размер: 300×400 px</span>
@@ -526,8 +903,9 @@
               {% for player in players %}
               <div class="row">
                 <strong>{{ player.name }}</strong>
-                <small>{{ player.team or 'Команда не указана' }} · {{ player.position or 'Позиция не указана' }} · {{ player.stats_points }} очков</small>
-                <a class="delete" href="{{ url_for('delete_item', table_name='players', item_id=player.id) }}">Удалить</a>
+                <small>№{{ player.jersey_number or player.id }} · {{ player.team or 'Команда не указана' }} · {{ player.position or 'Позиция не указана' }} · {{ player.stats_points }} очков</small>
+                <a href="{{ url_for('player_detail_page', player_id=player.id) }}" target="_blank" rel="noopener noreferrer">Открыть</a>
+                <form class="inline-delete-form" method="post" action="{{ url_for('delete_item', table_name='players', item_id=player.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}" /><button class="delete" type="submit">Удалить</button></form>
               </div>
               {% else %}
               <p class="empty">Игроков пока нет.</p>
@@ -542,7 +920,7 @@
               <div class="row">
                 <strong>{{ referee.name }}</strong>
                 <small>{{ referee.category or 'Категория не указана' }} · {{ referee.region or 'Регион не указан' }}</small>
-                <a class="delete" href="{{ url_for('delete_item', table_name='referees', item_id=referee.id) }}">Удалить</a>
+                <form class="inline-delete-form" method="post" action="{{ url_for('delete_item', table_name='referees', item_id=referee.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}" /><button class="delete" type="submit">Удалить</button></form>
               </div>
               {% else %}
               <p class="empty">Судей пока нет.</p>
@@ -556,10 +934,10 @@
       <section class="admin-section" id="horses">
         <div class="section-layout">
           <article class="panel">
-            <h2>Добавить лошадь</h2>
+            <h2>Добавить лошадь</h2><a class="open-site" href="{{ url_for('portal.review_submissions') }}">Объявления пользователей на проверку →</a>
             <form action="{{ url_for('add_horse') }}" method="post" enctype="multipart/form-data" class="form-grid">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-              <label>Кличка<input name="name" type="text" required placeholder="Аккула" /></label>
+              <label>Кличка<input name="name" type="text" required placeholder="Аккула" /></label><label>Владелец<input name="horse_owner_name" maxlength="200" /></label><label>Регион<input name="horse_region" maxlength="200" /></label><label>Игрок<select name="horse_player_id"><option value="">Не указан</option>{% for player in players %}<option value="{{ player.id }}">{{ player.name }}</option>{% endfor %}</select></label><label>Достижения<textarea name="horse_achievements"></textarea></label><label>Как измерены скорость и выносливость<input name="horse_rating_note" placeholder="Укажите единицы или шкалу оценки" /></label>
               <label>Порода<input name="breed" type="text" placeholder="Кыргыз жылкысы" /></label>
               <label>Возраст<input name="age" type="number" min="0" max="40" placeholder="7" /></label>
               <label>Масть<input name="color" type="text" placeholder="Ак боз" /></label>
@@ -567,16 +945,21 @@
               <label>Выносливость<input name="stamina" type="number" min="0" max="100" placeholder="90" /></label>
               <label>Баллы<input name="points" type="number" min="0" placeholder="120" /></label>
               <label>Цена продажи, сом<input name="price" type="number" min="0" placeholder="850000" /></label>
-              <label>Описание
-                <input name="description" type="text" placeholder="Краткая характеристика" />
+              <label>Подробное описание
+                <textarea name="horse_description" rows="6" placeholder="Характер, достижения, особенности..."></textarea>
+              </label>
+              <label>Контактный телефон
+                <input name="horse_phone" type="tel" placeholder="+996 700 123 456" />
               </label>
               <label class="check"><input name="is_for_sale" type="checkbox" /> Выставить на продажу</label>
-              <label class="file-field">Фото лошади
-                <input name="photo" type="file" accept="image/*" />
-                <span class="hint">Рекомендуемый размер: 800×600 px</span>
+              <label class="file-field">Фото лошади (можно несколько)
+                <input name="horse_photo" type="file" accept=".jpg,.jpeg,.png,.webp,image/*" multiple data-horse-photo-input />
+                <span class="hint">Можно выбрать несколько фото. Рекомендуемый размер: 1200×800 px</span>
+                <span class="photo-preview-grid" data-photo-preview></span>
               </label>
-              <label>Ссылка на фото
-                <input name="photo_url" type="text" placeholder="Или вставьте ссылку на фото" />
+              <label>URL фото через запятую
+                <input name="horse_photo_urls" type="text" placeholder="https://... , https://..." />
+                <span class="hint">Можно вставить несколько ссылок через запятую.</span>
               </label>
               <button type="submit">Добавить лошадь</button>
             </form>
@@ -598,18 +981,21 @@
                   <input name="stamina" type="number" min="0" max="100" value="{{ horse.stamina or 0 }}" placeholder="Выносливость" />
                   <input name="points" type="number" min="0" value="{{ horse.points or 0 }}" placeholder="Баллы" />
                   <input name="price" type="number" min="0" value="{{ horse.price or '' }}" placeholder="Цена" />
-                  <textarea name="description" rows="3" placeholder="Описание" style="max-height:80px;overflow-y:auto;">{{ horse.description or '' }}</textarea>
-                  <input name="photo_url" value="{{ horse.photo_url or '' }}" placeholder="Ссылка на фото" />
+                  <textarea name="horse_description" rows="6" placeholder="Подробное описание">{{ horse.description or '' }}</textarea>
+                  <input name="horse_phone" type="tel" value="{{ horse.phone or '' }}" placeholder="+996 700 123 456" /><input name="horse_owner_name" value="{{ horse.owner_name or '' }}" placeholder="Владелец" /><input name="horse_region" value="{{ horse.region or '' }}" placeholder="Регион" /><select name="horse_player_id" aria-label="Связанный игрок"><option value="">Игрок не указан</option>{% for player in players %}<option value="{{ player.id }}" {% if horse.player_id==player.id %}selected{% endif %}>{{ player.name }}</option>{% endfor %}</select><textarea name="horse_achievements" placeholder="Достижения">{{ horse.achievements or '' }}</textarea><input name="horse_rating_note" value="{{ horse.rating_note or '' }}" placeholder="Единицы или шкала оценки показателей" />
+                  <input name="horse_photo_urls" value="{{ horse.photo_urls|photo_urls_text }}" placeholder="URL фото через запятую" />
                   <label class="check"><input name="is_for_sale" type="checkbox" {% if horse.is_for_sale %}checked{% endif %} /> продаётся</label>
                   <label class="check"><input name="is_active" type="checkbox" {% if horse.is_active %}checked{% endif %} /> показывать</label>
                   <label class="file-field" style="grid-column: 1 / -1;">
-                    Заменить фото
-                    <input name="photo" type="file" accept="image/*" />
+                    Добавить несколько фото
+                    <input name="horse_photo" type="file" accept=".jpg,.jpeg,.png,.webp,image/*" multiple data-horse-photo-input />
+                    <span class="hint">Загруженные фото добавятся к URL из поля выше.</span>
+                    <span class="photo-preview-grid" data-photo-preview></span>
                   </label>
                   <button type="submit">Сохранить</button>
                 </form>
                 <a href="{{ url_for('horse_detail_page', horse_id=horse.id) }}" target="_blank" rel="noopener noreferrer">Открыть</a>
-                <a class="delete" href="{{ url_for('delete_item', table_name='horses', item_id=horse.id) }}">Удалить</a>
+                <form class="inline-delete-form" method="post" action="{{ url_for('delete_item', table_name='horses', item_id=horse.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}" /><button class="delete" type="submit">Удалить</button></form>
               </div>
               {% else %}
               <p class="empty">Лошадей пока нет.</p>
@@ -619,47 +1005,69 @@
         </div>
       </section>
 
-      <!-- Документы -->
-      <section class="admin-section" id="documents">
+      <!-- Все документы -->
+      <section class="admin-section" id="all-documents">
         <div class="section-layout">
           <article class="panel">
-            <h2>Загрузить документ</h2>
+            <h2>Загрузить PDF документ</h2>
             <form action="{{ url_for('upload_document') }}" method="post" enctype="multipart/form-data" class="form-grid">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-              <label>Название<input name="title" type="text" required placeholder="Название документа" /></label>
-              <label>Описание<input name="description" type="text" placeholder="Короткое описание" /></label>
+              <label>Название документа<input name="title" type="text" required placeholder="Название документа" /></label>
               <label>Категория
                 <select name="category">
-                  <option value="Уставные документы">Уставные документы</option>
-                  <option value="Правила">Правила</option>
-                  <option value="Положение">Положение</option>
-                  <option value="Заявки">Заявки</option>
-                  <option value="Команды">Команды</option>
-                  <option value="Документы">Документы</option>
+                  {% for value, label in document_categories.items() %}
+                  <option value="{{ value }}">{{ label }}</option>
+                  {% endfor %}
                 </select>
               </label>
-              <label>Дата<input name="upload_date" type="date" /></label>
-              <label class="file-field">Файл PDF/DOCX
-                <input name="file" type="file" accept=".pdf,.docx" required />
+              <label>Официальная дата<input name="official_date" type="date" /></label>
+              <label>Регистрационный номер<input name="reg_number" type="text" placeholder="Необязательно" /></label>
+              <label>Описание<textarea name="description" rows="5" placeholder="Краткое описание документа"></textarea></label>
+              <label class="file-field">PDF файл
+                <input name="file" type="file" accept=".pdf,application/pdf" required />
                 <span class="hint">Макс. размер: 20 МБ</span>
               </label>
               <button type="submit">Загрузить документ</button>
             </form>
           </article>
 
-          <article class="panel">
-            <h2>Документы</h2>
-            <div class="table-list">
+          <article class="panel admin-documents-panel">
+            <h2>Загруженные документы</h2>
+            <div class="admin-responsive-table">
+              <table class="admin-documents-table">
+                <thead>
+                  <tr>
+                    <th>Название</th>
+                    <th>Категория</th>
+                    <th>Дата</th>
+                    <th>Размер</th>
+                    <th>Действия</th>
+                  </tr>
+                </thead>
+                <tbody>
               {% for document in documents %}
-              <div class="row">
-                <strong>{{ document.title }}</strong>
-                <small>{{ document.category }} · {{ document.upload_date }}</small>
-                <a href="/{{ document.file_path }}" target="_blank" rel="noopener noreferrer">Открыть</a>
-                <a class="delete" href="{{ url_for('delete_item', table_name='documents', item_id=document.id) }}">Удалить</a>
-              </div>
+                  <tr>
+                    <td>
+                      <strong>{{ document.title }}</strong>
+                      {% if document.reg_number %}<small>Рег. № {{ document.reg_number }}</small>{% endif %}
+                    </td>
+                    <td><span class="document-category-badge category-{{ document.category }}">{{ document_categories.get(document.category, document.category) }}</span></td>
+                    <td>{{ document.official_date or document.upload_date or '—' }}</td>
+                    <td>{{ document.file_size|document_size_mb }} МБ</td>
+                    <td>
+                      <div class="document-actions">
+                        <a href="{{ (document.file_url or ('/' ~ document.file_path)) ~ '?view=1' }}" target="_blank" rel="noopener noreferrer" title="Просмотр">👁️</a>
+                        <a href="{{ document.file_url or ('/' ~ document.file_path) }}" download title="Скачать">⬇️</a>
+                        <a href="{{ url_for('edit_document', document_id=document.id) }}" title="Редактировать">✏️</a>
+                        <a class="delete danger" href="{{ url_for('delete_document', document_id=document.id) }}" title="Удалить">🗑️</a>
+                      </div>
+                    </td>
+                  </tr>
               {% else %}
-              <p class="empty">Документов пока нет.</p>
+                  <tr><td colspan="5" class="empty">Документов пока нет.</td></tr>
               {% endfor %}
+                </tbody>
+              </table>
             </div>
           </article>
         </div>
@@ -697,7 +1105,7 @@
               <div class="row">
                 <strong>{{ venue.name }}</strong>
                 <small>{{ venue.location or 'Регион не указан' }} · {{ venue.capacity or 0 }} мест</small>
-                <a class="delete" href="{{ url_for('delete_item', table_name='hippodromes', item_id=venue.id) }}">Удалить</a>
+                <form class="inline-delete-form" method="post" action="{{ url_for('delete_item', table_name='hippodromes', item_id=venue.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}" /><button class="delete" type="submit">Удалить</button></form>
               </div>
               {% else %}
               <p class="empty">Ипподромов пока нет.</p>
@@ -763,53 +1171,18 @@
         </div>
       </section>
 
-      <!-- Билеты -->
-      <section class="admin-section" id="tickets">
-        <article class="panel">
-          <h2>Заявки на билеты</h2>
-          <div class="table-list">
-            {% for ticket in ticket_requests %}
-            <div class="row">
-              <strong>{{ ticket.match_name or 'Матч не указан' }}</strong>
-              <small>{{ ticket.count }} билет(а) · {{ ticket.phone }}{% if ticket.email %} · {{ ticket.email }}{% endif %}</small>
-              <form action="{{ url_for('update_ticket', ticket_id=ticket.id) }}" method="post" class="inline-edit compact">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                <select name="status">
-                  <option value="new" {% if ticket.status == 'new' %}selected{% endif %}>Новая</option>
-                  <option value="processed" {% if ticket.status == 'processed' %}selected{% endif %}>Обработана</option>
-                  <option value="cancelled" {% if ticket.status == 'cancelled' %}selected{% endif %}>Отменена</option>
-                </select>
-                <button type="submit">Обновить</button>
-              </form>
-              <a class="delete" href="{{ url_for('delete_item', table_name='ticket_requests', item_id=ticket.id) }}">Удалить</a>
-            </div>
-            {% else %}
-            <p class="empty">Заявок пока нет.</p>
-            {% endfor %}
-          </div>
-        </article>
-      </section>
-
       <!-- Пользователи -->
       <section class="admin-section" id="users">
         <article class="panel">
           <h2>Пользователи</h2>
-          <div class="table-list">
-            {% for user in users %}
-            <div class="row">
-              <strong>{{ user.full_name }}</strong>
-              <small>{{ user.email }} · зарегистрирован {{ user.created_at }}</small>
-              <a class="delete" href="{{ url_for('delete_item', table_name='users', item_id=user.id) }}">Удалить</a>
-            </div>
-            {% else %}
-            <p class="empty">Пользователей пока нет.</p>
-            {% endfor %}
-          </div>
+          <p>Поиск, фильтры, редактирование, роли и блокировка доступны на отдельной странице.</p>
+          <a class="admin-link-button" href="{{ url_for('admin_users') }}">Открыть управление пользователями</a>
         </article>
       </section>
     </main>
 
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/admin-date.js') }}"></script>
     <script>
       // Переключение вкладок
       const tabs = document.querySelectorAll("[data-section]");
@@ -830,6 +1203,12 @@
       // Подтверждение удаления
       document.querySelectorAll(".delete").forEach((link) => {
         link.addEventListener("click", (event) => {
+          if (!confirm("Удалить запись?")) event.preventDefault();
+        });
+      });
+
+      document.querySelectorAll(".confirm-delete").forEach((form) => {
+        form.addEventListener("submit", (event) => {
           if (!confirm("Удалить запись?")) event.preventDefault();
         });
       });
@@ -882,6 +1261,21 @@
           }
         });
       }
+
+      document.querySelectorAll("[data-horse-photo-input]").forEach((input) => {
+        input.addEventListener("change", () => {
+          const preview = input.closest(".file-field")?.querySelector("[data-photo-preview]");
+          if (!preview) return;
+          preview.innerHTML = "";
+          [...input.files].forEach((file) => {
+            const image = document.createElement("img");
+            image.src = URL.createObjectURL(file);
+            image.alt = file.name;
+            image.onload = () => URL.revokeObjectURL(image.src);
+            preview.appendChild(image);
+          });
+        });
+      });
 
       // 🔧 Функция удаления фото новости
       function deleteNewsImage(newsId, newsTitle) {

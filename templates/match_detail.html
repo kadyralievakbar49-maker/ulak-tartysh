@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}{{ match.team1_name }} - {{ match.team2_name }} | Архив игр{% endblock %}
+
+{% block content %}
+<main class="archive-page">
+  <section class="archive-section archive-detail-section">
+    <a class="archive-back" href="{{ url_for('archive') }}" data-i18n="portalUi25">← Вернуться в архив</a>
+
+    <article class="archive-detail-card">
+      <div class="archive-match-meta">
+        <span>{{ match.match_date }}{% if match.match_time %} · {{ match.match_time }}{% endif %}</span>
+        {% if match.league %}<span>{{ match.league }}</span>{% endif %}
+        {% if match.tournament_name %}<span>{{ match.tournament_name }}</span>{% endif %}
+        {% if match.stage %}<span>{{ match.stage }}</span>{% endif %}
+        {% if match.is_playoff %}<span data-i18n="portalUi26">Плей-офф</span>{% endif %}
+      </div>
+
+      <div class="archive-detail-score">
+        <div class="archive-detail-team">
+          {% if match.winner_team in ['team1', match.team1_name] %}<span class="winner-badge" aria-label="Победитель">🏆</span>{% endif %}
+          <h1>{% if match_teams.get(match.team1_name) %}<a href="{{ url_for('team_detail_page',team_id=match_teams[match.team1_name]) }}">{{ match.team1_name }}</a>{% else %}{{ match.team1_name }}{% endif %}</h1>
+        </div>
+
+        <div class="archive-detail-scoreline">
+          <span>{{ match.team1_score }}</span>
+          <b>:</b>
+          <span>{{ match.team2_score }}</span>
+        </div>
+
+        <div class="archive-detail-team">
+          {% if match.winner_team in ['team2', match.team2_name] %}<span class="winner-badge" aria-label="Победитель">🏆</span>{% endif %}
+          <h1>{% if match_teams.get(match.team2_name) %}<a href="{{ url_for('team_detail_page',team_id=match_teams[match.team2_name]) }}">{{ match.team2_name }}</a>{% else %}{{ match.team2_name }}{% endif %}</h1>
+        </div>
+      </div>
+
+      <dl class="archive-detail-list">
+        {% if match.location %}
+        <div>
+          <dt data-i18n="portalUi27">Место</dt>
+          <dd>{{ match.location }}</dd>
+        </div>
+        {% endif %}
+        {% if match.season %}
+        <div>
+          <dt data-i18n="portalUi28">Сезон</dt>
+          <dd>{{ match.season }}</dd>
+        </div>
+        {% endif %}
+        {% if match.tournament_name %}
+        <div>
+          <dt data-i18n="portalUi29">Турнир</dt>
+          <dd>{{ match.tournament_name }}</dd>
+        </div>
+        {% endif %}
+      </dl>
+
+      {% if match.description %}
+      <div class="archive-description">
+        <h2 data-i18n="portalUi30">Описание матча</h2>
+        <p>{{ match.description }}</p>
+      </div>
+      {% endif %}
+
+      <div class="archive-actions archive-detail-actions">
+        {% if match.video_url %}
+        <a class="archive-watch" href="#match-video" data-i18n="portalUi19">Смотреть видео</a>
+        {% endif %}
+        <a class="archive-details" href="{{ url_for('archive') }}" data-i18n="portalUi31">Все матчи</a>
+      </div>
+    </article>
+
+    {% if related_news %}<section class="archive-gallery"><h2 data-i18n="matchNews">Новости матча</h2>{% for item in related_news %}<a class="mini-match-card" href="{{ url_for('news_detail_page',news_id=item.id) }}">{{ item.title }}</a>{% endfor %}</section>{% endif %}
+    {% if match.video_url %}
+    <section class="archive-gallery archive-video" id="match-video">
+      <h2 data-i18n="portalUi32">Видео матча</h2>
+      {% set match_player = video_embed(match.video_url) %}
+      {% if match_player.type == 'direct' %}
+      <div class="media-card-visual media-player archive-video-player">
+        <video src="{{ match_player.src }}" controls preload="metadata" playsinline></video>
+      </div>
+      {% elif match_player.type == 'embed' %}
+      <div class="media-card-visual media-player archive-video-player">
+        <iframe
+          src="{{ match_player.src }}"
+          title="{{ match.team1_name }} - {{ match.team2_name }}"
+          loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen></iframe>
+      </div>
+      {% else %}
+      <a class="archive-watch" href="{{ match.video_url }}" target="_blank" rel="noopener noreferrer" data-i18n="portalUi33">Открыть видео</a>
+      {% endif %}
+    </section>
+    {% endif %}
+
+    {% if gallery %}
+    <section class="archive-gallery">
+      <h2 data-i18n="portalUi34">Фото матча</h2>
+      <div>
+        {% for photo in gallery %}
+        <img src="{{ photo }}" alt="{{ match.team1_name }} - {{ match.team2_name }}" loading="lazy" />
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+
+    {% if videos or albums %}
+    <section class="archive-gallery match-media-linked">
+      <h2 data-i18n="portalUi35">Медиа матча</h2>
+      <div class="media-page-grid">
+        {% for video in videos %}
+        <article class="media-page-card media-video-card">
+          <a class="media-card-visual" href="{{ url_for('media_detail', video_id=video.id) }}">
+            {% if video.thumbnail and file_available(video.thumbnail) %}
+            <img src="{{ video.thumbnail }}" alt="{{ video.title }}" loading="lazy" />
+            {% elif video.video_url and file_available(video.video_url) and (video.video_url.endswith('.mp4') or video.video_url.endswith('.webm') or video.video_url.endswith('.mov')) %}
+            <video src="{{ video.video_url }}" muted playsinline preload="metadata"></video>
+            {% else %}
+            <span class="media-card-placeholder"></span>
+            {% endif %}
+            <span class="media-play" aria-hidden="true"></span>
+          </a>
+          <div class="media-card-body">
+            <h3>{{ video.title }}</h3>
+            <p>{{ video.category or 'Видео' }}{% if video.upload_date %} · {{ video.upload_date }}{% endif %}</p>
+          </div>
+        </article>
+        {% endfor %}
+
+        {% for album in albums %}
+        <article class="media-page-card media-album-card">
+          {% if album.cover_image and file_available(album.cover_image) %}
+          <a class="media-card-visual" href="{{ url_for('album_detail',album_id=album.id) }}">
+            <img src="{{ album.cover_image }}" alt="{{ album.title }}" loading="lazy" />
+            <span class="media-card-icon" aria-hidden="true">▧</span>
+          </a>
+          {% else %}
+          <div class="media-card-visual media-card-placeholder">
+            <span class="media-card-icon" aria-hidden="true">▧</span>
+          </div>
+          {% endif %}
+          <div class="media-card-body">
+            <h3>{{ album.title }}</h3>
+            <p>{{ album.actual_photo_count or album.photo_count or 0 }} фото{% if album.upload_date %} · {{ album.upload_date }}{% endif %}</p>
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+  </section>
+</main>
+{% endblock %}

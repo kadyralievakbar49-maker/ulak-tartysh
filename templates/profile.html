@@ -7,53 +7,43 @@
 <main>
   <section class="section page-hero profile-hero">
     <div class="profile-avatar">
-      {% if user.photo_url %}
+      {% if user.photo_url and file_available(user.photo_url) %}
       <img src="{{ user.photo_url }}" alt="{{ user.full_name }}" loading="lazy" />
       {% else %}
       <span>{{ user.full_name[:1] }}</span>
       {% endif %}
     </div>
     <div>
-      <p class="eyebrow">Жеке кабинет</p>
+      <p class="eyebrow" data-i18n="personalAccount">Жеке кабинет</p>
       <h1>{{ user.full_name }}</h1>
       <p class="lead">{{ user.email }} · {{ user.created_at }}</p>
     </div>
   </section>
 
+  <section class="section member-account-links">
+    <article class="info-panel"><h2 data-i18n="myCollection">Моё избранное</h2><p data-i18n="myCollectionLead">Лошади, игроки и команды, за которыми вы следите.</p><a class="member-action" href="{{ url_for('portal.saved') }}" data-i18n="openSaved">Открыть избранное и расписание</a></article>
+    <article class="info-panel"><h2 data-i18n="mySubmissions">Мои объявления</h2><p data-i18n="submitHorseLead">Объявление появится в каталоге после проверки администратором.</p><a class="primary" href="{{ url_for('portal.submit_horse') }}" data-i18n="submitHorse">Подать объявление о лошади</a></article>
+  </section>
   <section class="section profile-grid">
     <article class="profile-panel">
-      <h2>Профилди өзгөртүү</h2>
+      <h2 data-i18n="editProfile">Профилди өзгөртүү</h2>
       <form class="form-grid" id="profileUpdateForm">
-        <div class="form-field"><label>Email</label><input value="{{ user.email }}" disabled /></div>
-        <div class="form-field"><label>Аты-жөнү</label><input name="full_name" value="{{ user.full_name }}" required /></div>
-        <div class="form-field"><label>Телефон</label><input name="phone" value="{{ user.phone or '' }}" placeholder="+996 700 000 000" /></div>
-        <button class="primary" type="submit">Сактоо</button>
+        <div class="form-field"><label data-i18n="emailLabel">Email</label><input value="{{ user.email }}" disabled /></div>
+        <div class="form-field"><label data-i18n="fullName">Аты-жөнү</label><input name="full_name" value="{{ user.full_name }}" required /></div>
+        <div class="form-field"><label data-i18n="phone">Телефон</label><input name="phone" value="{{ user.phone or '' }}" placeholder="+996 700 000 000" /></div>
+        <button class="primary" type="submit" data-i18n="save">Сактоо</button>
       </form>
     </article>
 
     <article class="profile-panel">
-      <h2>Сыр сөздү өзгөртүү</h2>
+      <h2 data-i18n="changePassword">Сыр сөздү өзгөртүү</h2>
       <form class="form-grid" id="passwordChangeForm">
-        <div class="form-field"><label>Эски сыр сөз</label><input name="old_password" type="password" required /></div>
-        <div class="form-field"><label>Жаңы сыр сөз</label><input name="new_password" type="password" minlength="6" required /></div>
-        <button class="primary" type="submit">Өзгөртүү</button>
+        <div class="form-field"><label data-i18n="oldPassword">Эски сыр сөз</label><input name="old_password" type="password" required /></div>
+        <div class="form-field"><label data-i18n="newPassword">Жаңы сыр сөз</label><input name="new_password" type="password" minlength="6" required /></div>
+        <button class="primary" type="submit" data-i18n="change">Өзгөртүү</button>
       </form>
     </article>
 
-    <article class="profile-panel profile-tickets">
-      <h2>Билет заявкалары</h2>
-      <div class="ticket-list">
-        {% for ticket in tickets %}
-        <div class="ticket-card">
-          <strong>{{ ticket.match_name or 'Матч көрсөтүлгөн эмес' }}</strong>
-          <span>{{ ticket.count }} билет · {{ ticket.phone }}</span>
-          <small>{{ ticket.status }} · {{ ticket.created_at }}</small>
-        </div>
-        {% else %}
-        <p class="empty-state">Билет заявкалары азырынча жок.</p>
-        {% endfor %}
-      </div>
-    </article>
   </section>
 </main>
 {% endblock %}

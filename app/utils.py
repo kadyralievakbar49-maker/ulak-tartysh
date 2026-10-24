@@ -187,6 +187,7 @@ def init_db():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         photo_url TEXT,
+        photo_urls TEXT DEFAULT '',
         breed TEXT,
         age INTEGER,
         color TEXT,
@@ -195,9 +196,15 @@ def init_db():
         points INTEGER DEFAULT 0,
         price INTEGER,
         description TEXT,
+        phone TEXT DEFAULT '',
         is_for_sale INTEGER DEFAULT 0,
         is_active INTEGER DEFAULT 1
     )''')
+    horse_columns = {row[1] for row in conn.execute('PRAGMA table_info(horses)').fetchall()}
+    if 'photo_urls' not in horse_columns:
+        conn.execute("ALTER TABLE horses ADD COLUMN photo_urls TEXT DEFAULT ''")
+    if 'phone' not in horse_columns:
+        conn.execute("ALTER TABLE horses ADD COLUMN phone TEXT DEFAULT ''")
 
     conn.execute('''CREATE TABLE IF NOT EXISTS referees (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -241,28 +248,51 @@ def init_db():
         email TEXT NOT NULL UNIQUE,
         password_hash TEXT NOT NULL,
         is_verified INTEGER DEFAULT 0,
+        role TEXT DEFAULT 'user',
+        is_active INTEGER DEFAULT 1,
         created_at TEXT NOT NULL
     )''')
 
     user_columns = {row[1] for row in conn.execute('PRAGMA table_info(users)').fetchall()}
     if 'is_verified' not in user_columns:
         conn.execute('ALTER TABLE users ADD COLUMN is_verified INTEGER DEFAULT 0')
+    if 'role' not in user_columns:
+        conn.execute("ALTER TABLE users ADD COLUMN role TEXT DEFAULT 'user'")
+    if 'is_active' not in user_columns:
+        conn.execute('ALTER TABLE users ADD COLUMN is_active INTEGER DEFAULT 1')
+
+    conn.execute('''CREATE TABLE IF NOT EXISTS rules_sections (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        content TEXT NOT NULL,
+        order_num INTEGER DEFAULT 0,
+        is_active INTEGER DEFAULT 1
+    )''')
+
+    conn.execute('''CREATE TABLE IF NOT EXISTS regulations (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        description TEXT,
+        file_path TEXT,
+        regulation_date TEXT,
+        order_num INTEGER DEFAULT 0,
+        is_active INTEGER DEFAULT 1
+    )''')
+
+    conn.execute('''CREATE TABLE IF NOT EXISTS transfers (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        player TEXT NOT NULL,
+        from_team TEXT NOT NULL,
+        to_team TEXT NOT NULL,
+        transfer_date TEXT NOT NULL,
+        status TEXT DEFAULT 'На рассмотрении'
+    )''')
 
     conn.execute('''CREATE TABLE IF NOT EXISTS email_confirmations (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         email TEXT NOT NULL,
         code TEXT NOT NULL,
         expires_at TEXT NOT NULL,
-        created_at TEXT NOT NULL
-    )''')
-
-    conn.execute('''CREATE TABLE IF NOT EXISTS ticket_requests (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        match_name TEXT,
-        count INTEGER DEFAULT 1,
-        phone TEXT NOT NULL,
-        email TEXT,
-        status TEXT DEFAULT 'new',
         created_at TEXT NOT NULL
     )''')
 

@@ -18,22 +18,26 @@
     <div class="hero-overlay" {% if homepage_settings and homepage_settings.overlay_color %}style="background: {{ homepage_settings.overlay_color }};"{% endif %}></div>
     
     <div class="hero-content">
-      <p class="eyebrow">{{ homepage_settings.subtitle if homepage_settings else 'Расмий портал' }}</p>
-      <h1>{{ homepage_settings.title if homepage_settings else 'Улак тартыш оюндарын жаңы деңгээлде көрүңүз' }}</h1>
-      <p class="lead">{{ homepage_settings.description if homepage_settings else 'Матчтардын календары, лигалар, оюнчулар, жаңылыктар жана медиа бир жерде.' }}</p>
+      <p class="eyebrow" data-i18n="heroEyebrow">{{ homepage_settings.subtitle if homepage_settings else 'Расмий портал' }}</p>
+      <h1 data-i18n="heroTitle">{{ homepage_settings.title if homepage_settings else 'Улак тартыш оюндарын жаңы деңгээлде көрүңүз' }}</h1>
+      <p class="lead" data-i18n="heroLead">{{ homepage_settings.description if homepage_settings else 'Матчтардын календары, лигалар, оюнчулар, жаңылыктар жана медиа бир жерде.' }}</p>
       <div class="hero-actions">
-        <a class="primary magnetic-btn" href="{{ homepage_settings.button1_link if homepage_settings else '#matches' }}">{{ homepage_settings.button1_text if homepage_settings else 'Оюндарды көрүү' }}</a>
-        <a href="{{ homepage_settings.button2_link if homepage_settings else '#news' }}" class="secondary magnetic-btn">{{ homepage_settings.button2_text if homepage_settings else 'Жаңылыктар' }}</a>
+        {% set secondary_link = homepage_settings.button2_link if homepage_settings and homepage_settings.button2_link and homepage_settings.button2_link != '#news' else url_for('news_page') %}
+        <a class="primary magnetic-btn" href="{{ homepage_settings.button1_link if homepage_settings else '#matches' }}" data-i18n="heroPrimary">{{ homepage_settings.button1_text if homepage_settings else 'Оюндарды көрүү' }}</a>
+        <a href="{{ secondary_link }}" class="secondary magnetic-btn" data-i18n="heroSecondary">{{ homepage_settings.button2_text if homepage_settings else 'Жаңылыктар' }}</a>
       </div>
-      <div class="hero-stats glass" aria-label="Site statistics">
+      <div class="hero-stats glass" aria-label="Site statistics" data-i18n-aria-label="siteStatistics">
         {% if homepage_stats %}
         {% for stat in homepage_stats %}
-        <span><strong class="stat-number" data-target="{{ stat.value }}">0</strong><small>{{ stat.label }}</small></span>
+        <span>
+          <strong class="stat-number" data-target="{{ stat.value }}">0</strong>
+          <small data-i18n="{% if loop.index == 1 %}gameStat{% elif loop.index == 2 %}newsStat{% elif loop.index == 3 %}playerStat{% else %}statLabel{% endif %}">{{ stat.label }}</small>
+        </span>
         {% endfor %}
         {% else %}
-        <span><strong class="stat-number" data-target="{{ matches|length }}">0</strong><small>Оюн</small></span>
-        <span><strong class="stat-number" data-target="{{ total_news or news|length }}">0</strong><small>Жаңылык</small></span>
-        <span><strong class="stat-number" data-target="{{ players|length }}">0</strong><small>Оюнчу</small></span>
+        <span><strong class="stat-number" data-target="{{ matches|length }}">0</strong><small data-i18n="gameStat">Оюн</small></span>
+        <span><strong class="stat-number" data-target="{{ total_news or news|length }}">0</strong><small data-i18n="newsStat">Жаңылык</small></span>
+        <span><strong class="stat-number" data-target="{{ players|length }}">0</strong><small data-i18n="playerStat">Оюнчу</small></span>
         {% endif %}
       </div>
     </div>
@@ -54,13 +58,13 @@
       </div>
       <div class="score-meta">
         <span>{{ next_match.date }} · {{ next_match.time }}</span>
-        <span data-i18n="venueBishkek">Бишкек ипподрому</span>
+        <span>{{ next_match.location or 'Бишкек ипподрому' }}</span>
       </div>
       {% else %}
-      <p style="color: rgba(255,255,255,0.5); text-align: center; margin: 20px 0;">Оюндар азырынча жок</p>
+      <p style="color: rgba(255,255,255,0.5); text-align: center; margin: 20px 0;" data-i18n="noGames">Оюндар азырынча жок</p>
       {% endif %}
     </aside>
-    <a class="scroll-indicator" href="#matches" aria-label="Scroll to matches"></a>
+    <a class="scroll-indicator" href="#matches" aria-label="Scroll to matches" data-i18n-aria-label="scrollToMatches"></a>
   </section>
 
   <!-- ПОИСК -->
@@ -71,6 +75,47 @@
     </form>
   </section>
 
+  <section class="section home-dashboard">
+
+
+    <article class="home-dashboard-card">
+      <span class="dashboard-label" data-i18n="homeLatestResultLabel">Последний результат</span>
+      {% if latest_result %}
+      <h2>{{ latest_result.team1_score }}:{{ latest_result.team2_score }}</h2>
+      <p>{{ latest_result.team1_name }} - {{ latest_result.team2_name }}</p>
+      <small>{{ latest_result.match_date }} · {% if latest_result.league %}{{ latest_result.league }}{% else %}<span data-i18n="portalUi94">Лига не указана</span>{% endif %}</small>
+      {% else %}
+      <h2 data-i18n="homeNoResultsTitle">Нет результатов</h2>
+      <p data-i18n="homeNoResultsText">Архивные матчи пока не добавлены.</p>
+      {% endif %}
+    </article>
+
+    <article class="home-dashboard-card">
+      <span class="dashboard-label" data-i18n="homeLatestMediaLabel">Последние фото/видео</span>
+      {% set latest_media = (videos[0] if videos else (albums[0] if albums else none)) %}
+      {% if latest_media %}
+      <h2>{{ latest_media.title }}</h2>
+      <p>{{ latest_media.team_name or latest_media.tournament_name or 'Медиа федерации' }}</p>
+      <a href="{{ url_for('media_page') }}" data-i18n="openGallery">Открыть галерею</a>
+      {% else %}
+      <h2 data-i18n="homeNoMediaTitle">Медиа пока нет</h2>
+      <p data-i18n="homeNoMediaText">Фото и видео появятся после загрузки.</p>
+      {% endif %}
+    </article>
+
+    <article class="home-dashboard-card standings-card">
+      <span class="dashboard-label" data-i18n="homeStandingsLabel">Турнирная таблица</span>
+      {% for team in top_teams[:3] %}
+      <a href="{{ url_for('team_detail_page', team_id=team.id) }}">
+        <strong>{{ loop.index }}. {{ team.name }}</strong>
+        <span>{{ team.points or 0 }} <span data-i18n="pointsUnit">очков</span></span>
+      </a>
+      {% else %}
+      <p data-i18n="noTeams">Команды пока не добавлены.</p>
+      {% endfor %}
+    </article>
+  </section>
+
   <section class="section news-section" id="news">
     <div class="container">
       <div class="section-head">
@@ -78,7 +123,7 @@
           <p class="eyebrow" data-i18n="newsEyebrow">ЖАҢЫЛЫКТАР</p>
           <h2 data-i18n="newsTitle">Федерациядан акыркы маалыматтар</h2>
         </div>
-        <a href="{{ url_for('news_page') }}" class="btn-ghost">Баарын көрүү →</a>
+        <a href="{{ url_for('news_page') }}" class="btn-ghost"><span data-i18n="seeAll">Баарын көрүү</span> →</a>
       </div>
 
       <div class="news-carousel-container" data-news-ring>
@@ -86,39 +131,51 @@
           {% for item in news %}
           <div class="news-card-compact">
             <a href="{{ url_for('news_detail_page', news_id=item.id) }}">
-              {% if item.img_url %}
+              {% if item.img_url and file_available(item.img_url) %}
                 <img src="{{ item.img_url }}" alt="{{ item.title }}" loading="lazy">
               {% else %}
                 <div class="news-img-placeholder"></div>
               {% endif %}
               <h3>{{ item.title }}</h3>
-              <span class="date">{{ item.date }}</span>
+              <span class="date">{{ item.date|display_date }}</span>
             </a>
           </div>
           {% else %}
           <p class="empty-news" data-i18n="noNews">Жаңылыктар азырынча жок.</p>
           {% endfor %}
-
-          {% for item in news %}
-          <div class="news-card-compact" aria-hidden="true">
-            <a href="{{ url_for('news_detail_page', news_id=item.id) }}" tabindex="-1">
-              {% if item.img_url %}
-                <img src="{{ item.img_url }}" alt="" loading="lazy">
-              {% else %}
-                <div class="news-img-placeholder"></div>
-              {% endif %}
-              <h3>{{ item.title }}</h3>
-              <span class="date">{{ item.date }}</span>
-            </a>
-          </div>
-          {% endfor %}
         </div>
 
         {% if news|length > 1 %}
-        <button class="carousel-btn prev" type="button" onclick="moveNews(-1)" aria-label="Мурунку жаңылыктар">‹</button>
-        <button class="carousel-btn next" type="button" onclick="moveNews(1)" aria-label="Кийинки жаңылыктар">›</button>
+        <button class="carousel-btn prev" type="button" onclick="moveNews(-1)" aria-label="Мурунку жаңылыктар" data-i18n-aria-label="previousNews">‹</button>
+        <button class="carousel-btn next" type="button" onclick="moveNews(1)" aria-label="Кийинки жаңылыктар" data-i18n-aria-label="nextNews">›</button>
         {% endif %}
       </div>
+    </div>
+  </section>
+
+  <section class="section tandem-section" id="tandems">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow" data-i18n="portalUi2">ЛЕГЕНДАРНЫЕ ПАРЫ</p>
+        <h2 data-i18n="portalUi3">Участники и их лошади</h2>
+      </div>
+    </div>
+
+    <div class="tandem-grid">
+      {% for tandem in featured_tandems %}
+      <article class="tandem-card">
+        <div class="tandem-visual">
+          <img src="{{ tandem.image_url }}" alt="{{ tandem.player }} и конь {{ tandem.horse }}" loading="lazy" />
+          <span>{{ tandem.team }}</span>
+        </div>
+        <div class="tandem-body">
+          <p class="tandem-position">{{ tandem.position }}</p>
+          <h3>{{ tandem.player }} <span>×</span> {{ tandem.horse }}</h3>
+          <p>{{ tandem.description }}</p>
+          <strong>{{ tandem.achievement }}</strong>
+        </div>
+      </article>
+      {% endfor %}
     </div>
   </section>
 
@@ -129,7 +186,7 @@
         <p class="eyebrow" data-i18n="matchesEyebrow">Календарь</p>
         <h2 data-i18n="matchesTitle">Жакынкы беттештер</h2>
       </div>
-      <div class="filters" aria-label="Матч фильтри">
+      <div class="filters" aria-label="Матч фильтри" data-i18n-aria-label="matchFilters">
         <button class="tag active" data-filter="all" data-i18n="filterAll">Баары</button>
         <button class="tag" data-filter="Жогорку лига" data-i18n="leagueTop">Жогорку лига</button>
         <button class="tag" data-filter="Биринчи лига" data-i18n="leagueFirst">Биринчи лига</button>
@@ -139,15 +196,22 @@
     <div class="match-list" id="matchList">
       {% for match in matches %}
       <article class="match" data-league="{{ match.league }}" data-search="{{ match.search_tags }}">
-        <div class="match-date"><strong>{{ match.date }}</strong><span>{{ match.time }}</span></div>
-        <p>{{ match.league }}</p>
-        <h3>{{ match.team1 }}</h3>
-        <span class="vs">VS</span>
-        <h3>{{ match.team2 }}</h3>
-        <button class="ghost" data-match="{{ match.team1 }} - {{ match.team2 }}">Маалымат</button>
+        <div class="match-meta">
+          <div class="match-date">
+            <strong>{{ match.date }}</strong>
+            <span>{{ match.time }}</span>
+          </div>
+          <p>{{ match.league }}{% if match.status == 'live' %} · Live{% elif match.status == 'postponed' %} · Перенесён{% endif %}</p>
+        </div>
+        <div class="match-teams">
+          <h3 class="match-team match-team-home">{{ match.team1 }}</h3>
+          <span class="vs">VS</span>
+          <h3 class="match-team match-team-away">{{ match.team2 }}</h3>
+        </div>
+        <button class="ghost" data-match="{{ match.team1 }} - {{ match.team2 }}{% if match.location %} · {{ match.location }}{% endif %}{% if match.tournament_name %} · {{ match.tournament_name }}{% endif %}" data-i18n="details">Маалымат</button>
       </article>
       {% else %}
-      <p style="text-align: center; color: var(--muted); padding: 20px;">Жакынкы арада беттештер жок.</p>
+      <p style="text-align: center; color: var(--muted); padding: 20px;" data-i18n="noUpcomingMatches">Жакынкы арада беттештер жок.</p>
       {% endfor %}
     </div>
   </section>
@@ -159,47 +223,34 @@
         <p class="eyebrow" data-i18n="mediaEyebrow">Медиа</p>
         <h2 data-i18n="mediaTitle">Оюндан сүрөттөр жана обзорлор</h2>
       </div>
-      <button class="secondary" data-action="gallery" data-i18n="gallery">Галерея</button>
+      <a class="secondary" href="{{ url_for('media_page') }}" data-i18n="gallery">Галерея</a>
     </div>
     <div class="media-grid">
       {% for video in videos %}
-      <a class="media" href="{{ video.video_url }}" target="_blank" rel="noopener noreferrer">
-        {% if video.thumbnail %}
+      <a class="media" href="{{ url_for('media_detail', video_id=video.id) }}">
+        {% if video.thumbnail and file_available(video.thumbnail) %}
         <img class="media-photo" src="{{ video.thumbnail }}" alt="{{ video.title }}" loading="lazy" />
-        {% elif video.video_url.endswith('.mp4') or video.video_url.endswith('.webm') or video.video_url.endswith('.mov') %}
+        {% elif video.video_url and file_available(video.video_url) and (video.video_url.endswith('.mp4') or video.video_url.endswith('.webm') or video.video_url.endswith('.mov')) %}
         <video class="media-photo" src="{{ video.video_url }}" muted playsinline preload="metadata"></video>
         {% else %}
         <span class="media-photo" aria-hidden="true"></span>
         {% endif %}
-        <span class="media-label">{{ video.category or 'Видео' }} · {{ video.title }}</span>
+        <span class="media-label">{% if video.category %}{{ video.category }}{% else %}<span data-i18n="video">Видео</span>{% endif %} · {{ video.title }}</span>
       </a>
       {% endfor %}
 
       {% for album in albums %}
-      <button class="media" data-action="gallery">
-        {% if album.cover_url %}
+      <a class="media" href="{{ url_for('album_detail', album_id=album.id) }}">
+        {% if album.cover_url and file_available(album.cover_url) %}
         <img class="media-photo" src="{{ album.cover_url }}" alt="{{ album.title }}" loading="lazy" />
         {% else %}
         <span class="media-photo" aria-hidden="true"></span>
         {% endif %}
-        <span class="media-label">Фото · {{ album.title }}</span>
-      </button>
+        <span class="media-label"><span data-i18n="photo">Фото</span> · {{ album.title }}</span>
+      </a>
       {% endfor %}
 
-      {% if not videos and not albums %}
-      <button class="media" data-action="gallery">
-        <span class="media-photo" aria-hidden="true"></span>
-        <span class="media-label" data-i18n="videoReview">Видео обзор</span>
-      </button>
-      <button class="media" data-action="gallery">
-        <span class="media-photo" aria-hidden="true"></span>
-        <span class="media-label" data-i18n="photo">Фото</span>
-      </button>
-      <button class="media" data-action="gallery">
-        <span class="media-photo" aria-hidden="true"></span>
-        <span class="media-label" data-i18n="gallery">Галерея</span>
-      </button>
-      {% endif %}
+      {% if not videos and not albums %}<p class="empty-state" data-i18n="homeNoMediaTitle">Медиа пока нет</p>{% endif %}
     </div>
   </section>
 
@@ -210,12 +261,12 @@
         <p class="eyebrow" data-i18n="playersEyebrow">Оюнчулар</p>
         <h2 data-i18n="playersTitle">Рейтингдеги мыктылар</h2>
       </div>
-      <button class="ghost" data-action="rating" data-i18n="fullRating">Толук рейтинг</button>
+      <a class="ghost" href="{{ url_for('players_page') }}" data-i18n="fullRating">Толук рейтинг</a>
     </div>
-    <div class="player-grid" id="playerGrid">
+    <div class="player-grid player-strip" id="playerGrid">
       {% for player in players %}
-      <article class="player" data-search="{{ player.name }} {{ player.team }} {{ player.position }}">
-        {% if player.photo_url %}
+      <a class="player" href="{{ url_for('player_detail_page', player_id=player.id) }}" data-search="{{ player.name }} {{ player.team }} {{ player.position }}">
+        {% if player.photo_url and file_available(player.photo_url) %}
         <img class="player-img" src="{{ player.photo_url }}" alt="{{ player.name }}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';" />
         <div class="player-photo" aria-hidden="true" style="display: none;">{{ player.name[:1] }}</div>
         {% else %}
@@ -223,9 +274,9 @@
         {% endif %}
         <div class="player-info">
           <h3>{{ player.name }}</h3>
-          <span>{{ player.position or 'Оюнчу' }} · {{ player.stats_points }} упай</span>
+          <span>№{{ player.jersey_number or player.id }} · {% if player.position %}{{ player.position }}{% else %}<span data-i18n="playerLabel">Оюнчу</span>{% endif %} · {{ player.stats_points }} <span data-i18n="pointsUnit">упай</span></span>
         </div>
-      </article>
+      </a>
       {% else %}
       <p style="text-align: center; color: var(--muted); padding: 20px;" data-i18n="noPlayers">Оюнчулар азырынча жок.</p>
       {% endfor %}

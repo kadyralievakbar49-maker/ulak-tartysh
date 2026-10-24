@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ 'Редактирование' if regulation else 'Новый регламент' }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}" />
+  </head>
+  <body class="admin-standalone">
+    <main class="admin-card-page admin-card-wide">
+      <div class="admin-page-actions"><a class="admin-link-button" href="{{ url_for('admin_regulations') }}">← К регламентам</a></div>
+      <article class="panel">
+        <p class="eyebrow">Регламенты</p>
+        <h1>{{ 'Редактировать регламент' if regulation else 'Добавить регламент' }}</h1>
+        {% if error %}<p class="admin-alert error">{{ error }}</p>{% endif %}
+        <form class="form-grid cms-form" method="post" enctype="multipart/form-data">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          <label>Название<input name="title" value="{{ request.form.get('title', regulation.title if regulation else '') }}" required /></label>
+          <label>Описание<textarea name="description" rows="5">{{ request.form.get('description', regulation.description if regulation else '') }}</textarea></label>
+          <div class="two-col">
+            <label>Дата<input name="regulation_date" type="date" value="{{ request.form.get('regulation_date', regulation.regulation_date if regulation else '') }}" /></label>
+            {% if regulation %}<label>Порядок<input name="order_num" type="number" min="1" value="{{ request.form.get('order_num', regulation.order_num) }}" /></label>{% endif %}
+          </div>
+          <label>Ссылка на файл<input name="file_url" value="{{ request.form.get('file_url', regulation.file_path if regulation else '') }}" placeholder="/static/docs/file.pdf или https://..." /></label>
+          <label class="file-field">Загрузить PDF/DOCX<input name="file" type="file" accept=".pdf,.docx" /></label>
+          <label class="check"><input name="is_active" type="checkbox" {% if request.form.get('is_active') or (not request.form and (not regulation or regulation.is_active)) %}checked{% endif %} /> Показывать на сайте</label>
+          <button type="submit">Сохранить регламент</button>
+        </form>
+      </article>
+    </main>
+    <script src="{{ url_for('static', filename='js/admin-date.js') }}"></script>
+  </body>
+</html>

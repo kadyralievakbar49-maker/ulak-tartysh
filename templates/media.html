@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block title %}Медиа | Улак тартыш{% endblock %}
+{% block description %}Фотоальбомы, видео матчей и обзоры федерации Улак тартыш.{% endblock %}
+{% block og_title %}Медиа | Улак тартыш{% endblock %}
+{% block og_description %}Фотоальбомы, видео матчей и обзоры федерации Улак тартыш.{% endblock %}
+{% block page_title_key %}mediaPageBrowserTitle{% endblock %}
+
+{% block content %}
+<main class="media-page">
+  <section class="media-page-shell">
+    <nav class="media-breadcrumbs" aria-label="Хлебные крошки" data-i18n-aria-label="breadcrumbs">
+      <a href="{{ url_for('home') }}" data-i18n="navHomeMain">Башкы бет</a>
+      <span aria-hidden="true">/</span>
+      <a href="{{ url_for('media_page') }}" data-i18n="navMedia">Медиа</a>
+      <span aria-hidden="true">/</span>
+      <a id="mediaBreadcrumbCurrent" href="{{ url_for('media_page') }}#photo" data-i18n="mediaTabPhoto">Фото</a>
+    </nav>
+
+    <div class="media-page-heading">
+      <div>
+        <p class="eyebrow" data-i18n="mediaEyebrow">Медиа</p>
+        <h1 data-i18n="mediaPageTitle">Фото, видео жана оюн обзорлору</h1>
+        <p data-i18n="mediaPageLead">Федерациянын турнирлеринен сүрөттөр, матчтар жана видео обзорлор.</p>
+      </div>
+
+      <div class="media-tabs" role="tablist" aria-label="Разделы медиа" data-i18n-aria-label="mediaTabsLabel">
+        <button class="media-tab active" type="button" role="tab" aria-selected="true" aria-controls="media-photo" data-media-tab="photo" data-i18n="mediaTabPhoto">Фото</button>
+        <button class="media-tab" type="button" role="tab" aria-selected="false" aria-controls="media-video" data-media-tab="video" data-i18n="mediaTabVideo">Видео</button>
+        <button class="media-tab" type="button" role="tab" aria-selected="false" aria-controls="media-review" data-media-tab="review" data-i18n="mediaTabReview">Обзор</button>
+      </div>
+    </div>
+
+    <form class="media-search" id="mediaSearchForm" role="search">
+      <label class="sr-only" for="mediaSearchInput" data-i18n="mediaSearchLabel">Медиа издөө</label>
+      <input id="mediaSearchInput" type="search" autocomplete="off" placeholder="Издөө" data-i18n-placeholder="mediaSearchPlaceholder" />
+      <button type="submit" aria-label="Поиск" data-i18n-aria-label="searchButton">
+        <span aria-hidden="true">⌕</span>
+      </button>
+    </form>
+
+    <div class="media-page-layout">
+      <div class="media-content">
+        <section class="media-panel active" id="media-photo" role="tabpanel" data-media-panel="photo">
+          <div class="media-panel-title">
+            <span aria-hidden="true"></span>
+            <h2 data-i18n="mediaAlbumsTitle">Фотоальбомдор</h2>
+          </div>
+          <div class="media-page-grid media-photo-grid">
+            {% for album in albums %}
+            <article class="media-page-card media-album-card" data-media-item data-search-text="{{ album.title }} {{ album.upload_date or '' }} {{ album.team_name or '' }} {{ album.team1 or album.team1_name or '' }} {{ album.team2 or album.team2_name or '' }} {{ album.tournament_name or '' }}">
+              {% if album.cover_image and file_available(album.cover_image) %}
+              <a class="media-card-visual" href="{{ url_for('album_detail', album_id=album.id) }}">
+                <img src="{{ album.cover_image }}" alt="{{ album.title }}" loading="lazy" />
+                <span class="media-card-icon" aria-hidden="true">▧</span>
+              </a>
+              {% else %}
+              <div class="media-card-visual media-card-placeholder">
+                <span class="media-card-icon" aria-hidden="true">▧</span>
+              </div>
+              {% endif %}
+              <div class="media-card-body">
+                <h3>{{ album.title }}</h3>
+                <p>
+                  <span>{{ album.actual_photo_count or album.photo_count or 0 }}</span>
+                  <span data-i18n="mediaPhotosCount">фото</span>
+                  {% if album.upload_date %}<time datetime="{{ album.upload_date }}">· {{ album.upload_date }}</time>{% endif %}
+                </p>
+                <div class="media-card-tags">
+                  {% if album.team_name %}<span>{{ album.team_name }}</span>{% endif %}
+                  {% if album.team1 or album.team1_name %}<span>{{ album.team1 or album.team1_name }} - {{ album.team2 or album.team2_name }}</span>{% endif %}
+                  {% if album.tournament_name %}<span>{{ album.tournament_name }}</span>{% endif %}
+                </div>
+                {% if album.archive_match_id %}
+                <a class="media-card-link" href="{{ url_for('match_detail', match_id=album.archive_match_id) }}" data-i18n="portalUi12">Открыть матч</a>
+                {% endif %}
+                <a class="media-card-link" href="{{ url_for('album_detail', album_id=album.id) }}" data-i18n="portalUi13">Открыть альбом</a>
+              </div>
+            </article>
+            {% else %}
+            <div class="media-empty-static">
+              <strong data-i18n="mediaNoPhotos">Фотоальбомдор азырынча жок.</strong>
+              <span data-i18n="mediaNoPhotosLead">Альбомдор админкадан кошулгандан кийин бул жерде чыгат.</span>
+            </div>
+            {% endfor %}
+          </div>
+        </section>
+
+        <section class="media-panel" id="media-video" role="tabpanel" data-media-panel="video" hidden>
+          <div class="media-panel-title">
+            <span aria-hidden="true"></span>
+            <h2 data-i18n="mediaVideosTitle">Видеолор</h2>
+          </div>
+          <div class="media-page-grid">
+            {% for video in videos %}
+            <article class="media-page-card media-video-card" data-media-item data-search-text="{{ video.title }} {{ video.category or '' }} {{ video.upload_date or '' }} {{ video.team_name or '' }} {{ video.team1 or video.team1_name or '' }} {{ video.team2 or video.team2_name or '' }} {{ video.tournament_name or '' }}">
+              <a class="media-card-visual" href="{{ url_for('media_detail', video_id=video.id) }}">
+                {% if video.thumbnail and file_available(video.thumbnail) %}
+                <img src="{{ video.thumbnail }}" alt="{{ video.title }}" loading="lazy" />
+                {% elif video.video_url and file_available(video.video_url) and (video.video_url.endswith('.mp4') or video.video_url.endswith('.webm') or video.video_url.endswith('.mov')) %}
+                <video src="{{ video.video_url }}" muted playsinline preload="metadata"></video>
+                {% else %}
+                <span class="media-card-placeholder"></span>
+                {% endif %}
+                <span class="media-play" aria-hidden="true"></span>
+              </a>
+              <div class="media-card-body">
+                <h3>{{ video.title }}</h3>
+                <p>{{ video.category or 'Видео' }}{% if video.upload_date %} · {{ video.upload_date }}{% endif %}</p>
+                <div class="media-card-tags">
+                  {% if video.team_name %}<span>{{ video.team_name }}</span>{% endif %}
+                  {% if video.team1 or video.team1_name %}<span>{{ video.team1 or video.team1_name }} - {{ video.team2 or video.team2_name }}</span>{% endif %}
+                  {% if video.tournament_name %}<span>{{ video.tournament_name }}</span>{% endif %}
+                </div>
+                {% if video.archive_match_id %}
+                <a class="media-card-link" href="{{ url_for('match_detail', match_id=video.archive_match_id) }}" data-i18n="portalUi12">Открыть матч</a>
+                {% endif %}
+              </div>
+            </article>
+            {% else %}
+            <div class="media-empty-static">
+              <strong data-i18n="mediaNoVideos">Видеолор азырынча жок.</strong>
+              <span data-i18n="mediaNoVideosLead">Видеолор админкадан кошулгандан кийин бул жерде чыгат.</span>
+            </div>
+            {% endfor %}
+          </div>
+        </section>
+
+        <section class="media-panel" id="media-review" role="tabpanel" data-media-panel="review" hidden>
+          <div class="media-panel-title">
+            <span aria-hidden="true"></span>
+            <h2 data-i18n="mediaReviewsTitle">Оюн обзорлору</h2>
+          </div>
+          <div class="media-page-grid">
+            {% for video in reviews %}
+            <article class="media-page-card media-review-card" data-media-item data-search-text="{{ video.title }} {{ video.category or '' }} {{ video.upload_date or '' }} {{ video.team_name or '' }} {{ video.team1 or video.team1_name or '' }} {{ video.team2 or video.team2_name or '' }} {{ video.tournament_name or '' }}">
+              <a class="media-card-visual" href="{{ url_for('media_detail', video_id=video.id) }}">
+                {% if video.thumbnail and file_available(video.thumbnail) %}
+                <img src="{{ video.thumbnail }}" alt="{{ video.title }}" loading="lazy" />
+                {% elif video.video_url and file_available(video.video_url) and (video.video_url.endswith('.mp4') or video.video_url.endswith('.webm') or video.video_url.endswith('.mov')) %}
+                <video src="{{ video.video_url }}" muted playsinline preload="metadata"></video>
+                {% else %}
+                <span class="media-card-placeholder"></span>
+                {% endif %}
+                <span class="media-play" aria-hidden="true"></span>
+              </a>
+              <div class="media-card-body">
+                <span class="media-review-label" data-i18n="mediaTabReview">Обзор</span>
+                <h3>{{ video.title }}</h3>
+                {% if video.upload_date %}<p>{{ video.upload_date }}</p>{% endif %}
+                <div class="media-card-tags">
+                  {% if video.team_name %}<span>{{ video.team_name }}</span>{% endif %}
+                  {% if video.team1 or video.team1_name %}<span>{{ video.team1 or video.team1_name }} - {{ video.team2 or video.team2_name }}</span>{% endif %}
+                  {% if video.tournament_name %}<span>{{ video.tournament_name }}</span>{% endif %}
+                </div>
+                {% if video.archive_match_id %}
+                <a class="media-card-link" href="{{ url_for('match_detail', match_id=video.archive_match_id) }}" data-i18n="portalUi12">Открыть матч</a>
+                {% endif %}
+              </div>
+            </article>
+            {% else %}
+            <div class="media-empty-static">
+              <strong data-i18n="mediaNoReviews">Обзорлор азырынча жок.</strong>
+              <span data-i18n="mediaNoReviewsLead">«Обзор» категориясындагы видеолор бул жерде чыгат.</span>
+            </div>
+            {% endfor %}
+          </div>
+        </section>
+
+        <div class="media-search-empty" id="mediaSearchEmpty" hidden>
+          <strong data-i18n="mediaNothingFound">Эч нерсе табылган жок</strong>
+          <span data-i18n="mediaTryAnotherSearch">Башка издөө сөзүн колдонуп көрүңүз.</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/media.js') }}?v=2"></script>
+{% endblock %}

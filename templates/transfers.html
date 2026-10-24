@@ -4,22 +4,24 @@
 {% block description %}Список переходов игроков между командами федерации улак тартыш.{% endblock %}
 
 {% block content %}
-<main>
-  <section class="section page-hero">
+<main class="content-page">
+  <header class="content-page-header">
     <p class="eyebrow" data-i18n="pageTeamsEyebrow">Команды</p>
     <h1 data-i18n="transfers">Трансферлер</h1>
-    <p class="lead" data-i18n="transfersLead">Переходы игроков между командами и статус подтверждения.</p>
-  </section>
+    <p data-i18n="transfersLead">Переходы игроков между командами и статус подтверждения.</p>
+  </header>
 
-  <section class="section">
+  <section class="content-page-body">
     <div class="transfer-list">
       {% for transfer in transfers %}
       <article class="transfer-card">
-        <time datetime="{{ transfer.date }}">{{ transfer.date }}</time>
+        <time datetime="{{ transfer.transfer_date }}">{{ transfer.transfer_date }}</time>
         <h3>{{ transfer.player }}</h3>
         <p>{{ transfer.from_team }} → {{ transfer.to_team }}</p>
-        <span>{{ transfer.status }}</span>
+        <span class="transfer-status {% if transfer.status == 'Подтверждён' %}approved{% elif transfer.status == 'Отклонён' %}rejected{% else %}pending{% endif %}">{{ transfer.status }}</span>
       </article>
+      {% else %}
+      <p class="empty-state" data-i18n="transfersEmpty">Трансферы пока не добавлены.</p>
       {% endfor %}
     </div>
   </section>

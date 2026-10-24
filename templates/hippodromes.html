@@ -22,10 +22,10 @@
           <h3>{{ venue.name }}</h3>
           <p>{{ venue.description }}</p>
           <dl>
-            <div><dt data-i18n="addressLabel">Адрес</dt><dd>{{ venue.address or 'Не указан' }}</dd></div>
-            <div><dt data-i18n="capacity">Вместимость</dt><dd>{{ venue.capacity or 'Не указана' }}</dd></div>
-            <div><dt data-i18n="field">Поле</dt><dd>{{ venue.surface or 'Не указано' }}</dd></div>
-            <div><dt data-i18n="map">Карта</dt><dd>{% if venue.map_url %}<a href="{{ venue.map_url }}" target="_blank" rel="noopener noreferrer" data-i18n="open">Открыть</a>{% else %}Не указана{% endif %}</dd></div>
+            <div><dt data-i18n="addressLabel">Адрес</dt><dd>{% if venue.address %}{{ venue.address }}{% else %}<span data-i18n="notSpecified">Не указан</span>{% endif %}</dd></div>
+            <div><dt data-i18n="capacity">Вместимость</dt><dd>{% if venue.capacity %}{{ venue.capacity }}{% else %}<span data-i18n="notSpecified">Не указана</span>{% endif %}</dd></div>
+            <div><dt data-i18n="field">Поле</dt><dd>{% if venue.surface %}{{ venue.surface }}{% else %}<span data-i18n="notSpecified">Не указано</span>{% endif %}</dd></div>
+            <div><dt data-i18n="map">Карта</dt><dd>{% if venue.map_url %}<a href="{{ venue.map_url }}" target="_blank" rel="noopener noreferrer" data-i18n="open">Открыть</a>{% else %}<span data-i18n="notSpecified">Не указана</span>{% endif %}</dd></div>
           </dl>
         </div>
       </article>

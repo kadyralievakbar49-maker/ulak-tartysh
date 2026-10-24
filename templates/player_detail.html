@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}{{ player.name }} | Игрок улак тартыш{% endblock %}
+{% block description %}Профиль игрока {{ player.name }}: команда, позиция, номер, статистика и участие в матчах.{% endblock %}
+
+{% from '_member_actions.html' import favorite, subscription with context %}
+{% block content %}
+<main>
+  <section class="section player-detail-hero">
+    <div class="player-detail-photo">
+      {% if player.photo_url and file_available(player.photo_url) %}
+      <img src="{{ player.photo_url }}" alt="{{ player.name }}" loading="lazy" />
+      {% else %}
+      <span>{{ player.name[:1] }}</span>
+      {% endif %}
+    </div>
+    <div class="player-detail-main">
+      <p class="eyebrow" data-i18n="portalUi46">Профиль игрока</p>
+      <h1>{{ player.name }}</h1>
+      <div class="member-actions">{{ favorite('player', player.id) }}</div>
+      <p class="lead">
+        {{ player.position or 'Оюнчу' }} ·
+        {% if player.linked_team_id %}
+        <a href="{{ url_for('team_detail_page', team_id=player.linked_team_id) }}">{{ player.team_name }}</a>
+        {% else %}
+        {% if player.team %}{{ player.team }}{% else %}<span data-i18n="portalUi93">Команда не указана</span>{% endif %}
+        {% endif %}
+      </p>
+      <div class="compact-stats player-detail-stats">
+        <span><strong>№{{ player.jersey_number or player.id }}</strong><small data-i18n="portalUi47">номер</small></span>
+        <span><strong>{{ player.stats_matches or 0 }}</strong><small data-i18n="portalUi40">матчей</small></span>
+        <span><strong>{{ player.stats_points or 0 }}</strong><small data-i18n="portalUi41">очков</small></span>
+        <span><strong>{{ player.birth_year or '—' }}</strong><small data-i18n="portalUi48">год рождения</small></span>
+      </div>
+    </div>
+  </section>
+
+  {% if player.bio or player.region or player.team_league %}
+  <section class="section player-info-layout">
+    <article class="info-panel">
+      <h2 data-i18n="portalUi49">Информация</h2>
+      {% if player.bio %}<p>{{ player.bio }}</p>{% endif %}
+      <dl class="archive-detail-list">
+        {% if player.region %}<div><dt data-i18n="portalUi50">Регион</dt><dd>{{ player.region }}</dd></div>{% endif %}
+        {% if player.team_league %}<div><dt data-i18n="portalUi51">Лига</dt><dd>{{ player.team_league }}</dd></div>{% endif %}
+        {% if player.team_wins is not none %}<div><dt data-i18n="portalUi52">Победы команды</dt><dd>{{ player.team_wins }}</dd></div>{% endif %}
+      </dl>
+    </article>
+
+    <article class="info-panel">
+      <h2 data-i18n="portalUi53">Команда</h2>
+      <p>{% if player.team_name or player.team %}{{ player.team_name or player.team }}{% else %}<span data-i18n="portalUi93">Команда не указана</span>{% endif %}</p>
+      {% if player.linked_team_id %}
+      <a class="archive-details" href="{{ url_for('team_detail_page', team_id=player.linked_team_id) }}" data-i18n="portalUi54">Открыть команду</a>
+      {% endif %}
+    </article>
+  </section>
+  {% endif %}
+
+  <section class="section player-info-layout">
+    <article class="info-panel">
+      <h2 data-i18n="portalUi5">Ближайшие матчи</h2>
+      <div class="mini-match-list">
+        {% for match in upcoming_matches %}
+        <div class="mini-match-card">
+          <strong>{{ match.team1 }} - {{ match.team2 }}</strong>
+          <span>{{ match.date }}{% if match.time %} · {{ match.time }}{% endif %} · {{ match.league }}</span>
+        </div>
+        {% else %}
+        <p class="empty-state" data-i18n="portalUi55">Ближайшие матчи не добавлены.</p>
+        {% endfor %}
+      </div>
+    </article>
+
+    <article class="info-panel">
+      <h2 data-i18n="portalUi7">История матчей</h2>
+      <div class="mini-match-list">
+        {% for match in archive_matches %}
+        <a class="mini-match-card" href="{{ url_for('match_detail', match_id=match.id) }}">
+          <strong>{{ match.team1_name }} {{ match.team1_score }}:{{ match.team2_score }} {{ match.team2_name }}</strong>
+          <span>{{ match.match_date }} · {% if match.league %}{{ match.league }}{% else %}<span data-i18n="portalUi94">Лига не указана</span>{% endif %}</span>
+        </a>
+        {% else %}
+        <p class="empty-state" data-i18n="portalUi8">История матчей пока пустая.</p>
+        {% endfor %}
+      </div>
+    </article>
+  </section>
+
+  {% if team_players %}
+  <section class="section">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow" data-i18n="portalUi56">Состав</p>
+        <h2 data-i18n="portalUi57">Другие игроки команды</h2>
+      </div>
+      {% if player.linked_team_id %}
+      <a class="btn-ghost" href="{{ url_for('team_detail_page', team_id=player.linked_team_id) }}" data-i18n="portalUi58">Вся команда</a>
+      {% endif %}
+    </div>
+    <div class="team-player-grid">
+      {% for mate in team_players %}
+      <a class="team-player-card" href="{{ url_for('player_detail_page', player_id=mate.id) }}">
+        <span class="team-player-fallback">{{ mate.name[:1] }}</span>
+        <div>
+          <h3>{{ mate.name }}</h3>
+          <p>{{ mate.position or 'Оюнчу' }}</p>
+          <small>{{ mate.stats_points or 0 }} <span data-i18n="points">очков</span></small>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+{% if linked_horses %}<section class="section"><h2 data-i18n="linkedHorses">Лошади</h2><div class="saved-grid">{% for horse in linked_horses %}<a class="saved-card" href="{{ url_for('horse_detail_page',horse_id=horse.id) }}">{% if horse.photo_url and file_available(horse.photo_url) %}<img src="{{ horse.photo_url }}" alt="{{ horse.name }}" loading="lazy" />{% endif %}<h3>{{ horse.name }}</h3><p>{{ horse.breed or '' }}</p></a>{% endfor %}</div></section>{% endif %}
+</main>
+{% endblock %}

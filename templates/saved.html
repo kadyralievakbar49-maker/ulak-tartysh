@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% from '_member_actions.html' import favorite, subscription with context %}
+{% block title %}Избранное | Улак тартыш{% endblock %}
+{% block content %}
+<main class="member-page">
+  <section class="section page-hero">
+    <p class="eyebrow" data-i18n="personalAccount">Личный кабинет</p>
+    <h1 data-i18n="myCollection">Моё избранное</h1>
+    <p class="lead" data-i18n="myCollectionLead">Лошади, игроки и команды, за которыми вы следите.</p>
+    <div class="member-actions"><a class="member-action" href="{{ url_for('profile_page') }}" data-i18n="editProfile">Редактировать профиль</a><a class="primary" href="{{ url_for('portal.submit_horse') }}" data-i18n="submitHorse">Подать объявление о лошади</a></div>
+  </section>
+  {% for kind, title, endpoint, param in [('horse','navHorses','horse_detail_page','horse_id'),('player','navPlayers','player_detail_page','player_id'),('team','navTeam','team_detail_page','team_id')] %}
+  <section class="section member-section">
+    <h2 data-i18n="{{ title }}">{{ kind }}</h2>
+    <div class="saved-grid">
+    {% for entity in groups[kind] %}
+      <article class="saved-card">
+        <a href="{{ url_for(endpoint, **{param:entity.id}) }}">
+          {% if entity.photo_url and file_available(entity.photo_url) %}<img src="{{ entity.photo_url }}" alt="{{ entity.name }}" loading="lazy" />{% else %}<span class="saved-initial">{{ entity.name[:1] }}</span>{% endif %}
+          <h3>{{ entity.name }}</h3>
+          <p>{{ entity.region if kind == 'team' else entity.breed if kind == 'horse' else entity.team or '' }}</p>
+        </a>
+        {{ favorite(kind,entity.id) }}
+      </article>
+    {% else %}
+      <p class="empty-state" data-i18n="favoritesEmpty">Пока ничего не сохранено. Нажмите «В избранное» в карточке лошади, игрока или команды.</p>
+    {% endfor %}
+    </div>
+  </section>
+  {% endfor %}
+  <section class="section member-section" id="my-schedule">
+    <h2 data-i18n="mySchedule">Моё расписание</h2>
+    <p data-i18n="myScheduleLead">Ближайшие игры выбранных команд. Расписание обновляется вместе с сайтом.</p>
+    <div class="saved-grid">
+      {% for team in subscription_teams %}<article class="info-panel"><h3><a href="{{ url_for('team_detail_page',team_id=team.id) }}">{{ team.name }}</a></h3><div class="member-actions">{{ subscription(team.id) }}</div></article>{% endfor %}
+    </div>
+    <div class="mini-match-list">
+      {% for match in subscription_matches %}<article class="mini-match-card"><strong>{{ match.team1 }} — {{ match.team2 }}</strong><span>{{ match.date|display_date }}{% if match.time %} · {{ match.time }}{% endif %}{% if match.location %} · {{ match.location }}{% endif %}</span></article>
+      {% else %}<p class="empty-state" data-i18n="scheduleEmpty">Ближайших игр пока нет. Подпишитесь на команду на её странице.</p>{% endfor %}
+    </div>
+  </section>
+  <section class="section member-section" id="my-submissions">
+    <h2 data-i18n="mySubmissions">Мои объявления</h2>
+    {% for row in submissions %}<article class="info-panel submission-summary"><div><h3>{{ row.name }}</h3><span class="status-pill" data-i18n="submission_{{ row.status }}">{{ row.status }}</span><p>{{ row.created_at[:10]|display_date }}</p>{% if row.review_note %}<p>{{ row.review_note }}</p>{% endif %}</div>{% if row.horse_id %}<a class="member-action" href="{{ url_for('horse_detail_page',horse_id=row.horse_id) }}" data-i18n="details">Подробнее</a>{% endif %}</article>
+    {% else %}<p class="empty-state" data-i18n="submissionsEmpty">Вы пока не подавали объявления.</p>{% endfor %}
+  </section>
+</main>
+{% endblock %}

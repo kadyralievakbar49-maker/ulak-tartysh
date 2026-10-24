@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Редактирование документа | Админ-панель</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}" />
+  </head>
+  <body class="admin-standalone">
+    <main class="admin-card-page admin-card-wide">
+      <div class="admin-page-actions"><a class="admin-link-button" href="{{ url_for('admin_panel') }}#all-documents">← К документам</a></div>
+      <article class="panel">
+        <p class="eyebrow">Все документы</p>
+        <h1>Редактировать документ</h1>
+        {% if error %}<p class="admin-alert error">{{ error }}</p>{% endif %}
+        <form class="form-grid cms-form" method="post" enctype="multipart/form-data">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          <label>Название документа
+            <input name="title" value="{{ request.form.get('title', document.title) }}" required />
+          </label>
+          <div class="two-col">
+            <label>Категория
+              <select name="category">
+                {% for value, label in categories.items() %}
+                <option value="{{ value }}" {% if request.form.get('category', document.category) == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </label>
+            <label>Официальная дата
+              <input name="official_date" type="date" value="{{ request.form.get('official_date', document.official_date or document.upload_date) }}" />
+            </label>
+          </div>
+          <label>Регистрационный номер
+            <input name="reg_number" value="{{ request.form.get('reg_number', document.reg_number or '') }}" placeholder="328117-3301-ОО" />
+          </label>
+          <label>Описание
+            <textarea name="description" rows="5">{{ request.form.get('description', document.description or '') }}</textarea>
+          </label>
+          <label class="file-field">Заменить PDF файл
+            <input name="file" type="file" accept=".pdf,application/pdf" />
+            <span class="hint">Если оставить поле пустым, текущий файл сохранится.</span>
+          </label>
+          {% if document.file_url %}
+          <a class="admin-link-button" href="{{ document.file_url }}" target="_blank" rel="noopener noreferrer">Открыть текущий PDF</a>
+          {% endif %}
+          <button type="submit">Сохранить документ</button>
+        </form>
+      </article>
+    </main>
+  </body>
+</html>

@@ -9,12 +9,28 @@ services:
       - "5000:5000"
     volumes:
       - .:/app
-      - db_data:/app
       - uploads_data:/app/static/uploads
     env_file:
       - .env
+    environment:
+      - PORT=5000
     command: ["python", "app.py"]
 
+  backups:
+    image: ulak-tartysh2026-web
+    restart: unless-stopped
+    user: "${BACKUP_UID:-1000}:${BACKUP_GID:-1000}"
+    read_only: true
+    network_mode: none
+    tmpfs:
+      - /tmp
+    volumes:
+      - .:/app:ro
+      - ./backups:/app/backups
+      - uploads_data:/app/static/uploads:ro
+    environment:
+      - DATABASE_PATH=database.db
+    command: ["python", "scripts/backup_site.py", "--interval-hours", "24", "--keep", "14"]
+
 volumes:
-  db_data:
   uploads_data:

@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% from "_video_player.html" import video_player with context %}
+
+{% block title %}{{ video.title }} | Видео{% endblock %}
+{% block description %}{{ video.description or video.title }}{% endblock %}
+{% block og_title %}{{ video.title }}{% endblock %}
+{% block og_description %}{{ video.description or 'Видео федерации Улак тартыш.' }}{% endblock %}
+{% if video.thumbnail and file_available(video.thumbnail) %}{% block og_image %}{{ video.thumbnail }}{% endblock %}{% endif %}
+{% block page_title_key %}mediaPageBrowserTitle{% endblock %}
+
+{% block content %}
+<main class="video-detail-page">
+  <section class="video-detail-shell">
+    <nav class="media-breadcrumbs" aria-label="Хлебные крошки" data-i18n-aria-label="breadcrumbs">
+      <a href="{{ url_for('home') }}" data-i18n="navHomeMain">Башкы бет</a>
+      <span aria-hidden="true">/</span>
+      <a href="{{ url_for('media_page') }}" data-i18n="navMedia">Медиа</a>
+      <span aria-hidden="true">/</span>
+      <strong>{{ video.title }}</strong>
+    </nav>
+
+    <div class="video-detail-heading">
+      <p class="eyebrow" data-i18n="mediaTabVideo">Видео</p>
+      <h1>{{ video.title }}</h1>
+    </div>
+
+    <div class="video-watch-layout">
+      <article class="video-watch-main">
+        {{ video_player(video, 'video-watch-player') }}
+        <div class="video-watch-meta">
+          <div>
+            <h2>{{ video.title }}</h2>
+            <p>
+              {{ video.category or 'Видео' }}
+              {% if video.upload_date %} · {{ video.upload_date }}{% endif %}
+              · {{ (video.views or 0) + 1 }} <span data-i18n="viewCount">просмотров</span>
+            </p>
+          </div>
+          {% if video.archive_match_id %}
+          <a class="archive-details" href="{{ url_for('match_detail', match_id=video.archive_match_id) }}" data-i18n="portalUi12">Открыть матч</a>
+          {% endif %}
+        </div>
+
+        {% if video.description or video.team_name or video.tournament_name or video.team1_name or video.team1 %}
+        <div class="video-description">
+          {% if video.description %}<p>{{ video.description }}</p>{% endif %}
+          <div class="media-card-tags">
+            {% if video.team_name %}<span>{{ video.team_name }}</span>{% endif %}
+            {% if video.team1 or video.team1_name %}<span>{{ video.team1 or video.team1_name }} - {{ video.team2 or video.team2_name }}</span>{% endif %}
+            {% if video.tournament_name %}<span>{{ video.tournament_name }}</span>{% endif %}
+          </div>
+        </div>
+        {% endif %}
+      </article>
+
+      <aside class="video-sidebar" aria-label="Другие видео">
+        <h2 data-i18n="portalUi79">Другие видео</h2>
+        <div class="video-sidebar-list">
+          {% for item in other_videos %}
+          <a class="video-side-item" href="{{ url_for('media_detail', video_id=item.id) }}">
+            <span class="video-side-thumb">
+              {% if item.thumbnail and file_available(item.thumbnail) %}
+              <img src="{{ item.thumbnail }}" alt="{{ item.title }}" loading="lazy" />
+              {% elif item.video_url and file_available(item.video_url) and (item.video_url.endswith('.mp4') or item.video_url.endswith('.webm') or item.video_url.endswith('.mov')) %}
+              <video src="{{ item.video_url }}" muted playsinline preload="metadata"></video>
+              {% else %}
+              <span class="media-card-placeholder"></span>
+              {% endif %}
+              <span class="media-play" aria-hidden="true"></span>
+            </span>
+            <span class="video-side-text">
+              <strong>{{ item.title }}</strong>
+              <small>{{ item.category or 'Видео' }}{% if item.upload_date %} · {{ item.upload_date }}{% endif %}</small>
+            </span>
+          </a>
+          {% else %}
+          <p class="empty-state" data-i18n="portalUi80">Другие видео пока не добавлены.</p>
+          {% endfor %}
+        </div>
+      </aside>
+    </div>
+
+    <section class="video-comments" id="comments">
+      <h2><span data-i18n="portalUi90">Комментарии</span> ({{ comments|length }})</h2>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="comment-flashes">
+        {% for category, message in messages %}
+        <p class="{{ category }}">{{ message }}</p>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% endwith %}
+
+      {% if session.get('user_id') %}
+      <form class="comment-form" action="{{ url_for('add_video_comment', video_id=video.id) }}" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <label for="commentBody" data-i18n="portalUi81">Оставить комментарий</label>
+        <textarea id="commentBody" name="body" rows="4" maxlength="1000" required placeholder="Напишите комментарий" data-i18n-placeholder="portalUi89"></textarea>
+        <button class="primary" type="submit" data-i18n="portalUi82">Отправить</button>
+      </form>
+      {% else %}
+      <div class="comment-login-note">
+        <p data-i18n="portalUi83">Чтобы оставить комментарий, войдите или зарегистрируйтесь.</p>
+        <div>
+          <button class="btn-outline" type="button" onclick="showLoginModal()" data-i18n="portalUi84">Войти</button>
+          <button class="btn-primary" type="button" onclick="showRegisterModal()" data-i18n="portalUi85">Регистрация</button>
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="comment-list">
+        {% for comment in comments %}
+        <article class="comment-item">
+          {% if comment.photo_url and file_available(comment.photo_url) %}
+          <img src="{{ comment.photo_url }}" alt="{{ comment.full_name or 'User' }}" loading="lazy" />
+          {% else %}
+          <span>{{ (comment.full_name or 'U')[:1] }}</span>
+          {% endif %}
+          <div>
+            <header>
+              <strong>{{ comment.full_name or 'Пользователь' }}</strong>
+              <time datetime="{{ comment.created_at }}">{{ comment.created_at[:10] }}</time>
+            </header>
+            <p>{{ comment.body }}</p>
+          </div>
+        </article>
+        {% else %}
+        <p class="empty-state" data-i18n="portalUi86">Комментариев пока нет.</p>
+        {% endfor %}
+      </div>
+    </section>
+  </section>
+</main>
+{% endblock %}

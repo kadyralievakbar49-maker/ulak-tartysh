@@ -2,42 +2,121 @@
 
 {% block title %}{{ horse.name }} | Лошади{% endblock %}
 
+{% from '_member_actions.html' import favorite, subscription with context %}
 {% block content %}
-<main>
-  <section class="section horse-detail">
-    <a class="back-link" href="{{ url_for('horses_page') }}">← Лошади</a>
-    <div class="horse-detail-grid">
-      <div class="horse-detail-photo">
-        {% if horse.photo_url %}
-        <img src="{{ horse.photo_url }}" alt="{{ horse.name }}" loading="lazy" />
-        {% else %}
-        <span>{{ horse.name[:1] }}</span>
-        {% endif %}
-      </div>
-      <div class="horse-detail-info">
-        <p class="eyebrow">{{ horse.breed or 'Порода не указана' }}</p>
-        <h1>{{ horse.name }}</h1>
-        <p class="lead">{{ horse.description or 'Описание пока не добавлено.' }}</p>
-        <div class="horse-stats">
-          <span><strong>{{ horse.age or '-' }}</strong><em>лет</em></span>
-          <span><strong>{{ horse.speed or 0 }}</strong><em>скорость</em></span>
-          <span><strong>{{ horse.stamina or 0 }}</strong><em>выносливость</em></span>
-          <span><strong>{{ horse.points or 0 }}</strong><em>баллов</em></span>
-        </div>
-        <div class="horse-sale">
-          {% if horse.is_for_sale and horse.price %}
-          <strong>{{ "{:,}".format(horse.price).replace(",", " ") }} сом</strong>
-          <span>Продаётся</span>
-          {% elif horse.is_for_sale %}
-          <strong>Цена по запросу</strong>
-          <span>Продаётся</span>
+<main class="horse-detail-page">
+  <section class="horse-detail-shell horse-profile">
+    <a class="back-link" href="{{ url_for('horses_page') }}">← <span data-i18n="pageHorsesEyebrow">Лошади</span></a>
+
+    <div class="horse-layout">
+      <div class="horse-photo-section">
+        <div class="horse-main-photo">
+          {% if main_photo %}
+          <img id="horseMainImage" src="{{ main_photo }}" alt="{{ horse.name }}" />
+          <span id="horsePhotoFallback" hidden>{{ horse.name[:1] }}</span>
           {% else %}
-          <strong>Не продаётся</strong>
-          <span>Статус</span>
+          <span>{{ horse.name[:1] }}</span>
           {% endif %}
         </div>
+        {% if photos|length > 1 %}
+        <div class="horse-thumbnails" aria-label="Галерея лошади" data-i18n-aria-label="horseGallery">
+          {% for photo in photos %}
+          <button class="horse-thumbnail {% if loop.first %}active{% endif %}" type="button" data-horse-photo="{{ photo }}" aria-label="{{ horse.name }} — {{ loop.index }}" aria-pressed="{{ 'true' if loop.first else 'false' }}">
+            <img src="{{ photo }}" alt="{{ horse.name }} — {{ loop.index }}" loading="lazy" />
+          </button>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+
       </div>
+
+      <div class="horse-info-section">
+        <span class="breed-tag">{% if horse.breed %}{{ horse.breed }}{% else %}<span data-i18n="breedNotSpecified">Порода не указана</span>{% endif %}</span>
+        <h1>{{ horse.name }}</h1>
+      <div class="member-actions">{{ favorite('horse', horse.id) }}</div>
+        <p class="horse-color"><span data-i18n="horseColorLabel">Масть</span>: {% if horse.color %}{{ horse.color }}{% else %}<span data-i18n="colorNotSpecified">Масть не указана</span>{% endif %}</p>
+        <dl class="horse-metadata">
+          {% if horse.owner_name %}<div><dt data-i18n="horseOwner">Владелец</dt><dd>{{ horse.owner_name }}</dd></div>{% endif %}
+          {% if horse.region %}<div><dt data-i18n="regionLabel">Регион</dt><dd>{{ horse.region }}</dd></div>{% endif %}
+          {% if horse_player %}<div><dt data-i18n="playerLabel">Игрок</dt><dd><a href="{{ url_for('player_detail_page',player_id=horse_player.id) }}">{{ horse_player.name }}</a>{% if horse_player.linked_team_id %} · <a href="{{ url_for('team_detail_page',team_id=horse_player.linked_team_id) }}">{{ horse_player.linked_team_name }}</a>{% endif %}</dd></div>{% endif %}
+        </dl>
+        <h2 class="horse-section-heading" data-i18n="horseCharacteristics">Характеристики</h2>
+
+        <div class="horse-stats-grid">
+          <div class="stat-box"><strong>{{ horse.age if horse.age is not none else '—' }}</strong><span data-i18n="years">лет</span></div>
+          <div class="stat-box"><strong>{{ horse.speed if horse.speed is not none else '—' }}</strong><span data-i18n="speed">скорость</span></div>
+          <div class="stat-box"><strong>{{ horse.stamina if horse.stamina is not none else '—' }}</strong><span data-i18n="stamina">выносливость</span></div>
+          <div class="stat-box"><strong>{{ horse.points or 0 }}</strong><span data-i18n="points">баллов</span></div>
+        </div>
+
+        {% if horse.rating_note %}<p class="form-hint">{{ horse.rating_note }}</p>{% else %}<p class="form-hint" data-i18n="ratingsUnspecified">Единицы и метод оценки скорости и выносливости пока не указаны.</p>{% endif %}
+        {% if horse.achievements %}<article class="horse-achievements"><h2 class="horse-section-heading" data-i18n="horseAchievements">Достижения</h2><p>{{ horse.achievements }}</p></article>{% endif %}
+        <div class="horse-price-box{% if not horse.is_for_sale %} horse-price-unavailable{% endif %}">
+          {% if horse.is_for_sale and horse.price %}
+          <strong>{{ "{:,}".format(horse.price).replace(",", " ") }} <span data-i18n="currencySom">сом</span></strong>
+          <span data-i18n="forSale">Продаётся</span>
+          {% elif horse.is_for_sale %}
+          <strong data-i18n="priceOnRequest">Цена по запросу</strong>
+          <span data-i18n="forSale">Продаётся</span>
+          {% else %}
+          <strong data-i18n="notForSale">Не продаётся</strong>
+          <span data-i18n="status">Статус</span>
+          {% endif %}
+        </div>
+
+        {% if horse.phone %}
+        <article class="horse-contact-box">
+          <h2 class="horse-section-heading" data-i18n="horseContactTitle">Связаться по поводу лошади</h2>
+          <a class="horse-phone" href="tel:{{ phone_href }}">{{ horse.phone }}</a>
+          <div class="contact-buttons">
+            <a class="btn-call" href="tel:{{ phone_href }}" data-i18n="call">Позвонить</a>
+            <a class="btn-whatsapp" href="https://wa.me/{{ whatsapp_phone }}" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+          </div>
+        </article>
+        {% else %}
+        <p class="horse-contact-missing" data-i18n="horseContactMissing">Контактный телефон пока не указан.</p>
+        {% endif %}
+      </div>
+        <article class="horse-description-box">
+          <h2 data-i18n="horseDescriptionTitle">Описание лошади</h2>
+          {% if horse.description %}
+          <p>{{ horse.description }}</p>
+          {% else %}
+          <p data-i18n="descriptionMissing">Описание пока не добавлено.</p>
+          {% endif %}
+        </article>
     </div>
   </section>
 </main>
+
+<script>
+  (() => {
+    const mainImage = document.getElementById("horseMainImage");
+    const fallback = document.getElementById("horsePhotoFallback");
+
+    function showFallback() {
+      if (mainImage) mainImage.hidden = true;
+      if (fallback) fallback.hidden = false;
+    }
+
+    mainImage?.addEventListener("error", showFallback);
+    if (mainImage?.complete && !mainImage.naturalWidth) showFallback();
+
+    document.querySelectorAll("[data-horse-photo]").forEach((button) => {
+      button.addEventListener("click", () => {
+        if (!mainImage) return;
+        mainImage.hidden = false;
+        if (fallback) fallback.hidden = true;
+        mainImage.src = button.dataset.horsePhoto;
+        document.querySelectorAll("[data-horse-photo]").forEach((item) => {
+          item.classList.remove("active");
+          item.setAttribute("aria-pressed", "false");
+        });
+        button.classList.add("active");
+        button.setAttribute("aria-pressed", "true");
+      });
+    });
+  })();
+</script>
 {% endblock %}

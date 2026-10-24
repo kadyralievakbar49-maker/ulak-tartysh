@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Редактирование пользователя | Админ-панель</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}?v=3" />
+  </head>
+  <body class="admin-standalone">
+    <main class="admin-card-page">
+      <div class="admin-page-actions">
+        <a class="admin-link-button" href="{{ url_for('admin_user_detail', user_id=user.id) }}">← Назад к деталям</a>
+      </div>
+      <article class="panel">
+        <p class="eyebrow">Пользователь #{{ user.id }}</p>
+        <h1>Редактирование</h1>
+        {% if error %}<p class="admin-alert error">{{ error }}</p>{% endif %}
+        <form class="form-grid user-edit-form" method="post">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          <label>Имя
+            <input name="full_name" value="{{ request.form.get('full_name', user.full_name) }}" required />
+          </label>
+          <label>Email
+            <input name="email" type="email" value="{{ request.form.get('email', user.email) }}" required />
+          </label>
+          <label>Телефон
+            <input name="phone" value="{{ request.form.get('phone', user.phone or '') }}" placeholder="+996 700 000 000" />
+          </label>
+          <label>Новый пароль
+            <span class="password-field">
+              <input id="newPassword" name="password" type="password" minlength="6" autocomplete="new-password" />
+              <button class="password-toggle" type="button" aria-label="Показать пароль" aria-pressed="false" data-password-toggle data-target="newPassword">
+                <svg class="eye-open" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                <svg class="eye-closed" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d="M3 3l18 18"></path>
+                  <path d="M10.6 10.6A3 3 0 0 0 13.4 13.4"></path>
+                  <path d="M9.5 5.6A10.8 10.8 0 0 1 12 5.3c6 0 9.5 6.7 9.5 6.7a15.3 15.3 0 0 1-3 3.8"></path>
+                  <path d="M6.2 7.4A16 16 0 0 0 2.5 12s3.5 6.7 9.5 6.7c1.5 0 2.9-.4 4.1-1"></path>
+                </svg>
+              </button>
+            </span>
+            <span class="hint">Оставьте пустым, чтобы сохранить текущий пароль.</span>
+          </label>
+          <label>Роль
+            {% set selected_role = request.form.get('role', user.role) %}
+            <select name="role">
+              <option value="user" {% if selected_role == 'user' %}selected{% endif %}>Обычный пользователь</option>
+              <option value="admin" {% if selected_role == 'admin' %}selected{% endif %}>Администратор</option>
+            </select>
+          </label>
+          <label class="check">
+            <input name="is_active" type="checkbox" {% if request.form.get('is_active') or (not request.form and user.is_active) %}checked{% endif %} />
+            Аккаунт активен
+          </label>
+          <button type="submit">Сохранить пользователя</button>
+        </form>
+      </article>
+    </main>
+    <script>
+      document.querySelectorAll("[data-password-toggle]").forEach((button) => {
+        const input = document.getElementById(button.dataset.target);
+        if (!input) return;
+
+        button.addEventListener("click", () => {
+          const isVisible = input.type === "text";
+          input.type = isVisible ? "password" : "text";
+          button.setAttribute("aria-pressed", String(!isVisible));
+          button.setAttribute("aria-label", isVisible ? "Показать пароль" : "Скрыть пароль");
+        });
+      });
+    </script>
+  </body>
+</html>

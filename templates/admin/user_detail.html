@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ user.full_name }} | Пользователи</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}" />
+  </head>
+  <body class="admin-standalone">
+    <main class="admin-card-page">
+      <div class="admin-page-actions">
+        <a class="admin-link-button" href="{{ url_for('admin_users') }}">← Все пользователи</a>
+        <a class="open-site" href="{{ url_for('admin_user_edit', user_id=user.id) }}">Редактировать</a>
+      </div>
+      {% if request.args.get('saved') %}
+      <p class="admin-alert success">Изменения сохранены.</p>
+      {% endif %}
+      <article class="panel user-detail-card">
+        <div class="user-detail-heading">
+          <span class="user-detail-avatar">{{ user.full_name[:1] }}</span>
+          <div>
+            <p class="eyebrow">Пользователь #{{ user.id }}</p>
+            <h1>{{ user.full_name }}</h1>
+            <span class="status-badge {{ 'active' if user.is_active else 'blocked' }}">{{ 'Активен' if user.is_active else 'Заблокирован' }}</span>
+          </div>
+        </div>
+        <dl class="user-detail-list">
+          <div><dt>Email</dt><dd>{{ user.email }}</dd></div>
+          <div><dt>Телефон</dt><dd>{{ user.phone or 'Не указан' }}</dd></div>
+          <div><dt>Роль</dt><dd>{{ 'Администратор' if user.role == 'admin' else 'Обычный пользователь' }}</dd></div>
+          <div><dt>Дата регистрации</dt><dd>{{ user.created_at }}</dd></div>
+          <div><dt>Фото</dt><dd>{{ user.photo_url or 'Не загружено' }}</dd></div>
+        </dl>
+        <div class="user-detail-actions">
+          <form method="post" action="{{ url_for('admin_user_toggle_role', user_id=user.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <button type="submit">Сменить роль</button>
+          </form>
+          <form method="post" action="{{ url_for('admin_user_toggle_block', user_id=user.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <button type="submit">{{ 'Заблокировать' if user.is_active else 'Разблокировать' }}</button>
+          </form>
+        </div>
+      </article>
+    </main>
+  </body>
+</html>

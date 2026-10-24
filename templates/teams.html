@@ -15,7 +15,7 @@
       {% for team in teams %}
       <a class="team-card team-link-card" href="{{ url_for('team_detail_page', team_id=team.id) }}">
         <div class="team-photo-box">
-          {% if team.photo_url %}
+          {% if team.photo_url and file_available(team.photo_url) %}
           <img src="{{ team.photo_url }}" alt="{{ team.name }}" loading="lazy" />
           {% else %}
           <span>{{ team.name[:1] }}</span>
@@ -32,7 +32,7 @@
           <span><strong>{{ team.player_count or 0 }}</strong> <em data-i18n="playersCount">игроков</em></span>
           <span><strong>{{ team.wins }}</strong> <em data-i18n="wins">побед</em></span>
           <span><strong>{{ team.points }}</strong> <em data-i18n="points">очков</em></span>
-          <span><strong>{{ team.league }}</strong> лига</span>
+          <span><strong>{{ team.league }}</strong> <em data-i18n="league">лига</em></span>
         </div>
       </a>
       {% else %}

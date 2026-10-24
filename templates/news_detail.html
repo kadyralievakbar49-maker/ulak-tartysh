@@ -1,17 +1,34 @@
 {% extends "base.html" %}
 
-{% block title %}{{ item.title }} | Улак тартыш{% endblock %}
+{% set news_description = item.meta_description or item.body|striptags|truncate(155) or 'Улак тартыш федерациясынын жаңылыгы.' %}
+{% block title %}{{ item.meta_title or item.title }} | Улак тартыш{% endblock %}
+{% block description %}{{ news_description }}{% endblock %}
+{% block og_type %}article{% endblock %}
+{% block og_title %}{{ item.meta_title or item.title }} | Улак тартыш{% endblock %}
+{% block og_description %}{{ news_description }}{% endblock %}
+{% block og_image %}{{ news_og_image or url_for('static', filename='img/logo.jpg', _external=True) }}{% endblock %}
 
 {% block content %}
 <main>
-  <article class="section detail-page">
-    <a class="back-link" href="{{ url_for('home') }}#news">← <span data-i18n="backToNews">Жаңылыктар</span></a>
-    <p class="eyebrow">{{ item.date }}</p>
-    <h1>{{ item.title }}</h1>
-    {% if item.img_url %}
-    <img class="detail-cover" src="{{ item.img_url }}" alt="{{ item.title }}" loading="lazy" />
+  <article class="section detail-page news-detail-page">
+    <a class="back-link" href="{{ url_for('news_page') }}">← <span data-i18n="backToNews">Жаңылыктар</span></a>
+
+    {% if item.img_url and file_available(item.img_url) %}
+    <figure class="news-inline-image">
+      <img src="{{ item.img_url }}" alt="{{ item.title }}" loading="lazy" />
+      <figcaption>{{ item.title }}</figcaption>
+    </figure>
     {% endif %}
-    <div class="detail-text">
+
+    <div class="news-detail-body">
+      {% if not item.is_published %}
+      <p class="admin-preview-badge" data-i18n="portalUi4">Черновик: виден только администратору</p>
+      {% endif %}
+      <p class="eyebrow">{{ item.date|display_date }}</p>
+      <h1>{{ item.title }}</h1>
+
+      {% if news_team or news_match %}<div class="member-actions">{% if news_team %}<a class="member-action" href="{{ url_for('team_detail_page',team_id=news_team.id) }}">{{ news_team.name }}</a>{% endif %}{% if news_match %}<a class="member-action" href="{{ url_for('match_detail',match_id=news_match.id) }}">{{ news_match.team1_name }} — {{ news_match.team2_name }}</a>{% endif %}</div>{% endif %}
+      <div class="detail-text">
       {% if item.body %}
       {% for paragraph in item.body.split('\n') %}
       {% if paragraph.strip() %}<p>{{ paragraph }}</p>{% endif %}
@@ -19,6 +36,7 @@
       {% else %}
       <p data-i18n="newsBodyComingSoon">Толук текст жакында кошулат.</p>
       {% endif %}
+      </div>
     </div>
   </article>
 </main>

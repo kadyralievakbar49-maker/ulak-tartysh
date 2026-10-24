@@ -1,0 +1,56 @@
+{
+  "database_integrity": "ok",
+  "missing_local_files": [
+    {
+      "table": "regulations",
+      "id": 1,
+      "field": "file_path",
+      "path": "/static/docs/ulak-tartysh-regulation-1.pdf"
+    },
+    {
+      "table": "regulations",
+      "id": 2,
+      "field": "file_path",
+      "path": "/static/docs/team-application-1.pdf"
+    },
+    {
+      "table": "regulations",
+      "id": 3,
+      "field": "file_path",
+      "path": "/static/docs/federation-protocol-4.pdf"
+    }
+  ],
+  "external_links_not_checked": 13,
+  "horse_records_to_review": [
+    {
+      "id": 1,
+      "name": "Аккула",
+      "reasons": [
+        "sale_without_contact"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Карагер",
+      "reasons": [
+        "sale_without_contact"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Тигр",
+      "reasons": [
+        "sale_without_contact",
+        "missing_description"
+      ]
+    },
+    {
+      "id": 10,
+      "name": "Элина",
+      "reasons": [
+        "sale_without_contact",
+        "price_1_or_less"
+      ]
+    }
+  ]
+}

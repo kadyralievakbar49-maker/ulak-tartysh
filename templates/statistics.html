@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Статистика | Улак тартыш{% endblock %}
+{% block description %}Лучшие команды, лучшие игроки, победы, очки и история матчей федерации улак тартыш.{% endblock %}
+
+{% block content %}
+<main>
+  <section class="section page-hero">
+    <p class="eyebrow" data-i18n="portalUi1">Статистика</p>
+    <h1 data-i18n="portalUi59">Рейтинги и результаты</h1>
+    <p class="lead" data-i18n="portalUi60">Лучшие команды, результативные игроки, очки по лигам и последние матчи.</p>
+  </section>
+
+  <section class="section stats-dashboard">
+    <article class="info-panel">
+      <h2 data-i18n="portalUi61">Лучшие команды</h2>
+      <div class="rank-list">
+        {% for team in top_teams %}
+        <a href="{{ url_for('team_detail_page', team_id=team.id) }}">
+          <span>{{ loop.index }}</span>
+          <strong>{{ team.name }}</strong>
+          <em>{{ team.wins or 0 }} <span data-i18n="wins">побед</span> · {{ team.points or 0 }} <span data-i18n="points">очков</span></em>
+        </a>
+        {% else %}
+        <p class="empty-state" data-i18n="portalUi62">Команды пока не добавлены.</p>
+        {% endfor %}
+      </div>
+    </article>
+
+    <article class="info-panel">
+      <h2 data-i18n="portalUi63">Лучшие игроки</h2>
+      <div class="rank-list">
+        {% for player in top_players[:8] %}
+        <a href="{{ url_for('player_detail_page', player_id=player.id) }}">
+          <span>{{ loop.index }}</span>
+          <strong>{{ player.name }}</strong>
+          <em>{% if player.display_team %}{{ player.display_team }}{% else %}<span data-i18n="portalUi93">Команда не указана</span>{% endif %} · {{ player.stats_points or 0 }} <span data-i18n="points">очков</span></em>
+        </a>
+        {% else %}
+        <p class="empty-state" data-i18n="portalUi43">Игроки пока не добавлены.</p>
+        {% endfor %}
+      </div>
+    </article>
+  </section>
+
+  <section class="section stats-dashboard">
+    <article class="info-panel">
+      <h2 data-i18n="portalUi64">Очки по лигам</h2>
+      <div class="responsive-table">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th data-i18n="portalUi51">Лига</th>
+              <th data-i18n="portalUi65">Матчи</th>
+              <th data-i18n="portalUi66">Забитые очки</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for league in league_totals %}
+            <tr>
+              <td>{{ league.league }}</td>
+              <td>{{ league.matches_count or 0 }}</td>
+              <td>{{ league.total_points or 0 }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="3" data-i18n="portalUi67">Архивные матчи пока не добавлены.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <article class="info-panel">
+      <h2 data-i18n="portalUi7">История матчей</h2>
+      <div class="mini-match-list">
+        {% for match in recent_matches %}
+        <a class="mini-match-card" href="{{ url_for('match_detail', match_id=match.id) }}">
+          <strong>{{ match.team1_name }} {{ match.team1_score }}:{{ match.team2_score }} {{ match.team2_name }}</strong>
+          <span>{{ match.match_date }} · {% if match.league %}{{ match.league }}{% else %}<span data-i18n="portalUi94">Лига не указана</span>{% endif %}</span>
+        </a>
+        {% else %}
+        <p class="empty-state" data-i18n="portalUi8">История матчей пока пустая.</p>
+        {% endfor %}
+      </div>
+    </article>
+  </section>
+</main>
+{% endblock %}

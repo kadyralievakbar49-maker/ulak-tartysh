@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% set album_description = album.meta_description or album.description or 'Фотоальбом федерации Улак тартыш.' %}
+{% block title %}{{ album.meta_title or album.title }} | Фотоальбом{% endblock %}
+{% block description %}{{ album_description|striptags|truncate(155) }}{% endblock %}
+{% block og_type %}article{% endblock %}
+{% block og_title %}{{ album.meta_title or album.title }} | Фотоальбом{% endblock %}
+{% block og_description %}{{ album_description|striptags|truncate(155) }}{% endblock %}
+{% block og_image %}{{ album_og_image or url_for('static', filename='img/logo.jpg', _external=True) }}{% endblock %}
+
+{% block content %}
+<main class="album-detail-page">
+  <section class="album-detail-shell">
+    <a class="archive-back" href="{{ url_for('media_page') }}#photo" data-i18n="portalUi68">← Медиа</a>
+
+    <header class="album-detail-header">
+      <div>
+        <p class="eyebrow" data-i18n="portalUi69">Фотоальбом</p>
+        <h1>{{ album.title }}</h1>
+        <p>
+          {% if album.description %}{{ album.description }}{% else %}Сүрөттөр федерациянын медиа архивинен.{% endif %}
+        </p>
+      </div>
+      <dl class="album-detail-meta">
+        <div><dt data-i18n="portalUi70">Фото</dt><dd>{{ photos|length }}</dd></div>
+        {% if album.upload_date %}<div><dt data-i18n="portalUi71">Дата</dt><dd>{{ album.upload_date }}</dd></div>{% endif %}
+        {% if album.team_name %}<div><dt data-i18n="portalUi53">Команда</dt><dd>{{ album.team_name }}</dd></div>{% endif %}
+        {% if album.tournament_name %}<div><dt data-i18n="portalUi29">Турнир</dt><dd>{{ album.tournament_name }}</dd></div>{% endif %}
+      </dl>
+    </header>
+
+    {% if photos %}
+    <div class="album-gallery-grid" data-album-gallery>
+      {% for photo in photos %}
+      <button class="album-photo-card" type="button" data-album-photo="{{ loop.index0 }}" data-src="{{ photo.photo_url }}" data-caption="{{ photo.caption or album.title }}">
+        <img src="{{ photo.photo_url }}" alt="{{ photo.caption or album.title }}" loading="lazy" />
+        {% if photo.caption %}<span>{{ photo.caption }}</span>{% endif %}
+      </button>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="media-empty-static">
+      <strong data-i18n="portalUi72">Фото пока нет.</strong>
+      <span data-i18n="portalUi73">Добавьте фотографии в админке, и они появятся здесь.</span>
+    </div>
+    {% endif %}
+  </section>
+
+  <div class="album-lightbox" data-album-lightbox hidden>
+    <button class="album-lightbox-close" type="button" data-album-close aria-label="Закрыть">×</button>
+    <button class="album-lightbox-nav prev" type="button" data-album-prev aria-label="Предыдущее фото">‹</button>
+    <figure>
+      <img src="" alt="" data-album-lightbox-image />
+      <figcaption data-album-lightbox-caption></figcaption>
+    </figure>
+    <button class="album-lightbox-nav next" type="button" data-album-next aria-label="Следующее фото">›</button>
+  </div>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/album.js') }}"></script>
+{% endblock %}

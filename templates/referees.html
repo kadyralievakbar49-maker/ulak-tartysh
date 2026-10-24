@@ -20,16 +20,16 @@
     <div class="referee-grid">
       {% for referee in referees %}
       <article class="referee-card">
-        {% if referee.photo_url %}
+        {% if referee.photo_url and file_available(referee.photo_url) %}
         <img class="referee-avatar" src="{{ referee.photo_url }}" alt="{{ referee.name }}" loading="lazy" />
         {% else %}
         <span class="referee-avatar">{{ referee.name[:1] }}</span>
         {% endif %}
         <div>
           <h3>{{ referee.name }}</h3>
-          <p>{{ referee.category or 'Категория не указана' }}</p>
+          <p>{% if referee.category %}{{ referee.category }}{% else %}<span data-i18n="categoryNotSpecified">Категория не указана</span>{% endif %}</p>
         </div>
-        <small>{{ referee.experience_years or 0 }} лет · {{ referee.region or 'Регион не указан' }}</small>
+        <small>{{ referee.experience_years or 0 }} <span data-i18n="years">лет</span> · {% if referee.region %}{{ referee.region }}{% else %}<span data-i18n="regionNotSpecified">Регион не указан</span>{% endif %}</small>
       </article>
       {% else %}
       {% for referee in referees_public %}
@@ -39,8 +39,8 @@
           <h3>{{ referee.name }}</h3>
           <p>{{ referee.category }}</p>
         </div>
-        <small>{{ referee.experience }} лет · {{ referee.region }}</small>
-        <small>Назначение: {{ referee.assignment }}</small>
+        <small>{{ referee.experience }} <span data-i18n="years">лет</span> · {{ referee.region }}</small>
+        <small><span data-i18n="assignmentLabel">Назначение</span>: {{ referee.assignment }}</small>
       </article>
       {% endfor %}
       {% endfor %}
@@ -51,11 +51,11 @@
     <div class="league-grid">
       <article class="league-card">
         <strong data-i18n="categories">Категории</strong>
-        <span>Башкы калыс, улуттук категория, аймактык калыс, катчы-калыс.</span>
+        <span data-i18n="refereeCategoriesText">Главный судья, национальная категория, региональный судья и судья-секретарь.</span>
       </article>
       <article class="league-card">
         <strong data-i18n="assignments">Назначения</strong>
-        <span>Назначения формируются перед игровым туром и утверждаются федерацией.</span>
+        <span data-i18n="refereeAssignmentsText">Назначения формируются перед игровым туром и утверждаются федерацией.</span>
       </article>
     </div>
   </section>

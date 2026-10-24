@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Регламенты | Админ-панель</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}" />
+  </head>
+  <body>
+    <aside class="admin-sidebar">
+      <a class="admin-brand" href="{{ url_for('admin_panel') }}">
+        <img src="{{ url_for('static', filename='img/logo.jpg') }}" alt="Улак тартыш" />
+        <span><small>Управление сайтом</small><strong>Админ-панель</strong></span>
+      </a>
+      <nav class="admin-tabs">
+        <span class="admin-nav-label">Главное</span>
+        <a href="{{ url_for('admin_panel') }}">Обзор</a>
+        <a href="{{ url_for('admin_panel') }}#news">Новости</a>
+        <a href="{{ url_for('admin_panel') }}#documents">Документы</a>
+        <span class="admin-nav-label">Справочник</span>
+        <a href="{{ url_for('admin_rules') }}">Правила игры</a>
+        <a class="active" href="{{ url_for('admin_regulations') }}">Регламенты</a>
+        <a href="{{ url_for('admin_transfers') }}">Трансферы</a>
+        <span class="admin-nav-label">Доступ</span>
+        <a href="{{ url_for('admin_users') }}">Пользователи</a>
+      </nav>
+      <div class="sidebar-actions">
+        <a href="{{ url_for('pages.regulations_page') }}" target="_blank">Открыть страницу</a>
+        <a class="danger" href="{{ url_for('admin_logout') }}">Выйти</a>
+      </div>
+    </aside>
+    <main class="admin-main">
+      <header class="admin-topbar">
+        <div><p class="eyebrow">Документы</p><h1>Регламенты</h1></div>
+        <a class="open-site" href="{{ url_for('admin_regulation_add') }}">Добавить регламент</a>
+      </header>
+      <section class="panel">
+        <div class="responsive-table">
+          <table class="admin-user-table cms-table">
+            <thead><tr><th>Порядок</th><th>Название</th><th>Дата</th><th>Файл</th><th>Статус</th><th>Действия</th></tr></thead>
+            <tbody>
+              {% for item in regulations %}
+              <tr>
+                <td>{{ item.order_num }}</td>
+                <td><strong>{{ item.title }}</strong><br><small>{{ item.description or '' }}</small></td>
+                <td>{{ item.regulation_date }}</td>
+                <td>{% if item.file_path and file_available(item.file_path) %}<a href="{{ item.file_path }}" target="_blank" rel="noopener noreferrer">Открыть</a>{% elif item.file_path %}<span class="danger-text">Файл не найден</span>{% else %}—{% endif %}</td>
+                <td><span class="status-badge {{ 'active' if item.is_active else 'blocked' }}">{{ 'Опубликован' if item.is_active else 'Скрыт' }}</span></td>
+                <td>
+                  <div class="user-actions-grid">
+                    <a href="{{ url_for('admin_regulation_edit', regulation_id=item.id) }}">Редактировать</a>
+                    <form class="confirm-delete" method="post" action="{{ url_for('admin_regulation_delete', regulation_id=item.id) }}">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                      <button class="link-button danger-text" type="submit">Удалить</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              {% else %}
+              <tr><td colspan="6" class="empty">Регламентов пока нет.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+    <script>
+      document.querySelectorAll(".confirm-delete").forEach((form) => {
+        form.addEventListener("submit", (event) => {
+          if (!confirm("Удалить регламент?")) event.preventDefault();
+        });
+      });
+    </script>
+  </body>
+</html>

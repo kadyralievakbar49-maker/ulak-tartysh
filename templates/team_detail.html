@@ -3,11 +3,12 @@
 {% block title %}{{ team.name }} | Команда улак тартыш{% endblock %}
 {% block description %}Состав, регион, лига и статистика игроков команды {{ team.name }}.{% endblock %}
 
+{% from '_member_actions.html' import favorite, subscription with context %}
 {% block content %}
 <main>
   <section class="section page-hero team-detail-hero">
     <div class="team-detail-photo">
-      {% if team.photo_url %}
+      {% if team.photo_url and file_available(team.photo_url) %}
       <img src="{{ team.photo_url }}" alt="{{ team.name }}" loading="lazy" />
       {% else %}
       <span>{{ team.name[:1] }}</span>
@@ -16,7 +17,12 @@
     <div>
       <p class="eyebrow" data-i18n="team">Команда</p>
       <h1>{{ team.name }}</h1>
-      <p class="lead">{{ team.region or 'Регион не указан' }} · {{ team.league or 'Лига не указана' }}</p>
+      <div class="member-actions">{{ favorite('team', team.id) }} {{ subscription(team.id) }}</div>
+      <p class="lead">
+        {% if team.region %}{{ team.region }}{% else %}<span data-i18n="regionNotSpecified">Регион не указан</span>{% endif %}
+        ·
+        {% if team.league %}{{ team.league }}{% else %}<span data-i18n="leagueNotSpecified">Лига не указана</span>{% endif %}
+      </p>
     </div>
   </section>
 
@@ -30,22 +36,99 @@
 
     <div class="team-player-grid">
       {% for player in players %}
-      <article class="team-player-card">
-        {% if player.photo_url %}
+      <a class="team-player-card" href="{{ url_for('player_detail_page', player_id=player.id) }}">
+        {% if player.photo_url and file_available(player.photo_url) %}
         <img src="{{ player.photo_url }}" alt="{{ player.name }}" loading="lazy" />
         {% else %}
         <span class="team-player-fallback">{{ player.name[:1] }}</span>
         {% endif %}
         <div>
           <h3>{{ player.name }}</h3>
-          <p>{{ player.position or 'Оюнчу' }} · №{{ player.id }}</p>
-          <small>{{ player.stats_matches or 0 }} матчей · {{ player.stats_points or 0 }} очков</small>
+          <p>{% if player.position %}{{ player.position }}{% else %}<span data-i18n="playerLabel">Оюнчу</span>{% endif %} · №{{ player.jersey_number or player.id }}</p>
+          <small>{{ player.stats_matches or 0 }} <span data-i18n="matchesCount">матчей</span> · {{ player.stats_points or 0 }} <span data-i18n="points">очков</span></small>
         </div>
-      </article>
+      </a>
       {% else %}
       <p class="empty-state" data-i18n="noTeamPlayers">Игроки этой команды пока не добавлены.</p>
       {% endfor %}
     </div>
   </section>
+
+  <section class="section player-info-layout">
+    <article class="info-panel">
+      <h2 data-i18n="portalUi5">Ближайшие матчи</h2>
+      <div class="mini-match-list">
+        {% for match in upcoming_matches %}
+        <div class="mini-match-card">
+          <strong>{{ match.team1 }} - {{ match.team2 }}</strong>
+          <span>{{ match.date }}{% if match.time %} · {{ match.time }}{% endif %} · {{ match.league }}</span>
+        </div>
+        {% else %}
+        <p class="empty-state" data-i18n="portalUi6">Расписание команды пока пустое.</p>
+        {% endfor %}
+      </div>
+    </article>
+
+    <article class="info-panel">
+      <h2 data-i18n="portalUi7">История матчей</h2>
+      <div class="mini-match-list">
+        {% for match in archive_matches %}
+        <a class="mini-match-card" href="{{ url_for('match_detail', match_id=match.id) }}">
+          <strong>{{ match.team1_name }} {{ match.team1_score }}:{{ match.team2_score }} {{ match.team2_name }}</strong>
+          <span>{{ match.match_date }} · {% if match.league %}{{ match.league }}{% else %}<span data-i18n="portalUi94">Лига не указана</span>{% endif %}</span>
+        </a>
+        {% else %}
+        <p class="empty-state" data-i18n="portalUi8">История матчей пока пустая.</p>
+        {% endfor %}
+      </div>
+    </article>
+  </section>
+
+  {% if videos or albums %}
+  <section class="section">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow" data-i18n="portalUi9">Медиа</p>
+        <h2 data-i18n="portalUi10">Фото и видео команды</h2>
+      </div>
+      <a class="btn-ghost" href="{{ url_for('media_page') }}" data-i18n="portalUi11">Вся галерея</a>
+    </div>
+    <div class="media-page-grid">
+      {% for video in videos %}
+      <article class="media-page-card media-video-card">
+        <a class="media-card-visual" href="{{ url_for('media_detail', video_id=video.id) }}">
+          {% if video.thumbnail and file_available(video.thumbnail) %}
+          <img src="{{ video.thumbnail }}" alt="{{ video.title }}" loading="lazy" />
+          {% elif video.video_url and file_available(video.video_url) and (video.video_url.endswith('.mp4') or video.video_url.endswith('.webm') or video.video_url.endswith('.mov')) %}
+          <video src="{{ video.video_url }}" muted playsinline preload="metadata"></video>
+          {% else %}
+          <span class="media-card-placeholder"></span>
+          {% endif %}
+          <span class="media-play" aria-hidden="true"></span>
+        </a>
+        <div class="media-card-body">
+          <h3>{{ video.title }}</h3>
+          <p>{{ video.category or 'Видео' }}{% if video.upload_date %} · {{ video.upload_date }}{% endif %}</p>
+        </div>
+      </article>
+      {% endfor %}
+      {% for album in albums %}
+      <article class="media-page-card media-album-card">
+        {% if album.cover_image and file_available(album.cover_image) %}
+        <a class="media-card-visual" href="{{ album.cover_image }}" target="_blank" rel="noopener noreferrer">
+          <img src="{{ album.cover_image }}" alt="{{ album.title }}" loading="lazy" />
+          <span class="media-card-icon" aria-hidden="true">▧</span>
+        </a>
+        {% endif %}
+        <div class="media-card-body">
+          <h3>{{ album.title }}</h3>
+          <p>{{ album.actual_photo_count or album.photo_count or 0 }} фото{% if album.upload_date %} · {{ album.upload_date }}{% endif %}</p>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+{% if linked_horses %}<section class="section"><h2 data-i18n="linkedHorses">Лошади</h2><div class="saved-grid">{% for horse in linked_horses %}<a class="saved-card" href="{{ url_for('horse_detail_page',horse_id=horse.id) }}">{% if horse.photo_url and file_available(horse.photo_url) %}<img src="{{ horse.photo_url }}" alt="{{ horse.name }}" loading="lazy" />{% endif %}<h3>{{ horse.name }}</h3><p>{{ horse.breed or '' }}</p></a>{% endfor %}</div></section>{% endif %}
 </main>
 {% endblock %}

@@ -3,13 +3,30 @@
 {% block title %}Лошади | Улак тартыш{% endblock %}
 
 {% block content %}
-<main>
+<main class="horses-catalog">
   <section class="section page-hero">
     <p class="eyebrow" data-i18n="pageHorsesEyebrow">Лошади</p>
     <h1 data-i18n="pageHorsesTitle">Лошади улак тартыш</h1>
     <p class="lead" data-i18n="pageHorsesLead">Фото, характеристики, игровые баллы и статус продажи.</p>
   </section>
 
+
+  <section class="section horse-filter-section">
+    <form class="horse-filter-form" method="get" action="{{ url_for('horses_page') }}" role="search">
+      <label><span data-i18n="search">Поиск</span><input name="q" type="search" value="{{ filters.q }}" maxlength="100" data-i18n-placeholder="horseSearch" placeholder="Кличка, порода, владелец" /></label>
+      {% for field, options, title in [('breed',breeds,'horseBreed'),('region',regions,'regionLabel')] %}
+      <label><span data-i18n="{{ title }}">{{ field }}</span><select name="{{ field }}"><option value="" data-i18n="all">Все</option>{% for value in options %}<option value="{{ value }}" {% if filters[field]==value %}selected{% endif %}>{{ value }}</option>{% endfor %}</select></label>
+      {% endfor %}
+      <label><span data-i18n="status">Статус</span><select name="sale"><option value="" data-i18n="all">Все</option><option value="sale" {% if filters.sale=='sale' %}selected{% endif %} data-i18n="forSale">Продаётся</option><option value="not-sale" {% if filters.sale=='not-sale' %}selected{% endif %} data-i18n="notForSale">Не продаётся</option></select></label>
+      {% for field,title in [('min_price','minPrice'),('max_price','maxPrice'),('min_age','minAge'),('max_age','maxAge')] %}
+      <label><span data-i18n="{{ title }}">{{ field }}</span><input name="{{ field }}" type="number" min="0" max="{{ 50 if 'age' in field else 1000000000 }}" value="{{ filters[field] }}" /></label>
+      {% endfor %}
+      <label><span data-i18n="sortBy">Сортировка</span><select name="sort">{% for value,key in [('points','sortPoints'),('price','sortPrice'),('age','sortAge'),('name','sortName')] %}<option value="{{ value }}" {% if filters.sort==value %}selected{% endif %} data-i18n="{{ key }}">{{ value }}</option>{% endfor %}</select></label>
+      <div class="filter-actions"><button class="primary" type="submit" data-i18n="applyFilters">Применить</button><a class="member-action" href="{{ url_for('horses_page') }}" data-i18n="resetFilters">Сбросить</a></div>
+    </form>
+    <p class="filter-count" role="status"><span data-i18n="foundHorses">Найдено лошадей</span>: {{ total }}</p>
+    <a class="member-action" {% if session.get('user_id') %}href="{{ url_for('portal.submit_horse') }}"{% else %}href="{{ url_for('portal.submit_horse') }}" onclick="event.preventDefault();showRegisterModal()"{% endif %} data-i18n="submitHorse">Подать объявление о лошади</a>
+  </section>
   <section class="section horses-section">
     <div class="section-head compact-head">
       <div>
@@ -21,47 +38,51 @@
     <div class="horse-grid">
       {% for horse in horses %}
       <a class="horse-card" href="{{ url_for('horse_detail_page', horse_id=horse.id) }}" data-search="{{ horse.name }} {{ horse.breed }} {{ horse.color }}">
-        <div class="horse-visual{% if horse.photo_url %} has-photo{% endif %}">
-          {% if horse.photo_url %}
+        <div class="horse-visual{% if horse.photo_url and file_available(horse.photo_url) %} has-photo{% endif %}">
+          {% if horse.photo_url and file_available(horse.photo_url) %}
           <img src="{{ horse.photo_url }}" alt="{{ horse.name }}" loading="lazy" onerror="this.style.display='none'; this.parentElement.classList.remove('has-photo');" />
           {% endif %}
-          <span>{{ loop.index }}</span>
-          <strong>{{ horse.points }} баллов</strong>
+          <span>{{ horse.name[:1] }}</span>
+          <strong>{{ horse.points or 0 }} <span data-i18n="points">баллов</span></strong>
         </div>
         <div class="horse-body">
           <div class="horse-title">
             <div>
               <h3>{{ horse.name }}</h3>
-              <p>{{ horse.breed or 'Порода не указана' }} · {{ horse.color or 'масть не указана' }}</p>
+              <p>
+                {% if horse.breed %}{{ horse.breed }}{% else %}<span data-i18n="breedNotSpecified">Порода не указана</span>{% endif %}
+                ·
+                {% if horse.color %}{{ horse.color }}{% else %}<span data-i18n="colorNotSpecified">Масть не указана</span>{% endif %}
+              </p>
             </div>
-            <b class="horse-rating">{{ horse.points }}</b>
           </div>
-          <p class="horse-description">{{ horse.description or 'Описание пока не добавлено.' }}</p>
+          <p class="horse-description">{% if horse.description %}{{ horse.description }}{% else %}<span data-i18n="descriptionMissing">Описание пока не добавлено.</span>{% endif %}</p>
           <div class="horse-stats">
-            <span><strong>{{ horse.age or '-' }}</strong><em>лет</em></span>
-            <span><strong>{{ horse.speed or 0 }}</strong><em>скорость</em></span>
-            <span><strong>{{ horse.stamina or 0 }}</strong><em>выносливость</em></span>
-            <span><strong>{{ horse.points or 0 }}</strong><em>баллов</em></span>
+          <span><strong>{{ horse.age if horse.age is not none else '—' }}</strong><em data-i18n="years">лет</em></span>
+          <span><strong>{{ horse.speed if horse.speed is not none else '—' }}</strong><em data-i18n="speed">скорость</em></span>
+          <span><strong>{{ horse.stamina if horse.stamina is not none else '—' }}</strong><em data-i18n="stamina">выносливость</em></span>
+          <span><strong>{{ horse.points or 0 }}</strong><em data-i18n="points">баллов</em></span>
           </div>
           <div class="horse-sale">
             {% if horse.is_for_sale and horse.price %}
-            <strong>{{ "{:,}".format(horse.price).replace(",", " ") }} сом</strong>
-            <span>Продаётся</span>
+            <strong>{{ "{:,}".format(horse.price).replace(",", " ") }} <span data-i18n="currencySom">сом</span></strong>
+            <span data-i18n="forSale">Продаётся</span>
             {% elif horse.is_for_sale %}
-            <strong>Цена по запросу</strong>
-            <span>Продаётся</span>
+            <strong data-i18n="priceOnRequest">Цена по запросу</strong>
+            <span data-i18n="forSale">Продаётся</span>
             {% else %}
-            <strong>Не продаётся</strong>
-            <span>Статус</span>
+            <strong data-i18n="notForSale">Не продаётся</strong>
+            <span data-i18n="status">Статус</span>
             {% endif %}
           </div>
           <span class="ghost horse-more" data-i18n="details">Подробнее</span>
         </div>
       </a>
       {% else %}
-      <p class="empty-state" data-i18n="noHorses">Лошади пока не добавлены.</p>
+      <p class="empty-state" data-i18n="horsesNotFound">Лошади не найдены. Попробуйте изменить фильтры.</p>
       {% endfor %}
     </div>
+    {% if pages > 1 %}<nav class="member-actions pagination" aria-label="Страницы каталога" data-i18n-aria-label="catalogPages">{% if page>1 %}<a class="member-action" href="{{ page_url(page-1) }}" data-i18n="previousPage">Назад</a>{% endif %}<span>{{ page }} / {{ pages }}</span>{% if page<pages %}<a class="member-action" href="{{ page_url(page+1) }}" data-i18n="nextPage">Далее</a>{% endif %}</nav>{% endif %}
   </section>
 </main>
 {% endblock %}

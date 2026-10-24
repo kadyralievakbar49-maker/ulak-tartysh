@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}Игроки | Улак тартыш{% endblock %}
+{% block description %}Профили игроков, команды, номера, позиции и статистика участия в матчах.{% endblock %}
+
+{% block content %}
+<main>
+  <section class="section page-hero">
+    <p class="eyebrow" data-i18n="portalUi36">Игроки</p>
+    <h1 data-i18n="portalUi37">Профили игроков</h1>
+    <p class="lead" data-i18n="portalUi38">Составы команд, игровые номера, позиции и ключевая статистика спортсменов.</p>
+  </section>
+
+  <section class="section">
+    <form class="content-filter-bar" role="search">
+      <label>
+        <span data-i18n="portalUi87">Поиск</span>
+        <input id="playerSearch" type="search" placeholder="Имя, команда, позиция" data-i18n-placeholder="portalUi88" autocomplete="off" />
+      </label>
+      <label>
+        <span data-i18n="portalUi53">Команда</span>
+        <select id="playerTeamFilter">
+          <option value="all" data-i18n="portalUi39">Все команды</option>
+          {% for team in teams %}
+          <option value="{{ team.name }}">{{ team.name }}</option>
+          {% endfor %}
+        </select>
+      </label>
+    </form>
+
+    <div class="player-directory-grid" id="playerDirectoryGrid">
+      {% for player in players %}
+      <a class="player-profile-card" href="{{ url_for('player_detail_page', player_id=player.id) }}"
+         data-player-card
+         data-team="{{ player.team_name or player.team or '' }}"
+         data-search="{{ (player.name ~ ' ' ~ (player.team_name or player.team or '') ~ ' ' ~ (player.position or ''))|lower }}">
+        <div class="player-profile-photo">
+          {% if player.photo_url and file_available(player.photo_url) %}
+          <img src="{{ player.photo_url }}" alt="{{ player.name }}" loading="lazy" />
+          {% else %}
+          <span>{{ player.name[:1] }}</span>
+          {% endif %}
+        </div>
+        <div class="player-profile-body">
+          <span class="player-number">№{{ player.jersey_number or player.id }}</span>
+          <h2>{{ player.name }}</h2>
+          <p>{{ player.position or 'Оюнчу' }} · {% if player.team_name or player.team %}{{ player.team_name or player.team }}{% else %}<span data-i18n="portalUi93">Команда не указана</span>{% endif %}</p>
+          <div class="compact-stats">
+            <span><strong>{{ player.stats_matches or 0 }}</strong><small data-i18n="portalUi40">матчей</small></span>
+            <span><strong>{{ player.stats_points or 0 }}</strong><small data-i18n="portalUi41">очков</small></span>
+            <span><strong>{{ player.birth_year or '—' }}</strong><small data-i18n="portalUi42">год</small></span>
+          </div>
+        </div>
+      </a>
+      {% else %}
+      <p class="empty-state" data-i18n="portalUi43">Игроки пока не добавлены.</p>
+      {% endfor %}
+    </div>
+
+    <div class="archive-empty archive-empty-filtered" id="playersEmptyFiltered" hidden>
+      <h2 data-i18n="portalUi44">Игроки не найдены</h2>
+      <p data-i18n="portalUi45">Попробуйте изменить поиск или фильтр команды.</p>
+    </div>
+  </section>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  (() => {
+    const search = document.getElementById("playerSearch");
+    const team = document.getElementById("playerTeamFilter");
+    const cards = [...document.querySelectorAll("[data-player-card]")];
+    const empty = document.getElementById("playersEmptyFiltered");
+
+    function applyFilters() {
+      const query = (search?.value || "").trim().toLowerCase();
+      const teamValue = team?.value || "all";
+      let visible = 0;
+      cards.forEach((card) => {
+        const show =
+          (!query || card.dataset.search.includes(query)) &&
+          (teamValue === "all" || card.dataset.team === teamValue);
+        card.hidden = !show;
+        if (show) visible += 1;
+      });
+      if (empty) empty.hidden = visible > 0 || cards.length === 0;
+    }
+
+    search?.addEventListener("input", applyFilters);
+    team?.addEventListener("input", applyFilters);
+    applyFilters();
+  })();
+</script>
+{% endblock %}
